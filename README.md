@@ -15,5 +15,4 @@ fácil e prática.
 - Leonardo Rego Teixeira
 - Luís Miguel Silva Amorim
 - Maitê Mota Belo de Souza Silva
-- Paulo Henrique dos Santos
 - Victor Matheus Paiva Vianna
