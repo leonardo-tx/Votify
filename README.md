@@ -16,4 +16,4 @@ fácil e prática.
 - Luís Miguel Silva Amorim
 - Maitê Mota Belo de Souza Silva
 - Paulo Henrique dos Santos
-- Victor Vianna
+- Victor Matheus Paiva Vianna
