@@ -46,7 +46,7 @@ Para rodar o projeto, é necessário ter instalado:
 
 ### 3.1 Clonando o Repositório
 ```bash
-git clone https://seu-repositorio-url.git
+git clone https://github.com/leonardo-tx/Votify.git
 cd votify
 ```
 
