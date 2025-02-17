@@ -1,0 +1,4 @@
+br\com\votify\core\repository\UserRepository.class
+br\com\votify\core\domain\entities\users\UserTypeEnum.class
+br\com\votify\core\domain\entities\users\User.class
+br\com\votify\core\service\UserService.class
