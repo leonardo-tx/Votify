@@ -3,14 +3,6 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
-### IntelliJ IDEA ###
-target/
-!**/target
-votify-console/target
-votify-core/target
-votify-api/target
-
-### IntelliJ IDEA ###
 .idea
 .idea/modules.xml
 .idea/jarRepositories.xml
@@ -19,7 +11,6 @@ votify-api/target
 *.iws
 *.iml
 *.ipr
-*.
 
 ### Eclipse ###
 .apt_generated
