@@ -4,7 +4,11 @@ target/
 !**/src/test/**/target/
 
 ### IntelliJ IDEA ###
+target/
 !**/target
+votify-console/target
+votify-core/target
+votify-api/target
 
 ### IntelliJ IDEA ###
 .idea
