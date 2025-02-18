@@ -3,7 +3,6 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
-<<<<<<< HEAD
 ### IntelliJ IDEA ###
 target/
 !**/target
@@ -12,8 +11,6 @@ votify-core/target
 votify-api/target
 
 ### IntelliJ IDEA ###
-=======
->>>>>>> a5daf5721d48754eb1db519d95f60e7fda195819
 .idea
 .idea/modules.xml
 .idea/jarRepositories.xml
