@@ -3,6 +3,10 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
+.idea
+votify-api/target
+votify-core/target
+votify-console/target
 .idea/modules.xml
 .idea/jarRepositories.xml
 .idea/compiler.xml
