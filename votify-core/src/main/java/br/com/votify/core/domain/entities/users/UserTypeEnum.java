@@ -4,17 +4,19 @@ import lombok.Getter;
 
 @Getter
 public enum UserTypeEnum {
-    ADMIN("Admin"),
-    COMMON("Common");
+    COMMON(0),
+    MODERATOR(1),
+    ADMIN(2);
 
-    private final String userType;
 
-    UserTypeEnum(String userType) {
+    private final Integer userType;
+
+    UserTypeEnum(Integer userType) {
         this.userType = userType;
     }
 
     @Override
     public String toString() {
-        return userType;
+        return name();
     }
 }
