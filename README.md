@@ -8,7 +8,7 @@ fácil e prática.
 
 ## Membros
 
-- André Augusto Ferrarez
+- André Augusto Ferrarez 
 - Bruno Thales dos Santos
 - Jonathan de Oliveira Scottini
 - José Luiz Barbosa Costa
