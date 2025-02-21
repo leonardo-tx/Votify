@@ -19,10 +19,10 @@ public enum VotifyErrorCode {
     FIRST_NAME_EMPTY("first.name.empty"),
     FIRST_NAME_INVALID_LENGTH("first.name.invalid.length"),
     FIRST_NAME_INVALID("first.name.invalid"),
-    LAST_NAME_EMPTY("last.name.empty"),
     LAST_NAME_INVALID_LENGTH("last.name.invalid.length"),
     LAST_NAME_INVALID("last.name.invalid"),
     ROLE_EMPTY("role.empty"),
+    ROLE_REGISTER_INVALID("role.register.invalid"),
     USER_NOT_FOUND("user.not.found");
 
     private final String code;
