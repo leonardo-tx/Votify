@@ -1,5 +1,6 @@
 package br.com.votify.api.controller.users;
 
+
 import br.com.votify.api.dto.ApiResponse;
 import br.com.votify.api.dto.users.UserDetailedViewDTO;
 import br.com.votify.api.dto.users.UserRegisterDTO;
@@ -30,5 +31,13 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(ApiResponse.error(e));
         }
+    // TODO: Implementar try catch quando for adicionado as respostas
+    @PostMapping
+    public ResponseEntity<UserDetailedViewDTO> registerUser(@RequestBody UserRegisterDTO userRegisterDTO) throws VotifyException {
+        User user = userRegisterDTO.convertToEntity();
+        user = userService.createUser(user);
+
+        UserDetailedViewDTO userDto = UserDetailedViewDTO.parse(user);
+        return ResponseEntity.status(HttpStatus.CREATED).body(userDto);
     }
 }
