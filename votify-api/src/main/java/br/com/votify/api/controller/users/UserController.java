@@ -25,9 +25,10 @@ public class UserController {
             user = userService.createUser(user);
             UserDetailedViewDTO userDto = UserDetailedViewDTO.parse(user);
             return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(ApiResponse.success(userDto));
+                .body(ApiResponse.success(userDto));
         } catch (VotifyException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(ApiResponse.error(e));
+                .body(ApiResponse.error(e));
         }
+    }
 }
