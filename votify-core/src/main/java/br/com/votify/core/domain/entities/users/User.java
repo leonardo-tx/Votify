@@ -8,33 +8,46 @@ import lombok.Setter;
 @Getter
 @Setter
 @Table(name = "TB_USER")
-public class User {
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name = "USER_TYPE", discriminatorType = DiscriminatorType.STRING)
+public abstract class User {
+    public static final int USER_NAME_MIN_LENGTH = 3;
+    public static final int USER_NAME_MAX_LENGTH = 40;
+    public static final int EMAIL_MIN_LENGTH = 5;
+    public static final int EMAIL_MAX_LENGTH = 254;
+    public static final int NAME_MIN_LENGTH = 1;
+    public static final int NAME_MAX_LENGTH = 50;
+    public static final int PASSWORD_MIN_LENGTH = 8;
+    public static final int PASSWORD_MAX_BYTES = 72;
+
+    protected User() {
+    }
+
+    protected User(Long id, String userName, String name, String email, String password) {
+        this.id = id;
+        this.userName = userName;
+        this.name = name;
+        this.email = email;
+        this.password = password;
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
-    private String firstName;
-    private String lastName;
+    @Column(nullable = false, unique = true, length = USER_NAME_MAX_LENGTH)
+    private String userName;
 
-    @Column(unique = true)
-    private String document;
+    @Column(nullable = false, length = NAME_MAX_LENGTH)
+    private String name;
 
-    @Column(unique = true)
+    @Column(unique = true, nullable = false, length = EMAIL_MAX_LENGTH)
     private String email;
 
-    @Enumerated(EnumType.STRING)
-    private UserTypeEnum role;
+    @Column(nullable = false)
+    private String password;
 
-    public User() {
-    }
-
-    public User(Integer id, String firstName, String lastName, String document, String email, UserTypeEnum role) {
-        this.id = id;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.document = document;
-        this.email = email;
-        this.role = role;
+    public PermissionFlags getPermissions() {
+        return PermissionFlags.NONE;
     }
 }
