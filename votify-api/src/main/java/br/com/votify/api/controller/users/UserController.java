@@ -30,5 +30,13 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(ApiResponse.error(e));
         }
+    // TODO: Implementar try catch quando for adicionado as respostas
+    @PostMapping
+    public ResponseEntity<UserDetailedViewDTO> registerUser(@RequestBody UserRegisterDTO userRegisterDTO) throws VotifyException {
+        User user = userRegisterDTO.convertToEntity();
+        user = userService.createUser(user);
+
+        UserDetailedViewDTO userDto = UserDetailedViewDTO.parse(user);
+        return ResponseEntity.status(HttpStatus.CREATED).body(userDto);
     }
 }
