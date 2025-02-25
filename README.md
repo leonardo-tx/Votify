@@ -9,13 +9,11 @@ fácil e prática.
 ## Membros
 
 - André Augusto Ferrarez
-- Bruno Thales dos Santos
 - Jonathan de Oliveira Scottini
 - José Luiz Barbosa Costa
 - Leonardo Rego Teixeira
 - Luís Miguel Silva Amorim
 - Maitê Mota Belo de Souza Silva
-- Paulo Henrique dos Santos
 - Victor Matheus Paiva Vianna
 
 <details>
