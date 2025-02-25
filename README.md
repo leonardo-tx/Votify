@@ -1,4 +1,7 @@
 # Votify
+![Votify CI](https://github.com/leonardo-tx/Votify/actions/workflows/ci.yml/badge.svg)
+![Line Coverage](https://github.com/leonardo-tx/Votify/raw/main/badges/jacoco.svg)
+![Branch Coverage](https://github.com/leonardo-tx/Votify/raw/main/badges/branches.svg)
 
 O Votify é um projeto em grupo desenvolvido na faculdade Instituto Infnet  
 no bloco de Engenharia Disciplinada de Softwares.
