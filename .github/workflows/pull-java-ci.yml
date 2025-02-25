@@ -1,0 +1,30 @@
+name: Votify Pull request Java CI
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - '**/*.java'
+      - '**/pom.xml'
+      - '**/*.properties'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'adopt'
+
+      - name: Build and install all modules
+        run: mvn clean compile
+
+      - name: Run tests with Maven
+        run: mvn clean test
