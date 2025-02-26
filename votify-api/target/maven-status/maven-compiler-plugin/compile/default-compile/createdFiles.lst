@@ -1,7 +1,0 @@
-br/com/votify/api/dto/ApiResponse.class
-br/com/votify/api/dto/users/UserRegisterDTO.class
-br/com/votify/api/VotifyApiApplication.class
-br/com/votify/api/controller/users/UserController.class
-br/com/votify/api/dto/DTOInput.class
-br/com/votify/api/dto/users/UserDetailedViewDTO.class
-br/com/votify/api/configuration/SecurityConfig.class
