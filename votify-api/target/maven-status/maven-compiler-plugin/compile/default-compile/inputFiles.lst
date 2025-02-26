@@ -1,0 +1,7 @@
+/home/runner/work/Votify/Votify/votify-api/src/main/java/br/com/votify/api/VotifyApiApplication.java
+/home/runner/work/Votify/Votify/votify-api/src/main/java/br/com/votify/api/configuration/SecurityConfig.java
+/home/runner/work/Votify/Votify/votify-api/src/main/java/br/com/votify/api/controller/users/UserController.java
+/home/runner/work/Votify/Votify/votify-api/src/main/java/br/com/votify/api/dto/ApiResponse.java
+/home/runner/work/Votify/Votify/votify-api/src/main/java/br/com/votify/api/dto/DTOInput.java
+/home/runner/work/Votify/Votify/votify-api/src/main/java/br/com/votify/api/dto/users/UserDetailedViewDTO.java
+/home/runner/work/Votify/Votify/votify-api/src/main/java/br/com/votify/api/dto/users/UserRegisterDTO.java

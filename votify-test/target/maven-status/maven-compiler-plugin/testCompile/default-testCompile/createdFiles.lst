@@ -1,0 +1,6 @@
+br/com/votify/api/controller/users/UserControllerTest$2.class
+br/com/votify/core/utils/CharacterUtilsTest.class
+br/com/votify/core/service/UserServiceTest.class
+br/com/votify/core/domain/entities/users/UserValidatorTest.class
+br/com/votify/api/controller/users/UserControllerTest$1.class
+br/com/votify/api/controller/users/UserControllerTest.class

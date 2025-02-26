@@ -1,0 +1,17 @@
+GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
+votify-test/votify-core,br.com.votify.core.domain.entities.users,CommonUser,0,11,0,0,0,4,0,2,0,2
+votify-test/votify-core,br.com.votify.core.domain.entities.users,ModeratorUser,0,11,0,0,0,4,0,2,0,2
+votify-test/votify-core,br.com.votify.core.domain.entities.users,PermissionFlags,18,0,0,0,5,0,2,0,2,0
+votify-test/votify-core,br.com.votify.core.domain.entities.users,AdminUser,0,11,0,0,0,4,0,2,0,2
+votify-test/votify-core,br.com.votify.core.domain.entities.users,UserValidator,3,293,0,58,1,70,1,37,1,8
+votify-test/votify-core,br.com.votify.core.domain.entities.users,User,2,21,0,0,1,9,1,2,1,2
+votify-test/votify-core,br.com.votify.core.utils.exceptions,VotifyException,0,26,0,0,0,7,0,3,0,3
+votify-test/votify-core,br.com.votify.core.utils.exceptions,VotifyErrorCode,0,130,0,0,0,21,0,2,0,2
+votify-test/votify-core,br.com.votify.core.utils,CharacterUtils,3,20,0,8,1,2,1,6,1,2
+votify-test/votify-core,br.com.votify.core.service,UserService,0,71,0,6,0,15,0,7,0,4
+votify-test/votify-api,br.com.votify.api.dto.users,UserRegisterDTO,0,13,0,0,0,1,0,1,0,1
+votify-test/votify-api,br.com.votify.api.dto.users,UserDetailedViewDTO,0,12,0,0,0,5,0,1,0,1
+votify-test/votify-api,br.com.votify.api.configuration,SecurityConfig,0,7,0,0,0,2,0,2,0,2
+votify-test/votify-api,br.com.votify.api.controller.users,UserController,0,24,0,0,0,8,0,1,0,1
+votify-test/votify-api,br.com.votify.api.dto,ApiResponse,0,19,0,0,0,3,0,2,0,2
+votify-test/votify-api,br.com.votify.api,VotifyApiApplication,5,3,0,0,2,1,1,1,1,1

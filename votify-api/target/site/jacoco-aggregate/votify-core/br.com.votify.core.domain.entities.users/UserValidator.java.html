@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>UserValidator.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">votify-api</a> &gt; <a href="../index.html" class="el_bundle">votify-core</a> &gt; <a href="index.source.html" class="el_package">br.com.votify.core.domain.entities.users</a> &gt; <span class="el_source">UserValidator.java</span></div><h1>UserValidator.java</h1><pre class="source lang-java linenums">package br.com.votify.core.domain.entities.users;
+
+import br.com.votify.core.utils.exceptions.VotifyErrorCode;
+import br.com.votify.core.utils.exceptions.VotifyException;
+import br.com.votify.core.utils.CharacterUtils;
+
+import java.nio.charset.StandardCharsets;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+<span class="nc" id="L11">public final class UserValidator {</span>
+<span class="nc" id="L12">    public static final Pattern EMAIL_PATTERN = Pattern.compile(&quot;^[a-zA-Z0-9_!#$%&amp;’*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$&quot;);</span>
+    public static void validateFields(User user) throws VotifyException {
+<span class="nc" id="L14">        validatePassword(user.getPassword());</span>
+<span class="nc" id="L15">        validateUserName(user.getUserName());</span>
+<span class="nc" id="L16">        validateEmail(user.getEmail());</span>
+<span class="nc" id="L17">        validateName(user.getName());</span>
+<span class="nc" id="L18">    }</span>
+
+    public static void validateUserName(String userName) throws VotifyException {
+<span class="nc bnc" id="L21" title="All 2 branches missed.">        if (userName == null) {</span>
+<span class="nc" id="L22">            throw new VotifyException(VotifyErrorCode.USER_NAME_EMPTY);</span>
+        }
+<span class="nc bnc" id="L24" title="All 2 branches missed.">        if (userName.length() &lt; User.USER_NAME_MIN_LENGTH ||</span>
+<span class="nc bnc" id="L25" title="All 2 branches missed.">            userName.length() &gt; User.USER_NAME_MAX_LENGTH) {</span>
+<span class="nc" id="L26">            throw new VotifyException(</span>
+                VotifyErrorCode.USER_NAME_INVALID_LENGTH,
+<span class="nc" id="L28">                User.USER_NAME_MIN_LENGTH,</span>
+<span class="nc" id="L29">                User.USER_NAME_MAX_LENGTH</span>
+            );
+        }
+<span class="nc bnc" id="L32" title="All 4 branches missed.">        if (userName.charAt(0) == '-' || userName.charAt(userName.length() - 1) == '-') {</span>
+<span class="nc" id="L33">            throw new VotifyException(VotifyErrorCode.USER_NAME_INVALID);</span>
+        }
+<span class="nc bnc" id="L35" title="All 2 branches missed.">        for (int i = 0; i &lt; userName.length(); i++) {</span>
+<span class="nc" id="L36">            char c = userName.charAt(i);</span>
+<span class="nc bnc" id="L37" title="All 6 branches missed.">            if (c == '-' || CharacterUtils.isOneByteDigit(c) || CharacterUtils.isOneByteLowercaseLetter(c)) {</span>
+<span class="nc" id="L38">                continue;</span>
+            }
+<span class="nc" id="L40">            throw new VotifyException(VotifyErrorCode.USER_NAME_INVALID_CHARACTER);</span>
+        }
+<span class="nc" id="L42">    }</span>
+
+    public static void validateEmail(String email) throws VotifyException {
+<span class="nc bnc" id="L45" title="All 2 branches missed.">        if (email == null) {</span>
+<span class="nc" id="L46">            throw new VotifyException(VotifyErrorCode.EMAIL_EMPTY);</span>
+        }
+<span class="nc bnc" id="L48" title="All 2 branches missed.">        if (email.length() &lt; User.EMAIL_MIN_LENGTH ||</span>
+<span class="nc bnc" id="L49" title="All 2 branches missed.">            email.length() &gt; User.EMAIL_MAX_LENGTH) {</span>
+<span class="nc" id="L50">            throw new VotifyException(</span>
+                VotifyErrorCode.EMAIL_INVALID_LENGTH,
+<span class="nc" id="L52">                User.EMAIL_MIN_LENGTH,</span>
+<span class="nc" id="L53">                User.EMAIL_MAX_LENGTH</span>
+            );
+        }
+<span class="nc" id="L56">        Matcher matcher = EMAIL_PATTERN.matcher(email);</span>
+<span class="nc bnc" id="L57" title="All 2 branches missed.">        if (!matcher.matches()) {</span>
+<span class="nc" id="L58">            throw new VotifyException(VotifyErrorCode.EMAIL_INVALID);</span>
+        }
+<span class="nc" id="L60">    }</span>
+
+    public static void validatePassword(String password) throws VotifyException {
+<span class="nc bnc" id="L63" title="All 2 branches missed.">        if (password == null) {</span>
+<span class="nc" id="L64">            throw new VotifyException(VotifyErrorCode.PASSWORD_EMPTY);</span>
+        }
+<span class="nc bnc" id="L66" title="All 2 branches missed.">        if (password.length() &lt; User.PASSWORD_MIN_LENGTH) {</span>
+<span class="nc" id="L67">            throw new VotifyException(VotifyErrorCode.PASSWORD_INVALID_LENGTH, User.PASSWORD_MIN_LENGTH);</span>
+        }
+<span class="nc bnc" id="L69" title="All 2 branches missed.">        if (passwordHasInvalidChars(password)) {</span>
+<span class="nc" id="L70">            throw new VotifyException(VotifyErrorCode.PASSWORD_INVALID_CHARACTER);</span>
+        }
+<span class="nc" id="L72">        byte[] bytes = password.getBytes(StandardCharsets.UTF_8);</span>
+<span class="nc bnc" id="L73" title="All 2 branches missed.">        if (bytes.length &gt; User.PASSWORD_MAX_BYTES) {</span>
+<span class="nc" id="L74">            throw new VotifyException(VotifyErrorCode.PASSWORD_INVALID_BYTES);</span>
+        }
+<span class="nc" id="L76">    }</span>
+
+    private static boolean passwordHasInvalidChars(String password) {
+<span class="nc bnc" id="L79" title="All 2 branches missed.">        for (int i = 0; i &lt; password.length(); i++) {</span>
+<span class="nc" id="L80">            char c = password.charAt(i);</span>
+<span class="nc bnc" id="L81" title="All 2 branches missed.">            if (Character.isISOControl(c)) return true;</span>
+        }
+<span class="nc" id="L83">        return false;</span>
+    }
+
+    public static void validateName(String name) throws VotifyException {
+<span class="nc bnc" id="L87" title="All 2 branches missed.">        if (name == null) {</span>
+<span class="nc" id="L88">            throw new VotifyException(VotifyErrorCode.NAME_EMPTY);</span>
+        }
+<span class="nc bnc" id="L90" title="All 2 branches missed.">        if (name.length() &lt; User.NAME_MIN_LENGTH ||</span>
+<span class="nc bnc" id="L91" title="All 2 branches missed.">            name.length() &gt; User.NAME_MAX_LENGTH) {</span>
+<span class="nc" id="L92">            throw new VotifyException(</span>
+                VotifyErrorCode.NAME_INVALID_LENGTH,
+<span class="nc" id="L94">                User.NAME_MIN_LENGTH,</span>
+<span class="nc" id="L95">                User.NAME_MAX_LENGTH</span>
+            );
+        }
+<span class="nc bnc" id="L98" title="All 2 branches missed.">        if (nameHasInvalidChars(name)) {</span>
+<span class="nc" id="L99">            throw new VotifyException(VotifyErrorCode.NAME_INVALID);</span>
+        }
+<span class="nc" id="L101">    }</span>
+
+    private static boolean nameHasInvalidChars(String name) {
+<span class="nc bnc" id="L104" title="All 4 branches missed.">        if (name.charAt(0) == ' ' || name.charAt(name.length() - 1) == ' ') {</span>
+<span class="nc" id="L105">            return true;</span>
+        }
+<span class="nc" id="L107">        int whitespaceSequence = 0;</span>
+<span class="nc bnc" id="L108" title="All 2 branches missed.">        for (int i = 0; i &lt; name.length(); i++) {</span>
+<span class="nc" id="L109">            char c = name.charAt(i);</span>
+<span class="nc bnc" id="L110" title="All 2 branches missed.">            if (Character.isISOControl(c)) {</span>
+<span class="nc" id="L111">                return true;</span>
+            }
+<span class="nc bnc" id="L113" title="All 2 branches missed.">            if (c != ' ') {</span>
+<span class="nc" id="L114">                whitespaceSequence = 0;</span>
+<span class="nc" id="L115">                continue;</span>
+            }
+<span class="nc" id="L117">            whitespaceSequence += 1;</span>
+<span class="nc bnc" id="L118" title="All 2 branches missed.">            if (whitespaceSequence &gt; 1) {</span>
+<span class="nc" id="L119">                return true;</span>
+            }
+        }
+<span class="nc" id="L122">        return false;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

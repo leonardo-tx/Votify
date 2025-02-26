@@ -1,0 +1,11 @@
+GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
+votify-api/votify-core,br.com.votify.core.domain.entities.users,CommonUser,11,0,0,0,4,0,2,0,2,0
+votify-api/votify-core,br.com.votify.core.domain.entities.users,ModeratorUser,11,0,0,0,4,0,2,0,2,0
+votify-api/votify-core,br.com.votify.core.domain.entities.users,PermissionFlags,18,0,0,0,5,0,2,0,2,0
+votify-api/votify-core,br.com.votify.core.domain.entities.users,AdminUser,11,0,0,0,4,0,2,0,2,0
+votify-api/votify-core,br.com.votify.core.domain.entities.users,UserValidator,296,0,58,0,71,0,38,0,9,0
+votify-api/votify-core,br.com.votify.core.domain.entities.users,User,23,0,0,0,10,0,3,0,3,0
+votify-api/votify-core,br.com.votify.core.utils.exceptions,VotifyException,26,0,0,0,7,0,3,0,3,0
+votify-api/votify-core,br.com.votify.core.utils.exceptions,VotifyErrorCode,130,0,0,0,21,0,2,0,2,0
+votify-api/votify-core,br.com.votify.core.utils,CharacterUtils,23,0,8,0,3,0,7,0,3,0
+votify-api/votify-core,br.com.votify.core.service,UserService,71,0,6,0,15,0,7,0,4,0
