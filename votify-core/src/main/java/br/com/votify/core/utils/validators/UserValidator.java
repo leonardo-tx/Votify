@@ -1,5 +1,6 @@
-package br.com.votify.core.domain.entities.users;
+package br.com.votify.core.utils.validators;
 
+import br.com.votify.core.domain.entities.users.User;
 import br.com.votify.core.utils.exceptions.VotifyErrorCode;
 import br.com.votify.core.utils.exceptions.VotifyException;
 import br.com.votify.core.utils.CharacterUtils;
