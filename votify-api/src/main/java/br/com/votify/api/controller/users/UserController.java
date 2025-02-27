@@ -17,18 +17,15 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
     private final UserService userService;
 
-    // TODO: Executar os demais endpoints
     @PostMapping
-    public ResponseEntity<ApiResponse<UserDetailedViewDTO>> registerUser(@RequestBody UserRegisterDTO userRegisterDTO) {
-        try {
-            User user = userRegisterDTO.convertToEntity();
-            user = userService.createUser(user);
-            UserDetailedViewDTO userDto = UserDetailedViewDTO.parse(user);
-            return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success(userDto));
-        } catch (VotifyException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(ApiResponse.error(e));
-        }
+    public ResponseEntity<ApiResponse<UserDetailedViewDTO>> registerUser(
+        @RequestBody UserRegisterDTO userRegisterDTO
+    ) throws VotifyException {
+        User user = userRegisterDTO.convertToEntity();
+        User createdUser = userService.createUser(user);
+        UserDetailedViewDTO userDTO = UserDetailedViewDTO.parse(createdUser);
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+            .body(ApiResponse.success(userDTO));
     }
 }
