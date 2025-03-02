@@ -20,7 +20,8 @@ public enum VotifyErrorCode {
     NAME_EMPTY("name.empty"),
     NAME_INVALID_LENGTH("name.invalid.length"),
     NAME_INVALID("name.invalid"),
-    USER_NOT_FOUND("user.not.found");
+    USER_NOT_FOUND("user.not.found"),
+    LOGIN_UNAUTHORIZED("login.unauthorized");
 
     private final String code;
 
