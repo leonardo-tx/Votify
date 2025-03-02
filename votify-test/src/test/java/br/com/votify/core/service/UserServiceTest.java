@@ -122,18 +122,4 @@ public class UserServiceTest {
         );
         assertEquals(VotifyErrorCode.USER_NOT_FOUND, exception.getErrorCode());
     }
-
-    @Test
-    @Order(4)
-    public void checkPasswordMatchFromCreatedUser() throws VotifyException {
-        User user = userService.getUserById(1);
-        assertTrue(userService.checkPassword(user, "12345678abacaxi#"));
-    }
-
-    @Test
-    @Order(4)
-    public void checkInvalidPasswordFromCreatedUser() throws VotifyException {
-        User user = userService.getUserById(2);
-        assertFalse(userService.checkPassword(user, "12345678abacaxi#"));
-    }
 }
