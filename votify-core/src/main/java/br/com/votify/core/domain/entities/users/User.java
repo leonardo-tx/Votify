@@ -47,7 +47,7 @@ public abstract class User {
     @Column(nullable = false)
     private String password;
 
-    public PermissionFlags getPermissions() {
+    public int getPermissions() {
         return PermissionFlags.NONE;
     }
 }
