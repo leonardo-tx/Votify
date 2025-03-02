@@ -1,7 +1,7 @@
 package br.com.votify.core.service;
 
 import br.com.votify.core.domain.entities.users.User;
-import br.com.votify.core.domain.entities.users.UserValidator;
+import br.com.votify.core.utils.validators.UserValidator;
 import br.com.votify.core.utils.exceptions.VotifyErrorCode;
 import br.com.votify.core.utils.exceptions.VotifyException;
 import br.com.votify.core.repository.UserRepository;
@@ -14,7 +14,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class UserService {
-    private final PasswordEncoder passwordEncoder;
+    private final PasswordEncoderService passwordEncoderService;
     private final UserRepository userRepository;
 
     public User createUser(User user) throws VotifyException {
@@ -27,7 +27,7 @@ public class UserService {
         if (userRepository.existsByUserName(user.getUserName())) {
             throw new VotifyException(VotifyErrorCode.USER_NAME_ALREADY_EXISTS);
         }
-        String encryptedPassword = passwordEncoder.encode(user.getPassword());
+        String encryptedPassword = passwordEncoderService.encryptPassword(user.getPassword());
         user.setPassword(encryptedPassword);
 
         return userRepository.save(user);
@@ -43,9 +43,5 @@ public class UserService {
 
     public List<User> getAll() {
         return userRepository.findAll();
-    }
-
-    public boolean checkPassword(User user, String givenPassword) {
-        return passwordEncoder.matches(givenPassword, user.getPassword());
     }
 }
