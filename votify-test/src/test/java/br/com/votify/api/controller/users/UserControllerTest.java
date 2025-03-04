@@ -2,6 +2,7 @@ package br.com.votify.api.controller.users;
 
 import br.com.votify.api.dto.ApiResponse;
 import br.com.votify.api.dto.users.UserDetailedViewDTO;
+import br.com.votify.api.dto.users.UserLoginDTO;
 import br.com.votify.api.dto.users.UserRegisterDTO;
 import br.com.votify.core.utils.exceptions.VotifyErrorCode;
 import br.com.votify.core.utils.exceptions.VotifyException;
@@ -19,6 +20,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 
+import java.util.HashSet;
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -30,7 +34,7 @@ public class UserControllerTest {
 
     @Test
     @Order(0)
-    public void testRegisterUser() {
+    public void registerUser() {
         UserRegisterDTO dtoRegister = new UserRegisterDTO(
             "littledoge",
             "Byces",
@@ -58,7 +62,7 @@ public class UserControllerTest {
 
     @Test
     @Order(1)
-    public void testRegisterInvalidUser() {
+    public void registerInvalidUser() {
         UserRegisterDTO dtoRegister = new UserRegisterDTO(
                 "littlecat123",
                 "Littlecat",
@@ -79,5 +83,38 @@ public class UserControllerTest {
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertNotNull(response.getBody());
         assertEquals(expectedApiResponse.toString(), response.getBody().toString());
+    }
+
+    @Test
+    @Order(1)
+    public void loginUser() {
+        UserLoginDTO dtoLogin = new UserLoginDTO(
+            "123@gmail.com",
+            "littledoge123"
+        );
+        ApiResponse<?> expectedApiResponse = ApiResponse.success(null);
+
+        ResponseEntity<ApiResponse<UserDetailedViewDTO>> response = restTemplate.exchange(
+                "/users/login",
+                HttpMethod.POST,
+                new HttpEntity<>(dtoLogin),
+                new ParameterizedTypeReference<>() {}
+        );
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(expectedApiResponse.toString(), response.getBody().toString());
+
+        List<String> cookies = response.getHeaders().get("Set-Cookie");
+
+        assertNotNull(cookies);
+        assertEquals(2, cookies.size());
+
+        HashSet<String> hashSet = new HashSet<>();
+        for (String cookie : cookies) {
+            hashSet.add(cookie.split("=", 2)[0]);
+        }
+        assertTrue(hashSet.contains("access_token"));
+        assertTrue(hashSet.contains("refresh_token"));
     }
 }
