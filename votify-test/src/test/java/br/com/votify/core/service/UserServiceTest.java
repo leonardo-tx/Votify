@@ -8,11 +8,13 @@ import br.com.votify.core.domain.entities.users.ModeratorUser;
 import br.com.votify.core.domain.entities.users.User;
 import br.com.votify.core.utils.exceptions.VotifyErrorCode;
 import br.com.votify.core.utils.exceptions.VotifyException;
+import br.com.votify.test.RequestScopeTestExecutionListener;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestExecutionListeners;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -20,6 +22,10 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ContextConfiguration(classes = { VotifyApiApplication.class, SecurityConfig.class})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@TestExecutionListeners(
+    listeners = RequestScopeTestExecutionListener.class,
+    mergeMode = TestExecutionListeners.MergeMode.MERGE_WITH_DEFAULTS
+)
 public class UserServiceTest {
     @Autowired
     private UserService userService;
@@ -121,19 +127,5 @@ public class UserServiceTest {
             () -> userService.getUserById(10)
         );
         assertEquals(VotifyErrorCode.USER_NOT_FOUND, exception.getErrorCode());
-    }
-
-    @Test
-    @Order(4)
-    public void checkPasswordMatchFromCreatedUser() throws VotifyException {
-        User user = userService.getUserById(1);
-        assertTrue(userService.checkPassword(user, "12345678abacaxi#"));
-    }
-
-    @Test
-    @Order(4)
-    public void checkInvalidPasswordFromCreatedUser() throws VotifyException {
-        User user = userService.getUserById(2);
-        assertFalse(userService.checkPassword(user, "12345678abacaxi#"));
     }
 }
