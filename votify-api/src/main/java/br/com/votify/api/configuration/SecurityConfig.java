@@ -1,14 +1,34 @@
 package br.com.votify.api.configuration;
 
-import org.springframework.context.annotation.Bean;
+import br.com.votify.core.domain.entities.cookies.CookieProperties;
+import br.com.votify.core.domain.entities.tokens.TokenProperties;
+import jakarta.servlet.http.Cookie;
+import lombok.Getter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Configuration
+@Getter
 public class SecurityConfig {
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+    @Autowired
+    private TokenProperties tokenProperties;
+
+    @Autowired
+    private CookieProperties cookieProperties;
+
+    public void configureAccessTokenCookie(Cookie cookie) {
+        configureCookie(cookie);
+        cookie.setMaxAge(tokenProperties.getAccessTokenMaxAge());
+    }
+
+    public void configureRefreshTokenCookie(Cookie cookie) {
+        configureCookie(cookie);
+        cookie.setMaxAge(tokenProperties.getRefreshTokenMaxAge());
+    }
+
+    private void configureCookie(Cookie cookie) {
+        cookie.setHttpOnly(cookieProperties.isHttpOnly());
+        cookie.setSecure(cookieProperties.isSecure());
+        cookie.setPath(cookieProperties.getPath());
     }
 }
