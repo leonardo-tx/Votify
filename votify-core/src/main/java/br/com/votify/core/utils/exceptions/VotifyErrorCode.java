@@ -32,7 +32,15 @@ public enum VotifyErrorCode {
     COMMON_UNAUTHORIZED("common.unauthorized", HttpStatus.UNAUTHORIZED),
     INTERNAL("internal", HttpStatus.INTERNAL_SERVER_ERROR),
     BAD_REQUEST("bad.request", HttpStatus.BAD_REQUEST),
-    ENDPOINT_NOT_FOUND("endpoint.not.found", HttpStatus.BAD_REQUEST);
+    ENDPOINT_NOT_FOUND("endpoint.not.found", HttpStatus.BAD_REQUEST),
+    POLL_TITLE_ALREADY_EXISTS_FOR_THIS_USER("poll.title.duplicated", HttpStatus.BAD_REQUEST),
+    POLL_TITLE_INVALID_LENGTH("poll.title.invalid.length", HttpStatus.BAD_REQUEST),
+    POLL_TITLE_EMPTY("poll.title.empty", HttpStatus.BAD_REQUEST),
+    POLL_DESCRIPTION_EMPTY("poll.description.empty", HttpStatus.BAD_REQUEST),
+    POLL_DESCRIPTION_INVALID_LENGTH("poll.description.invalid.length", HttpStatus.BAD_REQUEST),
+    POLL_VOTE_OPTIONS_EMPTY("poll.vote.options.empty", HttpStatus.BAD_REQUEST),
+    POLL_INVALID_VOTE_OPTIONS_NUM("poll.vote.options.invalid.num", HttpStatus.BAD_REQUEST),
+    POLL_INVALID_CHOICE_LIMIT_PER_USER("poll.choice.limit.invalid", HttpStatus.BAD_REQUEST);
 
     private final String code;
     private final HttpStatusCode httpStatusCode;
