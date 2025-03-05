@@ -8,6 +8,7 @@ on:
       - '**/*.java'
       - '**/pom.xml'
       - '**/*.properties'
+      - '**/*.yml'
 
 jobs:
   test:
@@ -42,7 +43,7 @@ jobs:
       - name: Commit the badge (if it changed)
         run: |
           if [[ `git status --porcelain` ]]; then
-            git stash push -m "Temporary stash for coverage badge update"
+            git stash push -m "Temporary stash for coverage badge update" --include-untracked
             git checkout badges
             git stash pop
             if [[ `git status --porcelain` ]]; then
