@@ -8,6 +8,7 @@ on:
       - '**/*.java'
       - '**/pom.xml'
       - '**/*.properties'
+      - '**/*.yml'
 
 jobs:
   test:
