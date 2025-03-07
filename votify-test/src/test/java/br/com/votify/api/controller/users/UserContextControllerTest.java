@@ -1,9 +1,9 @@
 package br.com.votify.api.controller.users;
 
-import br.com.votify.api.dto.ApiResponse;
-import br.com.votify.api.dto.users.UserDetailedViewDTO;
-import br.com.votify.api.dto.users.UserLoginDTO;
-import br.com.votify.api.dto.users.UserRegisterDTO;
+import br.com.votify.dto.ApiResponse;
+import br.com.votify.dto.users.UserDetailedViewDTO;
+import br.com.votify.dto.users.UserLoginDTO;
+import br.com.votify.dto.users.UserRegisterDTO;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;

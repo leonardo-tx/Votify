@@ -14,6 +14,7 @@
         <module>votify-core</module>
         <module>votify-console</module>
         <module>votify-test</module>
+        <module>votify-dto</module>
     </modules>
 
     <properties>

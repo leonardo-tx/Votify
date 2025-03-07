@@ -1,8 +1,8 @@
 package br.com.votify.api.handlers;
 
-import br.com.votify.api.dto.ApiResponse;
 import br.com.votify.core.utils.exceptions.VotifyErrorCode;
 import br.com.votify.core.utils.exceptions.VotifyException;
+import br.com.votify.dto.ApiResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.BeanCreationException;
