@@ -1,12 +1,12 @@
 package br.com.votify.api.controller.users;
 
 import br.com.votify.api.configuration.SecurityConfig;
-import br.com.votify.api.dto.ApiResponse;
-import br.com.votify.api.dto.users.UserDetailedViewDTO;
 import br.com.votify.core.domain.entities.tokens.AuthTokens;
 import br.com.votify.core.domain.entities.users.User;
 import br.com.votify.core.service.ContextService;
 import br.com.votify.core.utils.exceptions.VotifyException;
+import br.com.votify.dto.ApiResponse;
+import br.com.votify.dto.users.UserDetailedViewDTO;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;

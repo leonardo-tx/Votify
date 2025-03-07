@@ -1,4 +1,4 @@
-package br.com.votify.api.dto;
+package br.com.votify.dto;
 
 import br.com.votify.core.utils.exceptions.VotifyException;
 import lombok.AllArgsConstructor;

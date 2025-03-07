@@ -1,4 +1,4 @@
-package br.com.votify.api.dto.users;
+package br.com.votify.dto.users;
 
 import br.com.votify.core.domain.entities.users.User;
 import lombok.AllArgsConstructor;
