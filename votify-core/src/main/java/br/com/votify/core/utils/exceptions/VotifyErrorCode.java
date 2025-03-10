@@ -32,13 +32,14 @@ public enum VotifyErrorCode {
     COMMON_UNAUTHORIZED("common.unauthorized", HttpStatus.UNAUTHORIZED),
     INTERNAL("internal", HttpStatus.INTERNAL_SERVER_ERROR),
     BAD_REQUEST("bad.request", HttpStatus.BAD_REQUEST),
-    ENDPOINT_NOT_FOUND("endpoint.not.found", HttpStatus.BAD_REQUEST);
+    ENDPOINT_NOT_FOUND("endpoint.not.found", HttpStatus.BAD_REQUEST),
+    USER_DELETE_UNAUTHORIZED("user.delete.unauthorized", HttpStatus.FORBIDDEN);
 
-    private final String code;
+    private final String messageKey;
     private final HttpStatusCode httpStatusCode;
 
-    VotifyErrorCode(String code, HttpStatusCode httpStatusCode) {
-        this.code = code;
+    VotifyErrorCode(String messageKey, HttpStatusCode httpStatusCode) {
+        this.messageKey = messageKey;
         this.httpStatusCode = httpStatusCode;
     }
 }
