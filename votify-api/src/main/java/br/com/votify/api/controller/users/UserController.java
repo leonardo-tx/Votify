@@ -6,6 +6,7 @@ import br.com.votify.core.domain.entities.users.User;
 import br.com.votify.core.service.ContextService;
 import br.com.votify.core.utils.exceptions.VotifyException;
 import br.com.votify.core.service.UserService;
+import br.com.votify.core.service.ContextService;
 import br.com.votify.dto.ApiResponse;
 import br.com.votify.dto.users.UserDetailedViewDTO;
 import br.com.votify.dto.users.UserLoginDTO;
@@ -74,5 +75,29 @@ public class UserController {
 
         return ResponseEntity.status(HttpStatus.OK)
             .body(ApiResponse.success(null));
+    }
+
+    @DeleteMapping("/me")
+    public ResponseEntity<ApiResponse<?>> deleteAccount(
+        HttpServletResponse response
+    ) throws VotifyException {
+        User currentUser = contextService.getUserOrThrow();
+        userService.deleteUser(currentUser.getId());
+        
+        // Limpar cookies após deletar a conta
+        Cookie refreshCookie = new Cookie("refresh_token", "");
+        Cookie accessCookie = new Cookie("access_token", "");
+        
+        refreshCookie.setMaxAge(0);
+        accessCookie.setMaxAge(0);
+        
+        securityConfig.configureRefreshTokenCookie(refreshCookie);
+        securityConfig.configureAccessTokenCookie(accessCookie);
+        
+        response.addCookie(refreshCookie);
+        response.addCookie(accessCookie);
+
+        return ResponseEntity.status(HttpStatus.NO_CONTENT)
+                .body(ApiResponse.success(null));
     }
 }

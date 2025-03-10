@@ -11,12 +11,12 @@ public class VotifyException extends Exception {
     private final VotifyErrorCode errorCode;
 
     public VotifyException(VotifyErrorCode errorCode) {
-        super(MESSAGES.getString(errorCode.getCode()));
+        super(MESSAGES.getString(errorCode.getMessageKey()));
         this.errorCode = errorCode;
     }
 
     public VotifyException(VotifyErrorCode errorCode, @Nullable Object... args) {
-        super(String.format(MESSAGES.getString(errorCode.getCode()), args));
+        super(String.format(MESSAGES.getString(errorCode.getMessageKey()), args));
         this.errorCode = errorCode;
     }
 }

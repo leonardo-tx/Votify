@@ -17,6 +17,7 @@ import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Date;
+import java.util.List;
 
 @Service
 public class TokenService {
@@ -67,6 +68,11 @@ public class TokenService {
             .compact();
         RefreshToken refreshToken = new RefreshToken(token, expiration, user);
         return refreshTokenRepository.save(refreshToken);
+    }
+
+    public void deleteAllFromUser(User user) {
+        List<RefreshToken> refreshTokens = refreshTokenRepository.findAllByUser(user);
+        refreshTokenRepository.deleteAll(refreshTokens);
     }
 
     public RefreshToken increaseRefreshTokenExpiration(String refreshToken) throws VotifyException {
