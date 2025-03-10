@@ -37,10 +37,10 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+// Testes de integração
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-@ExtendWith(MockitoExtension.class)
 public class UserContextControllerTest {
     @Autowired
     private TestRestTemplate restTemplate;
@@ -162,41 +162,69 @@ public class UserContextControllerTest {
         assertNull(response.getBody().getErrorCode());
         assertNull(response.getBody().getErrorMessage());
     }
+}
 
+// Testes unitários para o método deleteAccount
+@ExtendWith(MockitoExtension.class)
+class UserContextControllerDeleteAccountTest {
+    
+    @Mock
+    private UserService userService;
+    
+    @Mock
+    private SecurityConfig securityConfig;
+    
+    @Mock
+    private ContextService contextService;
+    
+    @Mock
+    private HttpServletResponse response;
+    
+    @InjectMocks
+    private UserContextController userContextController;
+    
+    private User testUser;
+    
+    @BeforeEach
+    void setUp() {
+        testUser = new CommonUser(1L, "test-user", "Test User", "test@example.com", "password123");
+    }
+    
     @Test
     void deleteAccount_ShouldDeleteUserAndClearCookies() throws VotifyException {
         // Arrange
         when(contextService.getUserOrThrow()).thenReturn(testUser);
         doNothing().when(userService).deleteUser(testUser.getId());
-
+        
         // Act
         ResponseEntity<ApiResponse<?>> responseEntity = userContextController.deleteAccount(response);
-
+        
         // Assert
         assertEquals(HttpStatus.NO_CONTENT, responseEntity.getStatusCode());
         verify(userService).deleteUser(testUser.getId());
         verify(response, times(2)).addCookie(any(Cookie.class));
-        verify(securityConfig, times(2)).configureAccessTokenCookie(any(Cookie.class));
+        verify(securityConfig).configureRefreshTokenCookie(any(Cookie.class));
+        verify(securityConfig).configureAccessTokenCookie(any(Cookie.class));
     }
-
+    
     @Test
     void deleteAccount_WhenUserNotFound_ShouldPropagateException() throws VotifyException {
         // Arrange
         when(contextService.getUserOrThrow()).thenReturn(testUser);
         doThrow(new VotifyException(VotifyErrorCode.USER_NOT_FOUND))
             .when(userService).deleteUser(testUser.getId());
-
+            
         // Act & Assert
         assertThrows(VotifyException.class, () -> userContextController.deleteAccount(response));
         verify(response, never()).addCookie(any(Cookie.class));
     }
-
+    
     @Test
     void deleteAccount_WhenUnauthorized_ShouldPropagateException() throws VotifyException {
         // Arrange
         when(contextService.getUserOrThrow())
             .thenThrow(new VotifyException(VotifyErrorCode.COMMON_UNAUTHORIZED));
-
+            
         // Act & Assert
         assertThrows(VotifyException.class, () -> userContextController.deleteAccount(response));
         verify(userService, never()).deleteUser(any());
