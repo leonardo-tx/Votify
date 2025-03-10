@@ -27,7 +27,6 @@ import static org.mockito.Mockito.*;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class UserServiceTest {
     private static final List<User> users = new ArrayList<>();
-    private static UserService userService;
     private static ContextService contextService;
     private static Long entityId = 1L;
 
@@ -98,7 +97,6 @@ public class UserServiceTest {
             return createdUser;
         });
         when(userRepository.findAll()).thenAnswer((invocation) -> users);
-        userService = new UserService(contextService, passwordEncoderService, userRepository, tokenService);
     }
 
     @BeforeEach

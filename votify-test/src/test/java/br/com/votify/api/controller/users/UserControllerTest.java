@@ -25,9 +25,10 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
-import org.springframework.test.context.web.WebAppConfiguration;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.HashSet;
 import java.util.List;
@@ -39,8 +40,7 @@ import static org.mockito.Mockito.*;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-@WebAppConfiguration
-@SpringJUnitConfig(SpringExtension.class)
+@ExtendWith(MockitoExtension.class)
 public class UserControllerTest {
     @Autowired
     private TestRestTemplate restTemplate;
@@ -91,7 +91,16 @@ public class UserControllerTest {
         );
 
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
-        assertEquals(expectedApiResponse.toString(), response.getBody().toString());
+        assertNotNull(response.getBody());
+        assertEquals(expectedApiResponse.isSuccess(), response.getBody().isSuccess());
+        
+        UserDetailedViewDTO expectedData = expectedApiResponse.getData();
+        UserDetailedViewDTO actualData = response.getBody().getData();
+        assertNotNull(actualData);
+        assertEquals(expectedData.getId(), actualData.getId());
+        assertEquals(expectedData.getUserName(), actualData.getUserName());
+        assertEquals(expectedData.getName(), actualData.getName());
+        assertEquals(expectedData.getEmail(), actualData.getEmail());
     }
 
     @Test

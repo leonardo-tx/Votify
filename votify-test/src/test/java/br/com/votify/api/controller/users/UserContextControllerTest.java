@@ -26,7 +26,7 @@ import org.springframework.http.*;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
-import org.springframework.test.context.junit.jupiter.extension.ExtendWith;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -116,7 +116,15 @@ public class UserContextControllerTest {
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertEquals(expectedApiResponse.toString(), response.getBody().toString());
+        assertEquals(expectedApiResponse.isSuccess(), response.getBody().isSuccess());
+        
+        UserDetailedViewDTO expectedData = expectedApiResponse.getData();
+        UserDetailedViewDTO actualData = response.getBody().getData();
+        assertNotNull(actualData);
+        assertEquals(expectedData.getId(), actualData.getId());
+        assertEquals(expectedData.getUserName(), actualData.getUserName());
+        assertEquals(expectedData.getName(), actualData.getName());
+        assertEquals(expectedData.getEmail(), actualData.getEmail());
     }
 
     @Test
@@ -149,7 +157,10 @@ public class UserContextControllerTest {
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertEquals(expectedApiResponse.toString(), response.getBody().toString());
+        assertEquals(expectedApiResponse.isSuccess(), response.getBody().isSuccess());
+        assertNull(response.getBody().getData());
+        assertNull(response.getBody().getErrorCode());
+        assertNull(response.getBody().getErrorMessage());
     }
 
     @Test

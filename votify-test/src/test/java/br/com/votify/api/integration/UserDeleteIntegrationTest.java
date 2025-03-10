@@ -7,6 +7,7 @@ import br.com.votify.core.repository.RefreshTokenRepository;
 import br.com.votify.core.repository.UserRepository;
 import br.com.votify.core.service.TokenService;
 import br.com.votify.core.utils.exceptions.VotifyException;
+import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,7 +62,7 @@ class UserDeleteIntegrationTest {
     void deleteAccount_WhenAuthenticated_ShouldDeleteUserAndTokens() throws Exception {
         // Act
         ResultActions result = mockMvc.perform(delete("/user")
-            .cookie(new javax.servlet.http.Cookie("access_token", accessToken)));
+            .cookie(new Cookie("access_token", accessToken)));
 
         // Assert
         result.andExpect(status().isNoContent());
@@ -92,7 +93,7 @@ class UserDeleteIntegrationTest {
     void deleteAccount_WithInvalidToken_ShouldReturnUnauthorized() throws Exception {
         // Act & Assert
         mockMvc.perform(delete("/user")
-            .cookie(new javax.servlet.http.Cookie("access_token", "invalid-token")))
+            .cookie(new Cookie("access_token", "invalid-token")))
             .andExpect(status().isUnauthorized())
             .andExpect(jsonPath("$.success").value(false))
             .andExpect(jsonPath("$.errorCode").value("access.token.invalid"));
