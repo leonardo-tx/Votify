@@ -2,24 +2,26 @@ package br.com.votify.dto;
 
 import br.com.votify.core.utils.exceptions.VotifyException;
 import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
 
-@Data
-@NoArgsConstructor
+@Getter
 @AllArgsConstructor
 public class ApiResponse<T> {
-    private boolean success;
-    private T data;
-    private String errorCode;
-    private String errorMessage;
+    private final boolean success;
+    private final T data;
+    private final String errorCode;
+    private final String errorMessage;
 
     public static <T> ApiResponse<T> success(T data) {
         return new ApiResponse<>(true, data, null, null);
     }
 
     public static <T> ApiResponse<T> error(VotifyException exception) {
-        return new ApiResponse<>(false, null,
-                exception.getErrorCode().getCode(), exception.getMessage());
+        return new ApiResponse<>(
+            false,
+            null,
+            exception.getErrorCode().getMessageKey(),
+            exception.getMessage()
+        );
     }
 }

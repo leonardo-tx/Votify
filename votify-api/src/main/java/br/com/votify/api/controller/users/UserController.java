@@ -5,6 +5,7 @@ import br.com.votify.core.domain.entities.tokens.AuthTokens;
 import br.com.votify.core.domain.entities.users.User;
 import br.com.votify.core.utils.exceptions.VotifyException;
 import br.com.votify.core.service.UserService;
+import br.com.votify.core.service.ContextService;
 import br.com.votify.dto.ApiResponse;
 import br.com.votify.dto.users.UserDetailedViewDTO;
 import br.com.votify.dto.users.UserLoginDTO;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
     private final UserService userService;
     private final SecurityConfig securityConfig;
+    private final ContextService contextService;
 
 
     @PostMapping

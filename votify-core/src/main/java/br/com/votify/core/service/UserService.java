@@ -7,11 +7,13 @@ import br.com.votify.core.utils.validators.UserValidator;
 import br.com.votify.core.utils.exceptions.VotifyErrorCode;
 import br.com.votify.core.utils.exceptions.VotifyException;
 import br.com.votify.core.repository.UserRepository;
+import br.com.votify.core.repository.RefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -23,6 +25,7 @@ public class UserService {
     private final PasswordEncoderService passwordEncoderService;
     private final UserRepository userRepository;
     private final TokenService tokenService;
+    private final RefreshTokenRepository refreshTokenRepository;
 
     public User createUser(User user) throws VotifyException {
         UserValidator.validateFields(user);
@@ -64,5 +67,22 @@ public class UserService {
 
     public List<User> getAll() {
         return userRepository.findAll();
+    }
+
+    @Transactional
+    public void deleteUser(Long userId) throws VotifyException {
+        User user = getUserById(userId);
+        
+        // Verifica se o usuário atual tem permissão para deletar
+        User currentUser = context.getUserOrThrow();
+        if (!currentUser.getId().equals(userId)) {
+            throw new VotifyException(VotifyErrorCode.USER_DELETE_UNAUTHORIZED);
+        }
+        
+        // Deleta todos os refresh tokens do usuário
+        refreshTokenRepository.deleteAll(refreshTokenRepository.findAllByUser(user));
+        
+        // Deleta o usuário
+        userRepository.delete(user);
     }
 }
