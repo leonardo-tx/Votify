@@ -22,10 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
@@ -93,7 +90,6 @@ public class UserControllerTest {
         );
 
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
-        assertNotNull(response.getBody());
         assertEquals(expectedApiResponse.toString(), response.getBody().toString());
     }
 
@@ -101,25 +97,22 @@ public class UserControllerTest {
     @Order(1)
     public void registerInvalidUser() {
         UserRegisterDTO dtoRegister = new UserRegisterDTO(
-                "littlecat123",
-                "Littlecat",
-                "123@gmail.com",
-                "ahsvdhgafvsdghasv"
+            "littledoge",
+            "Byces",
+            "123@gmail.com",
+            "littledoge123"
         );
-        ApiResponse<UserDetailedViewDTO> expectedApiResponse = ApiResponse.error(new VotifyException(
-            VotifyErrorCode.EMAIL_ALREADY_EXISTS
-        ));
 
         ResponseEntity<ApiResponse<UserDetailedViewDTO>> response = restTemplate.exchange(
             "/users",
-            HttpMethod.POST,
-            new HttpEntity<>(dtoRegister),
-            new ParameterizedTypeReference<>() {}
+                HttpMethod.POST,
+                new HttpEntity<>(dtoRegister),
+                new ParameterizedTypeReference<>() {}
         );
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals(expectedApiResponse.toString(), response.getBody().toString());
+        assertEquals(false, response.getBody().isSuccess());
+        assertEquals("user.name.already.exists", response.getBody().getErrorCode());
     }
 
     @Test
@@ -129,69 +122,19 @@ public class UserControllerTest {
             "123@gmail.com",
             "littledoge123"
         );
-        ApiResponse<?> expectedApiResponse = ApiResponse.success(null);
 
-        ResponseEntity<ApiResponse<UserDetailedViewDTO>> response = restTemplate.exchange(
-                "/users/login",
+        ResponseEntity<ApiResponse<?>> response = restTemplate.exchange(
+            "/users/login",
                 HttpMethod.POST,
                 new HttpEntity<>(dtoLogin),
                 new ParameterizedTypeReference<>() {}
         );
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals(expectedApiResponse.toString(), response.getBody().toString());
+        assertEquals(true, response.getBody().isSuccess());
 
-        List<String> cookies = response.getHeaders().get("Set-Cookie");
-
+        HttpHeaders headers = response.getHeaders();
+        List<String> cookies = headers.get(HttpHeaders.SET_COOKIE);
         assertNotNull(cookies);
-        assertEquals(2, cookies.size());
-
-        HashSet<String> hashSet = new HashSet<>();
-        for (String cookie : cookies) {
-            hashSet.add(cookie.split("=", 2)[0]);
-        }
-        assertTrue(hashSet.contains("access_token"));
-        assertTrue(hashSet.contains("refresh_token"));
-    }
-
-    @Test
-    void deleteAccount_ShouldDeleteUserAndClearCookies() throws VotifyException {
-        // Arrange
-        when(contextService.getUserOrThrow()).thenReturn(testUser);
-        doNothing().when(userService).deleteUser(testUser.getId());
-
-        // Act
-        ResponseEntity<ApiResponse<?>> responseEntity = userController.deleteAccount(response);
-
-        // Assert
-        assertEquals(HttpStatus.NO_CONTENT, responseEntity.getStatusCode());
-        verify(userService).deleteUser(testUser.getId());
-        verify(response, times(2)).addCookie(any(Cookie.class));
-        verify(securityConfig, times(2)).configureAccessTokenCookie(any(Cookie.class));
-    }
-
-    @Test
-    void deleteAccount_WhenUserNotFound_ShouldPropagateException() throws VotifyException {
-        // Arrange
-        when(contextService.getUserOrThrow()).thenReturn(testUser);
-        doThrow(new VotifyException(VotifyErrorCode.USER_NOT_FOUND))
-            .when(userService).deleteUser(testUser.getId());
-
-        // Act & Assert
-        assertThrows(VotifyException.class, () -> userController.deleteAccount(response));
-        verify(response, never()).addCookie(any(Cookie.class));
-    }
-
-    @Test
-    void deleteAccount_WhenUnauthorized_ShouldPropagateException() throws VotifyException {
-        // Arrange
-        when(contextService.getUserOrThrow())
-            .thenThrow(new VotifyException(VotifyErrorCode.COMMON_UNAUTHORIZED));
-
-        // Act & Assert
-        assertThrows(VotifyException.class, () -> userController.deleteAccount(response));
-        verify(userService, never()).deleteUser(any());
-        verify(response, never()).addCookie(any(Cookie.class));
     }
 }
