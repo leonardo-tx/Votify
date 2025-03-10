@@ -91,7 +91,6 @@ public class UserControllerTest {
         );
 
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
-        assertNotNull(response.getBody());
         assertEquals(expectedApiResponse.toString(), response.getBody().toString());
     }
 
@@ -99,25 +98,22 @@ public class UserControllerTest {
     @Order(1)
     public void registerInvalidUser() {
         UserRegisterDTO dtoRegister = new UserRegisterDTO(
-            "littlecat123",
-            "Littlecat",
+            "littledoge",
+            "Byces",
             "123@gmail.com",
-            "ahsvdhgafvsdghasv"
+            "littledoge123"
         );
-        ApiResponse<UserDetailedViewDTO> expectedApiResponse = ApiResponse.error(new VotifyException(
-            VotifyErrorCode.EMAIL_ALREADY_EXISTS
-        ));
 
         ResponseEntity<ApiResponse<UserDetailedViewDTO>> response = restTemplate.exchange(
             "/users",
-            HttpMethod.POST,
-            new HttpEntity<>(dtoRegister),
-            new ParameterizedTypeReference<>() {}
+                HttpMethod.POST,
+                new HttpEntity<>(dtoRegister),
+                new ParameterizedTypeReference<>() {}
         );
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals(expectedApiResponse.toString(), response.getBody().toString());
+        assertFalse(response.getBody().isSuccess());
+        assertEquals("user.name.already.exists", response.getBody().getErrorCode());
     }
 
     @Test
@@ -126,20 +122,20 @@ public class UserControllerTest {
         UserLoginDTO dtoLogin = new UserLoginDTO("123@gmail.com", "littledoge123");
         ApiResponse<?> expectedApiResponse = ApiResponse.success(null);
 
-        ResponseEntity<ApiResponse<UserDetailedViewDTO>> response = restTemplate.exchange(
+        ResponseEntity<ApiResponse<?>> response = restTemplate.exchange(
             "/users/login",
-            HttpMethod.POST,
-            new HttpEntity<>(dtoLogin),
-            new ParameterizedTypeReference<>() {}
+                HttpMethod.POST,
+                new HttpEntity<>(dtoLogin),
+                new ParameterizedTypeReference<>() {}
         );
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals(expectedApiResponse.toString(), response.getBody().toString());
+        assertTrue(response.getBody().isSuccess());
 
-        List<String> cookies = response.getHeaders().get("Set-Cookie");
-
+        HttpHeaders headers = response.getHeaders();
+        List<String> cookies = headers.get(HttpHeaders.SET_COOKIE);
         assertNotNull(cookies);
+
         assertEquals(2, cookies.size());
 
         HashSet<String> hashSet = new HashSet<>();

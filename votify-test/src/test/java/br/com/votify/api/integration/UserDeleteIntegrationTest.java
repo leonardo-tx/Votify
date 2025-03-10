@@ -60,7 +60,7 @@ class UserDeleteIntegrationTest {
     @Test
     void deleteAccount_WhenAuthenticated_ShouldDeleteUserAndTokens() throws Exception {
         // Act
-        ResultActions result = mockMvc.perform(delete("/users/me")
+        ResultActions result = mockMvc.perform(delete("/user")
             .cookie(new javax.servlet.http.Cookie("access_token", accessToken)));
 
         // Assert
@@ -82,7 +82,7 @@ class UserDeleteIntegrationTest {
     @Test
     void deleteAccount_WhenNotAuthenticated_ShouldReturnUnauthorized() throws Exception {
         // Act & Assert
-        mockMvc.perform(delete("/users/me"))
+        mockMvc.perform(delete("/user"))
             .andExpect(status().isUnauthorized())
             .andExpect(jsonPath("$.success").value(false))
             .andExpect(jsonPath("$.errorCode").value("common.unauthorized"));
@@ -91,7 +91,7 @@ class UserDeleteIntegrationTest {
     @Test
     void deleteAccount_WithInvalidToken_ShouldReturnUnauthorized() throws Exception {
         // Act & Assert
-        mockMvc.perform(delete("/users/me")
+        mockMvc.perform(delete("/user")
             .cookie(new javax.servlet.http.Cookie("access_token", "invalid-token")))
             .andExpect(status().isUnauthorized())
             .andExpect(jsonPath("$.success").value(false))
