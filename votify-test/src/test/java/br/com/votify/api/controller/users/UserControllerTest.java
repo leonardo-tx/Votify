@@ -121,8 +121,9 @@ public class UserControllerTest {
         );
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+
         assertFalse(response.getBody().isSuccess());
-        assertEquals("user.name.already.exists", response.getBody().getErrorCode());
+        assertEquals("email.already.exists", response.getBody().getErrorCode());
     }
 
     @Test
