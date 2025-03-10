@@ -1,4 +1,4 @@
-package br.com.votify.api.dto;
+package br.com.votify.dto;
 
 public interface DTOInput<TEntity> {
     TEntity convertToEntity();
