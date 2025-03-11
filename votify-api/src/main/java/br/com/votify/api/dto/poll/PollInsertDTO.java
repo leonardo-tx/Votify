@@ -1,7 +1,7 @@
 package br.com.votify.api.dto.poll;
 
-import br.com.votify.api.dto.DTOInput;
 import br.com.votify.core.domain.entities.poll.Poll;
+import br.com.votify.dto.DTOInput;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -18,7 +18,6 @@ public final class PollInsertDTO implements DTOInput<Poll> {
     private LocalDateTime endDate;
     private boolean userRegistration;
     private Integer choiceLimitPerUser;
-    private Long userId;
 
     @Override
     public Poll convertToEntity() {
