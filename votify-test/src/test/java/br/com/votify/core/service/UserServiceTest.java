@@ -318,72 +318,10 @@ public class UserServiceTest {
     @Test
     @Order(5)
     public void loginAlreadyLogged() throws VotifyException {
-        // Arrange
         when(contextService.isAuthenticated()).thenReturn(true);
-        
-        // Act & Assert
-        VotifyException exception = assertThrows(
-            VotifyException.class,
-            () -> userService.login("arthurgatinho@gmail.com", "angelofthenight")
-        );
+
+        VotifyException exception = assertThrows(VotifyException.class,
+            () -> userService.login("test@example.com", "password123"));
         assertEquals(VotifyErrorCode.LOGIN_ALREADY_LOGGED, exception.getErrorCode());
-    }
-
-    @Test
-    void deleteUser_WhenUserExists_AndIsOwner_ShouldDeleteSuccessfully() throws VotifyException {
-        // Arrange
-        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
-        when(contextService.getUserOrThrow()).thenReturn(testUser);
-        when(refreshTokenRepository.findAllByUser(testUser))
-            .thenReturn(Arrays.asList(testRefreshToken));
-
-        // Act
-        userService.deleteUser(1L);
-
-        // Assert
-        verify(refreshTokenRepository).deleteAll(Arrays.asList(testRefreshToken));
-        verify(userRepository).delete(testUser);
-    }
-
-    @Test
-    void deleteUser_WhenUserDoesNotExist_ShouldThrowException() {
-        // Arrange
-        when(userRepository.findById(1L)).thenReturn(Optional.empty());
-
-        // Act & Assert
-        VotifyException exception = assertThrows(VotifyException.class,
-            () -> userService.deleteUser(1L));
-        assertEquals(VotifyErrorCode.USER_NOT_FOUND, exception.getErrorCode());
-    }
-
-    @Test
-    void deleteUser_WhenNotOwner_ShouldThrowException() throws VotifyException {
-        // Arrange
-        User otherUser = new CommonUser(2L, "other-user", "Other User", "other@example.com", "password123");
-        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
-        when(contextService.getUserOrThrow()).thenReturn(otherUser);
-
-        // Act & Assert
-        VotifyException exception = assertThrows(VotifyException.class,
-            () -> userService.deleteUser(1L));
-        assertEquals(VotifyErrorCode.USER_DELETE_UNAUTHORIZED, exception.getErrorCode());
-    }
-
-    @Test
-    void deleteUser_ShouldDeleteAllRefreshTokens() throws VotifyException {
-        // Arrange
-        RefreshToken token1 = new RefreshToken("token1", null, testUser);
-        RefreshToken token2 = new RefreshToken("token2", null, testUser);
-        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
-        when(contextService.getUserOrThrow()).thenReturn(testUser);
-        when(refreshTokenRepository.findAllByUser(testUser))
-            .thenReturn(Arrays.asList(token1, token2));
-
-        // Act
-        userService.deleteUser(1L);
-
-        // Assert
-        verify(refreshTokenRepository).deleteAll(Arrays.asList(token1, token2));
-        verify(userRepository).delete(testUser);
     }
 }
