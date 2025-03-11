@@ -52,8 +52,7 @@ public class UserContextController {
     public ResponseEntity<ApiResponse<?>> deleteAccount(
             HttpServletResponse response
     ) throws VotifyException {
-        User currentUser = contextService.getUserOrThrow();
-        userService.deleteUser(currentUser.getId());
+        contextService.deleteUser();
         
         Cookie refreshCookie = new Cookie("refresh_token", "");
         Cookie accessCookie = new Cookie("access_token", "");
