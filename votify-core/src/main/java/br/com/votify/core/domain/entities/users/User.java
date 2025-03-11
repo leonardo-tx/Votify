@@ -50,4 +50,8 @@ public abstract class User {
     public int getPermissions() {
         return PermissionFlags.NONE;
     }
+
+    public boolean hasPermission(int permissionFlags) {
+        return (getPermissions() & permissionFlags) != 0;
+    }
 }
