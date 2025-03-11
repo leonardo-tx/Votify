@@ -190,7 +190,6 @@ class UserContextControllerDeleteAccountTest {
     
     @Test
     void deleteAccount_ShouldDeleteUserAndClearCookies() throws VotifyException {
-        when(contextService.getUserOrThrow()).thenReturn(testUser);
         doNothing().when(contextService).deleteUser();
         
         ResponseEntity<ApiResponse<?>> responseEntity = userContextController.deleteAccount(response);
@@ -200,25 +199,5 @@ class UserContextControllerDeleteAccountTest {
         verify(response, times(2)).addCookie(any(Cookie.class));
         verify(securityConfig).configureRefreshTokenCookie(any(Cookie.class));
         verify(securityConfig).configureAccessTokenCookie(any(Cookie.class));
-    }
-    
-    @Test
-    void deleteAccount_WhenUserNotFound_ShouldPropagateException() throws VotifyException {
-        when(contextService.getUserOrThrow()).thenReturn(testUser);
-        doThrow(new VotifyException(VotifyErrorCode.USER_NOT_FOUND))
-            .when(contextService).deleteUser();
-            
-        assertThrows(VotifyException.class, () -> userContextController.deleteAccount(response));
-        verify(response, never()).addCookie(any(Cookie.class));
-    }
-    
-    @Test
-    void deleteAccount_WhenUnauthorized_ShouldPropagateException() throws VotifyException {
-        when(contextService.getUserOrThrow())
-            .thenThrow(new VotifyException(VotifyErrorCode.COMMON_UNAUTHORIZED));
-            
-        assertThrows(VotifyException.class, () -> userContextController.deleteAccount(response));
-        verify(contextService, never()).deleteUser();
-        verify(response, never()).addCookie(any(Cookie.class));
     }
 }

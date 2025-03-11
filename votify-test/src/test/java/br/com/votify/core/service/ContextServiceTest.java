@@ -194,7 +194,6 @@ public class ContextServiceTest {
     
     @Test
     public void deleteUser_WhenAuthenticated_ShouldDeleteSuccessfully() throws VotifyException {
-        // Arrange
         UserRepository userRepository = mock(UserRepository.class);
         TokenService tokenService = mock(TokenService.class);
         RefreshTokenRepository refreshTokenRepository = mock(RefreshTokenRepository.class);
@@ -213,17 +212,14 @@ public class ContextServiceTest {
         
         ContextService contextService = new ContextService(userRepository, tokenService, refreshTokenRepository, httpServletRequest);
         
-        // Act
         contextService.deleteUser();
         
-        // Assert
         verify(refreshTokenRepository).deleteAll(Arrays.asList(testRefreshToken));
         verify(userRepository).delete(testUser);
     }
     
     @Test
     public void deleteUser_WhenNotAuthenticated_ShouldThrowException() throws VotifyException {
-        // Arrange
         UserRepository userRepository = mock(UserRepository.class);
         TokenService tokenService = mock(TokenService.class);
         RefreshTokenRepository refreshTokenRepository = mock(RefreshTokenRepository.class);
@@ -231,14 +227,12 @@ public class ContextServiceTest {
         
         ContextService contextService = new ContextService(userRepository, tokenService, refreshTokenRepository, httpServletRequest);
         
-        // Act & Assert
         VotifyException exception = assertThrows(VotifyException.class, contextService::deleteUser);
         assertEquals(VotifyErrorCode.COMMON_UNAUTHORIZED, exception.getErrorCode());
     }
     
     @Test
     public void deleteUser_ShouldDeleteAllRefreshTokens() throws VotifyException {
-        // Arrange
         UserRepository userRepository = mock(UserRepository.class);
         TokenService tokenService = mock(TokenService.class);
         RefreshTokenRepository refreshTokenRepository = mock(RefreshTokenRepository.class);
@@ -258,10 +252,8 @@ public class ContextServiceTest {
         
         ContextService contextService = new ContextService(userRepository, tokenService, refreshTokenRepository, httpServletRequest);
         
-        // Act
         contextService.deleteUser();
         
-        // Assert
         verify(refreshTokenRepository).deleteAll(Arrays.asList(token1, token2));
         verify(userRepository).delete(testUser);
     }
