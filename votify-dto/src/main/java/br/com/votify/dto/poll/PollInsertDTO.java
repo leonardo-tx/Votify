@@ -27,13 +27,15 @@ public final class PollInsertDTO implements DTOInput<Poll> {
     @Override
     public Poll convertToEntity() {
         Poll poll = new Poll(
+            null,
             title,
             description,
             startDate,
             endDate,
             userRegistration,
             new ArrayList<>(),
-            choiceLimitPerUser
+            choiceLimitPerUser,
+            null
         );
         if (voteOptions == null) {
             return poll;
