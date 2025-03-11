@@ -4,15 +4,17 @@ import br.com.votify.core.domain.entities.vote.VoteOption;
 import br.com.votify.core.utils.exceptions.VotifyErrorCode;
 import br.com.votify.core.utils.exceptions.VotifyException;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 public final class PollValidator {
 
     public static void validateFields(Poll poll) throws VotifyException {
         validateTitle(poll.getTitle());
         validateDescription(poll.getDescription());
-        validateVoteOptions(poll.getVoteOptions());
         validateChoiceLimitPerUser(poll.getChoiceLimitPerUser(), poll.getVoteOptions());
+        valdiateStartEndDate(poll.getStartDate(),poll.getEndDate());
     }
 
     public static void validateTitle(String title) throws VotifyException {
@@ -26,6 +28,16 @@ public final class PollValidator {
                     Poll.TITLE_MIN_LENGTH,
                     Poll.TITLE_MAX_LENGTH
             );
+        }
+    }
+
+    public static void valdiateStartEndDate(LocalDateTime startDate, LocalDateTime endDate) throws VotifyException {
+        if(Objects.isNull(startDate) || Objects.isNull(endDate)) {
+            throw new VotifyException(VotifyErrorCode.POLL_DATE_EMPTY);
+        }
+
+        if(endDate.isBefore(startDate)) {
+            throw new VotifyException(VotifyErrorCode.POLL_DATE_INVALID);
         }
     }
 
@@ -43,22 +55,8 @@ public final class PollValidator {
         }
     }
 
-    public static void validateVoteOptions(List<VoteOption> voteOptions) throws VotifyException {
-        if (voteOptions == null) {
-            throw new VotifyException(VotifyErrorCode.POLL_VOTE_OPTIONS_EMPTY);
-        }
-        if (voteOptions.isEmpty() ||
-                voteOptions.size() > Poll.VOTE_OPTIONS_MAX) {
-            throw new VotifyException(
-                    VotifyErrorCode.POLL_INVALID_VOTE_OPTIONS_NUM,
-                    Poll.VOTE_OPTIONS_MIN,
-                    Poll.VOTE_OPTIONS_MAX
-            );
-        }
-    }
-
     private static void validateChoiceLimitPerUser(Integer choiceLimitPerUser, List<VoteOption> voteOptions) throws VotifyException {
-        if (choiceLimitPerUser > voteOptions.size()) {
+        if (Objects.nonNull(voteOptions) && choiceLimitPerUser > voteOptions.size()) {
             throw new VotifyException(
                     VotifyErrorCode.POLL_INVALID_CHOICE_LIMIT_PER_USER
             );
