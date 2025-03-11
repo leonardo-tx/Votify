@@ -28,13 +28,13 @@ public class Poll {
     public static final int PAGE_SIZE_LIMIT = 10;
 
     public Poll(
-        String title,
-        String description,
-        LocalDateTime startDate,
-        LocalDateTime endDate,
-        boolean userRegistration,
-        List<VoteOption> voteOptions,
-        Integer choiceLimitPerUser
+            String title,
+            String description,
+            LocalDateTime startDate,
+            LocalDateTime endDate,
+            boolean userRegistration,
+            List<VoteOption> voteOptions,
+            Integer choiceLimitPerUser
     ) {
         this.title = title;
         this.description = description;

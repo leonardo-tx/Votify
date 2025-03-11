@@ -32,6 +32,7 @@ public enum VotifyErrorCode {
     COMMON_UNAUTHORIZED("common.unauthorized", HttpStatus.UNAUTHORIZED),
     INTERNAL("internal", HttpStatus.INTERNAL_SERVER_ERROR),
     BAD_REQUEST("bad.request", HttpStatus.BAD_REQUEST),
+    METHOD_NOT_ALLOWED("method.not.allowed", HttpStatus.METHOD_NOT_ALLOWED),
     ENDPOINT_NOT_FOUND("endpoint.not.found", HttpStatus.NOT_FOUND),
     POLL_TITLE_ALREADY_EXISTS_FOR_THIS_USER("poll.title.duplicated", HttpStatus.BAD_REQUEST),
     POLL_TITLE_INVALID_LENGTH("poll.title.invalid.length", HttpStatus.BAD_REQUEST),
