@@ -55,7 +55,6 @@ public class UserContextController {
         User currentUser = contextService.getUserOrThrow();
         userService.deleteUser(currentUser.getId());
         
-        // Limpar cookies após deletar a conta
         Cookie refreshCookie = new Cookie("refresh_token", "");
         Cookie accessCookie = new Cookie("access_token", "");
         

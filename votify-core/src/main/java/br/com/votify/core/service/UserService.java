@@ -73,16 +73,12 @@ public class UserService {
     public void deleteUser(Long userId) throws VotifyException {
         User user = getUserById(userId);
         
-        // Verifica se o usuário atual tem permissão para deletar
         User currentUser = context.getUserOrThrow();
         if (!currentUser.getId().equals(userId)) {
             throw new VotifyException(VotifyErrorCode.USER_DELETE_UNAUTHORIZED);
         }
         
-        // Deleta todos os refresh tokens do usuário
         tokenService.deleteAllFromUser(currentUser);
-        
-        // Deleta o usuário
         userRepository.delete(user);
     }
 }
