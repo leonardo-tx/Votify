@@ -31,8 +31,8 @@ public class PollController {
     public ResponseEntity<ApiResponse<PollDetailedViewDTO>> insertPoll(@RequestBody PollInsertDTO pollInsertDTO) throws VotifyException {
         Poll poll = pollService.createPoll(pollInsertDTO.convertToEntity(), contextService.getUserOrThrow());
         PollDetailedViewDTO pollDto = PollDetailedViewDTO.parse(poll);
-        return ResponseEntity.status(HttpStatus.CREATED)
-            .body(ApiResponse.success(pollDto));
+
+        return ApiResponse.success(pollDto, HttpStatus.CREATED).createResponseEntity();
     }
     
     @GetMapping("/user/{userId}")
@@ -47,7 +47,7 @@ public class PollController {
                 .collect(Collectors.toList());
         
         PageResponse<PollListViewDTO> pageResponse = PageResponse.from(pollPage, pollDtos);
-        return ResponseEntity.ok(ApiResponse.success(pageResponse));
+        return ApiResponse.success(pageResponse, HttpStatus.OK).createResponseEntity();
     }
     
     @GetMapping("/my")
@@ -60,9 +60,8 @@ public class PollController {
         Long userId = userOptional.map(User::getId).orElse(null);
         
         if (userId == null) {
-            return ResponseEntity.ok(ApiResponse.success(
-                new PageResponse<>(List.of(), 0, size, 0, 0, true, true)
-            ));
+            PageResponse<PollListViewDTO> pageResponse = new PageResponse<>(List.of(), 0, size, 0, 0, true, true);
+            return ApiResponse.success(pageResponse, HttpStatus.OK).createResponseEntity();
         }
 
         Page<Poll> pollPage = pollService.findAllByUserId(userId, page, size);
@@ -71,6 +70,6 @@ public class PollController {
                 .collect(Collectors.toList());
         
         PageResponse<PollListViewDTO> pageResponse = PageResponse.from(pollPage, pollDtos);
-        return ResponseEntity.ok(ApiResponse.success(pageResponse));
+        return ApiResponse.success(pageResponse, HttpStatus.OK).createResponseEntity();
     }
 }

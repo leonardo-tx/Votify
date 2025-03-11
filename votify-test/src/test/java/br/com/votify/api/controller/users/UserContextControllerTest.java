@@ -5,6 +5,11 @@ import br.com.votify.dto.users.UserDetailedViewDTO;
 import br.com.votify.dto.users.UserLoginDTO;
 import br.com.votify.dto.users.UserRegisterDTO;
 import org.junit.jupiter.api.*;
+import br.com.votify.test.AuthHelper;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -43,19 +48,8 @@ public class UserContextControllerTest {
                 "littledoge123"
         );
 
-        restTemplate.exchange(
-                "/users",
-                HttpMethod.POST,
-                new HttpEntity<>(dtoRegister),
-                new ParameterizedTypeReference<>() {}
-        );
-        ResponseEntity<ApiResponse<?>> loginResponse = restTemplate.exchange(
-                "/users/login",
-                HttpMethod.POST,
-                new HttpEntity<>(dtoLogin),
-                new ParameterizedTypeReference<>() {}
-        );
-        this.cookies = loginResponse.getHeaders().get("Set-Cookie");
+        AuthHelper.register(restTemplate, dtoRegister);
+        this.cookies = AuthHelper.login(restTemplate, dtoLogin);
         this.setupCompleted = true;
     }
 
@@ -67,7 +61,7 @@ public class UserContextControllerTest {
                 "littledoge",
                 "Byces",
                 "123@gmail.com"
-        ));
+        ), null);
 
         HttpHeaders headers = new HttpHeaders();
         headers.add("Cookie", cookies.get(0));
@@ -97,19 +91,7 @@ public class UserContextControllerTest {
     @Test
     @Order(1)
     public void regenerateTokens() {
-        UserLoginDTO dtoLogin = new UserLoginDTO(
-                "123@gmail.com",
-                "littledoge123"
-        );
-
-        ResponseEntity<ApiResponse<UserDetailedViewDTO>> loginResponse = restTemplate.exchange(
-                "/users/login",
-                HttpMethod.POST,
-                new HttpEntity<>(dtoLogin),
-                new ParameterizedTypeReference<>() {}
-        );
-
-        List<String> cookies = loginResponse.getHeaders().get("Set-Cookie");
+        ApiResponse<?> expectedApiResponse = ApiResponse.success(null, null);
 
         HttpHeaders headers = new HttpHeaders();
         headers.add("Cookie", cookies.get(0));

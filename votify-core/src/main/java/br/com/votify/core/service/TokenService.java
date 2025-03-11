@@ -39,7 +39,9 @@ public class TokenService {
         }
 
         Date issuedAt = Date.from(Instant.now());
-        Date expiration = Date.from(issuedAt.toInstant().plusSeconds(60 * 15));
+        Date expiration = Date.from(issuedAt.toInstant()
+            .plusSeconds(tokenProperties.getAccessTokenMaxAge())
+        );
 
         return Jwts.builder()
             .issuedAt(issuedAt)
@@ -54,7 +56,9 @@ public class TokenService {
 
     public RefreshToken createRefreshToken(User user) {
         Date issuedAt = Date.from(Instant.now());
-        Date expiration = Date.from(issuedAt.toInstant().plusSeconds(3600 * 24 * 28));
+        Date expiration = Date.from(issuedAt.toInstant()
+            .plusSeconds(tokenProperties.getRefreshTokenMaxAge())
+        );
 
         String token = Jwts.builder()
             .issuedAt(issuedAt)
@@ -75,7 +79,9 @@ public class TokenService {
         }
         TokenValidator.validateRefreshToken(refreshTokenFromDatabase, refreshSecretKey);
 
-        Date expiration = Date.from(Instant.now().plusSeconds(3600 * 24 * 28));
+        Date expiration = Date.from(Instant.now()
+            .plusSeconds(tokenProperties.getRefreshTokenMaxAge())
+        );
         refreshTokenFromDatabase.setExpiration(expiration);
 
         return refreshTokenRepository.save(refreshTokenFromDatabase);
