@@ -19,10 +19,28 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
+        <dependency>
+            <groupId>br.com.votify</groupId>
+            <artifactId>votify-dto</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-test</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.5.0</version>
+                <configuration>
+                    <mainClass>br.com.votify.console.ConsoleApp</mainClass>
+                </configuration>
+            </plugin>
             <!-- Plugin de compilação -->
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
