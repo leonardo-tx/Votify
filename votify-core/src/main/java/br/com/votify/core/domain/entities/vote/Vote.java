@@ -24,7 +24,4 @@ public class Vote {
 
     @Column(name = "encrypted_user_id", nullable = false)
     private String encryptedUserId;
-
-    @Column(name = "anonymous_voter_hash", nullable = false, unique = true)
-    private String anonymousVoterHash;
 }
