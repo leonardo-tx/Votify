@@ -19,17 +19,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RequestMapping("/polls")
 public class PollController {
-
     private final PollService pollService;
     private final ContextService contextService;
 
-
     @PostMapping
     public ResponseEntity<ApiResponse<PollDetailedViewDTO>> insertPoll(@RequestBody PollInsertDTO pollInsertDTO) throws VotifyException {
-            contextService.throwIfNotAuthenticated();
-            Poll poll = pollService.createPoll(pollInsertDTO.convertToEntity(), contextService.getUserOrThrow());
-            PollDetailedViewDTO pollDto = PollDetailedViewDTO.parse(poll);
-            return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(ApiResponse.success(pollDto));
+        Poll poll = pollService.createPoll(pollInsertDTO.convertToEntity(), contextService.getUserOrThrow());
+        PollDetailedViewDTO pollDto = PollDetailedViewDTO.parse(poll);
+        return ResponseEntity.status(HttpStatus.CREATED)
+            .body(ApiResponse.success(pollDto));
     }
 }

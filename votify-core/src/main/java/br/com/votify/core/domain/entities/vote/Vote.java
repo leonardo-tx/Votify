@@ -1,8 +1,10 @@
 package br.com.votify.core.domain.entities.vote;
 
+import br.com.votify.core.domain.entities.users.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
@@ -10,6 +12,7 @@ import lombok.Setter;
 @Setter
 @Table(name = "TB_VOTE")
 @AllArgsConstructor
+@NoArgsConstructor
 public class Vote {
 
     @Id
@@ -17,11 +20,17 @@ public class Vote {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "vote_option_id",
-            foreignKey = @ForeignKey(name = "fk_vote_option_vote"),
-            nullable = false)
+    @JoinColumn(
+        name = "vote_option_id",
+        foreignKey = @ForeignKey(name = "fk_vote_option_vote"),
+        nullable = false
+    )
     private VoteOption voteOption;
 
-    @Column(name = "encrypted_user_id", nullable = false)
-    private String encryptedUserId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(
+        name = "user_id",
+        foreignKey = @ForeignKey(name = "fk_user_vote")
+    )
+    private User user;
 }

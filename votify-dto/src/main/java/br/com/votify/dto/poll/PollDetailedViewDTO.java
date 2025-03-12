@@ -22,13 +22,13 @@ public class PollDetailedViewDTO {
 
     public static PollDetailedViewDTO parse(Poll entity) {
         return new PollDetailedViewDTO(
-                entity.getId(),
-                entity.getTitle(),
-                entity.getDescription(),
-                entity.getStartDate(),
-                entity.getEndDate(),
-                entity.getChoiceLimitPerUser(),
-                entity.getResponsible().getName()
+            entity.getId(),
+            entity.getTitle(),
+            entity.getDescription(),
+            entity.getStartDate(),
+            entity.getEndDate(),
+            entity.getChoiceLimitPerUser(),
+            entity.getResponsible().getName()
         );
     }
 }
