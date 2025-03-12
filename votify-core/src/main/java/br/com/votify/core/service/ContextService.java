@@ -16,6 +16,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 @Scope(value = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
@@ -47,6 +48,10 @@ public class ContextService {
         }
         long id = tokenService.getUserIdFromAccessToken(accessToken);
         this.user = userRepository.findById(id).orElse(null);
+    }
+
+    public Optional<User> getUserOptional() {
+        return Optional.ofNullable(user);
     }
 
     @NonNull

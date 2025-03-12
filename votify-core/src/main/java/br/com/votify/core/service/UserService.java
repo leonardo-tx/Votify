@@ -7,6 +7,7 @@ import br.com.votify.core.utils.validators.UserValidator;
 import br.com.votify.core.utils.exceptions.VotifyErrorCode;
 import br.com.votify.core.utils.exceptions.VotifyException;
 import br.com.votify.core.repository.UserRepository;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
@@ -19,7 +20,8 @@ import java.util.List;
 @RequiredArgsConstructor
 @Scope(value = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class UserService {
-    public final ContextService context;
+    @Getter
+    private final ContextService context;
     private final PasswordEncoderService passwordEncoderService;
     private final UserRepository userRepository;
     private final TokenService tokenService;
