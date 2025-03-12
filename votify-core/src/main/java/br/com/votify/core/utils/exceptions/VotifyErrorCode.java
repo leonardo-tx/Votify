@@ -27,12 +27,16 @@ public enum VotifyErrorCode {
     REFRESH_TOKEN_INVALID("refresh.token.invalid", HttpStatus.BAD_REQUEST),
     ACCESS_TOKEN_EXPIRED("access.token.expired", HttpStatus.UNAUTHORIZED),
     ACCESS_TOKEN_INVALID("access.token.invalid", HttpStatus.BAD_REQUEST),
-    LOGIN_UNAUTHORIZED("login.unauthorized", HttpStatus.UNAUTHORIZED),
+    LOGIN_UNAUTHORIZED("login.unauthorized", HttpStatus.BAD_REQUEST),
     LOGIN_ALREADY_LOGGED("login.already.logged", HttpStatus.BAD_REQUEST),
     COMMON_UNAUTHORIZED("common.unauthorized", HttpStatus.UNAUTHORIZED),
+    PASSWORD_RESET_CODE_INVALID("password.reset.code.invalid", HttpStatus.BAD_REQUEST),
+    PASSWORD_RESET_REQUEST_EXISTS("password.reset.request.exists", HttpStatus.BAD_REQUEST),
+    PASSWORD_RESET_EMAIL_NOT_FOUND("password.reset.email.not.found", HttpStatus.BAD_REQUEST),
+
     INTERNAL("internal", HttpStatus.INTERNAL_SERVER_ERROR),
     BAD_REQUEST("bad.request", HttpStatus.BAD_REQUEST),
-    ENDPOINT_NOT_FOUND("endpoint.not.found", HttpStatus.BAD_REQUEST);
+    ENDPOINT_NOT_FOUND("endpoint.not.found", HttpStatus.NOT_FOUND);
 
     private final String code;
     private final HttpStatusCode httpStatusCode;

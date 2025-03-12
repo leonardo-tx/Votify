@@ -31,35 +31,35 @@ public class UserContextControllerTest {
     @Order(0)
     public void get() {
         UserRegisterDTO dtoRegister = new UserRegisterDTO(
-            "littledoge",
-            "Byces",
-            "123@gmail.com",
-            "littledoge123"
+                "littledoge",
+                "Byces",
+                "123@gmail.com",
+                "littledoge123"
         );
         UserLoginDTO dtoLogin = new UserLoginDTO(
-            "123@gmail.com",
-            "littledoge123"
+                "123@gmail.com",
+                "littledoge123"
         );
 
         restTemplate.exchange(
-            "/users",
-            HttpMethod.POST,
-            new HttpEntity<>(dtoRegister),
-            new ParameterizedTypeReference<>() {}
+                "/users",
+                HttpMethod.POST,
+                new HttpEntity<>(dtoRegister),
+                new ParameterizedTypeReference<>() {}
         );
 
         ResponseEntity<ApiResponse<UserDetailedViewDTO>> loginResponse = restTemplate.exchange(
-            "/users/login",
-            HttpMethod.POST,
-            new HttpEntity<>(dtoLogin),
-            new ParameterizedTypeReference<>() {}
+                "/users/login",
+                HttpMethod.POST,
+                new HttpEntity<>(dtoLogin),
+                new ParameterizedTypeReference<>() {}
         );
 
         ApiResponse<UserDetailedViewDTO> expectedApiResponse = ApiResponse.success(new UserDetailedViewDTO(
-            1L,
-            "littledoge",
-            "Byces",
-            "123@gmail.com"
+                1L,
+                "littledoge",
+                "Byces",
+                "123@gmail.com"
         ));
 
         List<String> cookies = loginResponse.getHeaders().get("Set-Cookie");
@@ -68,10 +68,10 @@ public class UserContextControllerTest {
         headers.add("Cookie", cookies.get(1));
 
         ResponseEntity<ApiResponse<UserDetailedViewDTO>> response = restTemplate.exchange(
-            "/user",
-            HttpMethod.GET,
-            new HttpEntity<>(headers),
-            new ParameterizedTypeReference<>() {}
+                "/user",
+                HttpMethod.GET,
+                new HttpEntity<>(headers),
+                new ParameterizedTypeReference<>() {}
         );
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -83,15 +83,15 @@ public class UserContextControllerTest {
     @Order(1)
     public void regenerateTokens() {
         UserLoginDTO dtoLogin = new UserLoginDTO(
-            "123@gmail.com",
-            "littledoge123"
+                "123@gmail.com",
+                "littledoge123"
         );
 
         ResponseEntity<ApiResponse<UserDetailedViewDTO>> loginResponse = restTemplate.exchange(
-            "/users/login",
-            HttpMethod.POST,
-            new HttpEntity<>(dtoLogin),
-            new ParameterizedTypeReference<>() {}
+                "/users/login",
+                HttpMethod.POST,
+                new HttpEntity<>(dtoLogin),
+                new ParameterizedTypeReference<>() {}
         );
 
         ApiResponse<?> expectedApiResponse = ApiResponse.success(null);
@@ -101,10 +101,10 @@ public class UserContextControllerTest {
         headers.add("Cookie", cookies.get(0));
 
         ResponseEntity<ApiResponse<?>> response = restTemplate.exchange(
-            "/user/regenerate-tokens",
-            HttpMethod.POST,
-            new HttpEntity<>(headers),
-            new ParameterizedTypeReference<>() {}
+                "/user/regenerate-tokens",
+                HttpMethod.POST,
+                new HttpEntity<>(headers),
+                new ParameterizedTypeReference<>() {}
         );
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
