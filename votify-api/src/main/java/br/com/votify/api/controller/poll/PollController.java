@@ -1,7 +1,7 @@
 package br.com.votify.api.controller.poll;
 
-import br.com.votify.api.dto.poll.PollDetailedViewDTO;
-import br.com.votify.api.dto.poll.PollInsertDTO;
+import br.com.votify.dto.poll.PollDetailedViewDTO;
+import br.com.votify.dto.poll.PollInsertDTO;
 import br.com.votify.core.domain.entities.poll.Poll;
 import br.com.votify.core.service.ContextService;
 import br.com.votify.core.service.PollService;
@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/poll")
+@RequestMapping("/polls")
 public class PollController {
 
     private final PollService pollService;
@@ -25,16 +25,11 @@ public class PollController {
 
 
     @PostMapping
-    public ResponseEntity<ApiResponse<PollDetailedViewDTO>> insertPoll(@RequestBody PollInsertDTO pollInsertDTO) {
-        try {
+    public ResponseEntity<ApiResponse<PollDetailedViewDTO>> insertPoll(@RequestBody PollInsertDTO pollInsertDTO) throws VotifyException {
             contextService.throwIfNotAuthenticated();
             Poll poll = pollService.createPoll(pollInsertDTO.convertToEntity(), contextService.getUserOrThrow());
             PollDetailedViewDTO pollDto = PollDetailedViewDTO.parse(poll);
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(ApiResponse.success(pollDto));
-        } catch (VotifyException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(ApiResponse.error(e));
-        }
     }
 }
