@@ -13,6 +13,7 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -83,5 +84,12 @@ public class GlobalExceptionHandler {
             .body(ApiResponse.error(new VotifyException(VotifyErrorCode.INTERNAL)));
     }
 
-
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ApiResponse<?>> globalMethodArgumentTypeMismatchExceptionHandler(
+        MethodArgumentTypeMismatchException e,
+        WebRequest request
+    ) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+            .body(ApiResponse.error(new VotifyException(VotifyErrorCode.BAD_REQUEST)));
+    }
 }
