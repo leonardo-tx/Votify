@@ -85,4 +85,8 @@ public class TokenService {
         String idAsString = TokenValidator.validateAccessToken(token, accessSecretKey).getSubject();
         return Long.parseLong(idAsString);
     }
+
+    public void deleteRefreshTokenById(String token) {
+        refreshTokenRepository.deleteById(token);
+    }
 }

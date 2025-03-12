@@ -87,6 +87,10 @@ public class ContextService {
         return cookies.get(key);
     }
 
+    public String getCookieValueOrDefault(String key, String defaultValue) {
+        return cookies.getOrDefault(key, defaultValue);
+    }
+
     public void deleteUser() throws VotifyException {
         User currentUser = getUserOrThrow();
         userRepository.delete(currentUser);
