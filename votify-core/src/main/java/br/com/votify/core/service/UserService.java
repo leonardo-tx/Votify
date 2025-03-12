@@ -77,8 +77,6 @@ public class UserService {
         if (!currentUser.getId().equals(userId)) {
             throw new VotifyException(VotifyErrorCode.USER_DELETE_UNAUTHORIZED);
         }
-        
-        tokenService.deleteAllFromUser(currentUser);
         userRepository.delete(user);
     }
 }

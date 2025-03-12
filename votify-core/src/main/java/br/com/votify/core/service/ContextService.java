@@ -4,7 +4,6 @@ import br.com.votify.core.domain.entities.tokens.AuthTokens;
 import br.com.votify.core.domain.entities.tokens.RefreshToken;
 import br.com.votify.core.domain.entities.users.User;
 import br.com.votify.core.repository.UserRepository;
-import br.com.votify.core.repository.RefreshTokenRepository;
 import br.com.votify.core.utils.exceptions.VotifyErrorCode;
 import br.com.votify.core.utils.exceptions.VotifyException;
 import jakarta.servlet.http.Cookie;
@@ -14,7 +13,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.WebApplicationContext;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -27,17 +25,14 @@ public class ContextService {
     private final Map<String, String> cookies;
     private final User user;
     private final UserRepository userRepository;
-    private final RefreshTokenRepository refreshTokenRepository;
 
     public ContextService(
         UserRepository userRepository,
         TokenService tokenService,
-        RefreshTokenRepository refreshTokenRepository,
         HttpServletRequest httpServletRequest
     ) throws VotifyException {
         this.tokenService = tokenService;
         this.userRepository = userRepository;
-        this.refreshTokenRepository = refreshTokenRepository;
         this.cookies = new HashMap<>();
         if (httpServletRequest.getCookies() == null) {
             this.user = null;
@@ -91,13 +86,9 @@ public class ContextService {
     public String getCookieValue(String key) {
         return cookies.get(key);
     }
-    
-    @Transactional
+
     public void deleteUser() throws VotifyException {
         User currentUser = getUserOrThrow();
-        
-        refreshTokenRepository.deleteAll(refreshTokenRepository.findAllByUser(currentUser));
-        
         userRepository.delete(currentUser);
     }
 }

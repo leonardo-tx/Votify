@@ -1,41 +1,22 @@
 package br.com.votify.api.controller.users;
 
-import br.com.votify.api.configuration.SecurityConfig;
-import br.com.votify.core.domain.entities.users.CommonUser;
-import br.com.votify.core.domain.entities.users.User;
-import br.com.votify.core.service.ContextService;
-import br.com.votify.core.service.UserService;
-import br.com.votify.core.utils.exceptions.VotifyErrorCode;
-import br.com.votify.core.utils.exceptions.VotifyException;
 import br.com.votify.dto.ApiResponse;
 import br.com.votify.dto.users.UserDetailedViewDTO;
 import br.com.votify.dto.users.UserLoginDTO;
 import br.com.votify.dto.users.UserRegisterDTO;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletResponse;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -44,31 +25,13 @@ public class UserContextControllerTest {
     @Autowired
     private TestRestTemplate restTemplate;
 
-    @Mock
-    private UserService userService;
-
-    @Mock
-    private SecurityConfig securityConfig;
-
-    @Mock
-    private ContextService contextService;
-
-    @Mock
-    private HttpServletResponse response;
-
-    @InjectMocks
-    private UserContextController userContextController;
-
-    private User testUser;
+    private boolean setupCompleted = false;
+    private List<String> cookies = new ArrayList<>();
 
     @BeforeEach
-    void setUp() {
-        testUser = new CommonUser(1L, "test-user", "Test User", "test@example.com", "password123");
-    }
+    public void setupBeforeEach() {
+        if (setupCompleted) return;
 
-    @Test
-    @Order(0)
-    public void get() {
         UserRegisterDTO dtoRegister = new UserRegisterDTO(
             "littledoge",
             "Byces",
@@ -81,19 +44,24 @@ public class UserContextControllerTest {
         );
 
         restTemplate.exchange(
-            "/users",
-            HttpMethod.POST,
-            new HttpEntity<>(dtoRegister),
-            new ParameterizedTypeReference<>() {}
+                "/users",
+                HttpMethod.POST,
+                new HttpEntity<>(dtoRegister),
+                new ParameterizedTypeReference<>() {}
         );
-
-        ResponseEntity<ApiResponse<UserDetailedViewDTO>> loginResponse = restTemplate.exchange(
-            "/users/login",
-            HttpMethod.POST,
-            new HttpEntity<>(dtoLogin),
-            new ParameterizedTypeReference<>() {}
+        ResponseEntity<ApiResponse<?>> loginResponse = restTemplate.exchange(
+                "/users/login",
+                HttpMethod.POST,
+                new HttpEntity<>(dtoLogin),
+                new ParameterizedTypeReference<>() {}
         );
+        this.cookies = loginResponse.getHeaders().get("Set-Cookie");
+        this.setupCompleted = true;
+    }
 
+    @Test
+    @Order(0)
+    public void get() {
         ApiResponse<UserDetailedViewDTO> expectedApiResponse = ApiResponse.success(new UserDetailedViewDTO(
             1L,
             "littledoge",
@@ -101,11 +69,9 @@ public class UserContextControllerTest {
             "123@gmail.com"
         ));
 
-        List<String> cookies = loginResponse.getHeaders().get("Set-Cookie");
         HttpHeaders headers = new HttpHeaders();
         headers.add("Cookie", cookies.get(0));
         headers.add("Cookie", cookies.get(1));
-
         ResponseEntity<ApiResponse<UserDetailedViewDTO>> response = restTemplate.exchange(
             "/user",
             HttpMethod.GET,
@@ -115,7 +81,7 @@ public class UserContextControllerTest {
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertEquals(expectedApiResponse.isSuccess(), response.getBody().isSuccess());
+        assertTrue(response.getBody().isSuccess());
         
         UserDetailedViewDTO expectedData = expectedApiResponse.getData();
         UserDetailedViewDTO actualData = response.getBody().getData();
@@ -124,29 +90,16 @@ public class UserContextControllerTest {
         assertEquals(expectedData.getUserName(), actualData.getUserName());
         assertEquals(expectedData.getName(), actualData.getName());
         assertEquals(expectedData.getEmail(), actualData.getEmail());
+        assertNull(response.getBody().getErrorCode());
+        assertNull(response.getBody().getErrorMessage());
     }
 
     @Test
     @Order(1)
     public void regenerateTokens() {
-        UserLoginDTO dtoLogin = new UserLoginDTO(
-            "123@gmail.com",
-            "littledoge123"
-        );
-
-        ResponseEntity<ApiResponse<UserDetailedViewDTO>> loginResponse = restTemplate.exchange(
-            "/users/login",
-            HttpMethod.POST,
-            new HttpEntity<>(dtoLogin),
-            new ParameterizedTypeReference<>() {}
-        );
-
-        ApiResponse<?> expectedApiResponse = ApiResponse.success(null);
-
-        List<String> cookies = loginResponse.getHeaders().get("Set-Cookie");
         HttpHeaders headers = new HttpHeaders();
         headers.add("Cookie", cookies.get(0));
-
+        headers.add("Cookie", cookies.get(1));
         ResponseEntity<ApiResponse<?>> response = restTemplate.exchange(
             "/user/regenerate-tokens",
             HttpMethod.POST,
@@ -156,48 +109,44 @@ public class UserContextControllerTest {
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertEquals(expectedApiResponse.isSuccess(), response.getBody().isSuccess());
+        assertTrue(response.getBody().isSuccess());
         assertNull(response.getBody().getData());
         assertNull(response.getBody().getErrorCode());
         assertNull(response.getBody().getErrorMessage());
     }
-}
 
-@ExtendWith(MockitoExtension.class)
-class UserContextControllerDeleteAccountTest {
-    
-    @Mock
-    private UserService userService;
-    
-    @Mock
-    private SecurityConfig securityConfig;
-    
-    @Mock
-    private ContextService contextService;
-    
-    @Mock
-    private HttpServletResponse response;
-    
-    @InjectMocks
-    private UserContextController userContextController;
-    
-    private User testUser;
-    
-    @BeforeEach
-    void setUp() {
-        testUser = new CommonUser(1L, "test-user", "Test User", "test@example.com", "password123");
-    }
-    
     @Test
-    void deleteAccount_ShouldDeleteUserAndClearCookies() throws VotifyException {
-        doNothing().when(contextService).deleteUser();
-        
-        ResponseEntity<ApiResponse<?>> responseEntity = userContextController.deleteAccount(response);
-        
-        assertEquals(HttpStatus.NO_CONTENT, responseEntity.getStatusCode());
-        verify(contextService).deleteUser();
-        verify(response, times(2)).addCookie(any(Cookie.class));
-        verify(securityConfig).configureRefreshTokenCookie(any(Cookie.class));
-        verify(securityConfig).configureAccessTokenCookie(any(Cookie.class));
+    @Order(2)
+    void deleteAccount() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Cookie", cookies.get(0));
+        headers.add("Cookie", cookies.get(1));
+        ResponseEntity<ApiResponse<?>> response = restTemplate.exchange(
+            "/user",
+            HttpMethod.DELETE,
+            new HttpEntity<>(headers),
+            new ParameterizedTypeReference<>() {}
+        );
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertTrue(response.getBody().isSuccess());
+        assertNull(response.getBody().getData());
+        assertNull(response.getBody().getErrorCode());
+        assertNull(response.getBody().getErrorMessage());
+
+        List<String> cookies = response.getHeaders().get(HttpHeaders.SET_COOKIE);
+        assertNotNull(cookies);
+        assertEquals(2, cookies.size());
+
+        HashSet<String> hashSet = new HashSet<>();
+        for (String cookie : cookies) {
+            String[] split = cookie.split("=", 2);
+            hashSet.add(split[0]);
+
+            assertEquals("", split[1].split(";")[0]);
+        }
+        assertTrue(hashSet.contains("access_token"));
+        assertTrue(hashSet.contains("refresh_token"));
     }
 }

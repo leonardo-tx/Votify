@@ -1,7 +1,6 @@
 package br.com.votify.dto;
 
 import br.com.votify.core.utils.exceptions.VotifyException;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -11,7 +10,6 @@ import lombok.ToString;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-@JsonIgnoreProperties(ignoreUnknown = true)
 @ToString
 @EqualsAndHashCode
 public class ApiResponse<T> {

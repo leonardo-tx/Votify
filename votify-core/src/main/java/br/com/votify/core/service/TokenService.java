@@ -9,7 +9,6 @@ import br.com.votify.core.utils.exceptions.VotifyException;
 import br.com.votify.core.utils.validators.TokenValidator;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
@@ -17,7 +16,6 @@ import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Date;
-import java.util.List;
 
 @Service
 public class TokenService {
@@ -68,11 +66,6 @@ public class TokenService {
             .compact();
         RefreshToken refreshToken = new RefreshToken(token, expiration, user);
         return refreshTokenRepository.save(refreshToken);
-    }
-
-    public void deleteAllFromUser(User user) {
-        List<RefreshToken> refreshTokens = refreshTokenRepository.findAllByUser(user);
-        refreshTokenRepository.deleteAll(refreshTokens);
     }
 
     public RefreshToken increaseRefreshTokenExpiration(String refreshToken) throws VotifyException {

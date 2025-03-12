@@ -1,8 +1,13 @@
 package br.com.votify.core.domain.entities.users;
 
+import br.com.votify.core.domain.entities.tokens.RefreshToken;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
+import java.util.List;
 
 @Entity
 @Getter
@@ -46,6 +51,10 @@ public abstract class User {
 
     @Column(nullable = false)
     private String password;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private List<RefreshToken> refreshTokens;
 
     public int getPermissions() {
         return PermissionFlags.NONE;

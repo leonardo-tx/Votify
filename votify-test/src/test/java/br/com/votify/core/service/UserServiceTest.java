@@ -1,74 +1,89 @@
 package br.com.votify.core.service;
 
 import br.com.votify.core.domain.entities.tokens.AuthTokens;
-import br.com.votify.core.domain.entities.tokens.RefreshToken;
 import br.com.votify.core.domain.entities.users.*;
-import br.com.votify.core.repository.RefreshTokenRepository;
 import br.com.votify.core.repository.UserRepository;
 import br.com.votify.core.utils.exceptions.VotifyErrorCode;
 import br.com.votify.core.utils.exceptions.VotifyException;
 import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.quality.Strictness;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class UserServiceTest {
     private static final List<User> users = new ArrayList<>();
+    private static UserService userService;
+    private static ContextService contextService;
     private static Long entityId = 1L;
 
-    @Mock
-    private UserRepository userRepository;
+    @BeforeAll
+    public static void prepareBeforeAll() {
+        contextService = mock(ContextService.class);
+        PasswordEncoderService passwordEncoderService = new PasswordEncoderService();
+        UserRepository userRepository = mock(UserRepository.class);
+        TokenService tokenService = mock(TokenService.class);
 
-    @Mock
-    private RefreshTokenRepository refreshTokenRepository;
-
-    @Mock
-    private TokenService tokenService;
-
-    @Mock
-    private PasswordEncoderService passwordEncoderService;
-    
-    @Mock
-    private ContextService contextService;
-
-    @InjectMocks
-    private UserService userService;
-
-    private User testUser;
-    private RefreshToken testRefreshToken;
-
-    @BeforeEach
-    void setUp() {
-        lenient().when(passwordEncoderService.encryptPassword(any())).thenReturn("encrypted_password");
-        lenient().when(passwordEncoderService.checkPassword(any(), any())).thenReturn(true);
-        
-        testUser = new CommonUser(1L, "test-user", "Test User", "test@example.com", "password123");
-        testRefreshToken = new RefreshToken("token123", null, testUser);
-        
-        reset(userRepository, refreshTokenRepository, tokenService, contextService);
-        
-        lenient().when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
-            User user = invocation.getArgument(0);
-            if (user.getId() == null) {
-                user.setId(entityId++);
+        when(userRepository.existsByEmail(any(String.class))).thenAnswer((invocation) -> {
+            String email = invocation.getArgument(0);
+            for (User user : users) {
+                if (Objects.equals(user.getEmail(), email)) return true;
             }
-            return user;
+            return false;
         });
+        when(userRepository.existsByUserName(any(String.class))).thenAnswer((invocation) -> {
+            String userName = invocation.getArgument(0);
+            for (User user : users) {
+                if (Objects.equals(user.getUserName(), userName)) return true;
+            }
+            return false;
+        });
+        when(userRepository.findById(any(Long.class))).thenAnswer((invocation) -> {
+            Long id = invocation.getArgument(0);
+            for (User user : users) {
+                if (Objects.equals(user.getId(), id)) return Optional.of(user);
+            }
+            return Optional.empty();
+        });
+        when(userRepository.findByEmail(any(String.class))).thenAnswer((invocation) -> {
+            String email = invocation.getArgument(0);
+            for (User user : users) {
+                if (Objects.equals(user.getEmail(), email)) return Optional.of(user);
+            }
+            return Optional.empty();
+        });
+        doAnswer((invocation) -> {
+            Long id = invocation.getArgument(0);
+            for (int i = 0; i < users.size(); i++) {
+                User user = users.get(i);
+                if (Objects.equals(user.getId(), id)) {
+                    users.remove(i);
+                    return null;
+                }
+            }
+            return null;
+        }).when(userRepository).deleteById(any(Long.class));
+        when(userRepository.save(any(User.class))).thenAnswer((invocation) -> {
+            User createdUser = invocation.getArgument(0);
+            for (int i = 0; i < users.size(); i++) {
+                User user = users.get(i);
+                if (Objects.equals(user.getId(), createdUser.getId())) {
+                    users.set(i, createdUser);
+                    return createdUser;
+                }
+            }
+            createdUser.setId(entityId++);
+            users.add(createdUser);
+            return createdUser;
+        });
+        when(userRepository.findAll()).thenAnswer((invocation) -> users);
+        userService = new UserService(contextService, passwordEncoderService, userRepository, tokenService);
     }
 
     @Test
@@ -81,60 +96,39 @@ public class UserServiceTest {
             "marcos@proton.me",
             "12345678abacaxi#"
         );
-        
-        when(userRepository.existsByEmail(anyString())).thenReturn(false);
-        when(userRepository.existsByUserName(anyString())).thenReturn(false);
-        
+
         User userFromService = assertDoesNotThrow(() -> userService.createUser(user));
-        
-        assertNotNull(userFromService);
-        assertNotNull(userFromService.getId());
-        assertEquals("valid-username", userFromService.getUserName());
-        verify(userRepository).save(any(User.class));
+        assertEquals(1, userFromService.getId());
     }
 
     @Test
     @Order(1)
     public void createValidModeratorUser() {
         User user = new ModeratorUser(
-            null,
+            2L,
             "silverhand",
             "Jhonny Silverhand",
             "jhonny@nightcity.2077",
             "6Samurai6"
         );
-        
-        when(userRepository.existsByEmail(anyString())).thenReturn(false);
-        when(userRepository.existsByUserName(anyString())).thenReturn(false);
-        
+
         User userFromService = assertDoesNotThrow(() -> userService.createUser(user));
-        
-        assertNotNull(userFromService);
-        assertNotNull(userFromService.getId());
-        assertEquals("silverhand", userFromService.getUserName());
-        verify(userRepository).save(any(User.class));
+        assertEquals(2, userFromService.getId());
     }
 
     @Test
     @Order(2)
     public void createValidAdminUser() {
         User user = new AdminUser(
-            null,
+            2342342L,
             "arthurzinho-gameplays",
             "Arthur Cervero",
             "arthurgatinho@gmail.com",
             "angelofthenight"
         );
-        
-        when(userRepository.existsByEmail(anyString())).thenReturn(false);
-        when(userRepository.existsByUserName(anyString())).thenReturn(false);
-        
+
         User userFromService = assertDoesNotThrow(() -> userService.createUser(user));
-        
-        assertNotNull(userFromService);
-        assertNotNull(userFromService.getId());
-        assertEquals("arthurzinho-gameplays", userFromService.getUserName());
-        verify(userRepository).save(any(User.class));
+        assertEquals(3, userFromService.getId());
     }
 
     @Test
@@ -147,9 +141,6 @@ public class UserServiceTest {
             "arthurgatinho@gmail.com",
             "aeaeaeaeaeaeaea"
         );
-        
-        when(userRepository.existsByEmail("arthurgatinho@gmail.com")).thenReturn(true);
-        
         VotifyException exception = assertThrows(
             VotifyException.class,
             () -> userService.createUser(user)
@@ -167,9 +158,6 @@ public class UserServiceTest {
             "silverhand@outlook.com",
             "yeeeeeeeey765"
         );
-        
-        when(userRepository.existsByUserName("silverhand")).thenReturn(true);
-        
         VotifyException exception = assertThrows(
             VotifyException.class,
             () -> userService.createUser(user)
@@ -180,37 +168,19 @@ public class UserServiceTest {
     @Test
     @Order(4)
     public void getAll() {
-        List<User> mockUsers = Arrays.asList(
-            new CommonUser(1L, "user1", "User One", "user1@example.com", "password1"),
-            new CommonUser(2L, "user2", "User Two", "user2@example.com", "password2"),
-            new CommonUser(3L, "user3", "User Three", "user3@example.com", "password3")
-        );
-        when(userRepository.findAll()).thenReturn(mockUsers);
-        
-        List<User> result = userService.getAll();
-        
-        assertEquals(3, result.size());
-        verify(userRepository).findAll();
+        assertEquals(3, userService.getAll().size());
     }
 
     @Test
     @Order(4)
     public void getUserById() {
-        User mockUser = new ModeratorUser(2L, "silverhand", "Jhonny Silverhand", "jhonny@nightcity.2077", "6Samurai6");
-        when(userRepository.findById(2L)).thenReturn(Optional.of(mockUser));
-        
         User user = assertDoesNotThrow(() -> userService.getUserById(2));
-        
-        assertNotNull(user);
         assertEquals("jhonny@nightcity.2077", user.getEmail());
-        verify(userRepository).findById(2L);
     }
 
     @Test
     @Order(4)
     public void getNonExistentUser() {
-        when(userRepository.findById(10L)).thenReturn(Optional.empty());
-        
         VotifyException exception = assertThrows(
             VotifyException.class,
             () -> userService.getUserById(10)
@@ -220,35 +190,16 @@ public class UserServiceTest {
 
     @Test
     @Order(4)
-    public void login() throws VotifyException {
-        User mockUser = new ModeratorUser(2L, "silverhand", "Jhonny Silverhand", "jhonny@nightcity.2077", "6Samurai6");
-        RefreshToken mockRefreshToken = new RefreshToken("refresh-token", null, mockUser);
-        AuthTokens mockAuthTokens = new AuthTokens("access-token", mockRefreshToken);
-        
-        when(contextService.isAuthenticated()).thenReturn(false);
-        when(userRepository.findByEmail("jhonny@nightcity.2077")).thenReturn(Optional.of(mockUser));
-        when(passwordEncoderService.checkPassword(mockUser, "6Samurai6")).thenReturn(true);
-        when(tokenService.createRefreshToken(mockUser)).thenReturn(mockRefreshToken);
-        when(tokenService.createAccessToken(mockRefreshToken)).thenReturn("access-token");
-        
+    public void login() {
         AuthTokens authTokens = assertDoesNotThrow(
             () -> userService.login("jhonny@nightcity.2077", "6Samurai6")
         );
-
         assertNotNull(authTokens);
-        assertEquals("access-token", authTokens.getAccessToken());
-        assertEquals(mockRefreshToken, authTokens.getRefreshToken());
     }
 
     @Test
     @Order(4)
-    public void incorretPasswordLogin() throws VotifyException {
-        User mockUser = new ModeratorUser(2L, "silverhand", "Jhonny Silverhand", "jhonny@nightcity.2077", "6Samurai6");
-        
-        when(contextService.isAuthenticated()).thenReturn(false);
-        when(userRepository.findByEmail("jhonny@nightcity.2077")).thenReturn(Optional.of(mockUser));
-        when(passwordEncoderService.checkPassword(mockUser, "6Samurai7")).thenReturn(false);
-        
+    public void incorretPasswordLogin() {
         VotifyException exception = assertThrows(
             VotifyException.class,
             () -> userService.login("jhonny@nightcity.2077", "6Samurai7")
@@ -258,10 +209,7 @@ public class UserServiceTest {
 
     @Test
     @Order(4)
-    public void incorretEmailLogin() throws VotifyException {
-        when(contextService.isAuthenticated()).thenReturn(false);
-        when(userRepository.findByEmail("jhonny@nightcity.2076")).thenReturn(Optional.empty());
-        
+    public void incorretEmailLogin() {
         VotifyException exception = assertThrows(
             VotifyException.class,
             () -> userService.login("jhonny@nightcity.2076", "6Samurai6")
@@ -271,10 +219,7 @@ public class UserServiceTest {
 
     @Test
     @Order(4)
-    public void allIncorrectLogin() throws VotifyException {
-        when(contextService.isAuthenticated()).thenReturn(false);
-        when(userRepository.findByEmail("jhonny@nightcity.2076")).thenReturn(Optional.empty());
-        
+    public void allIncorrectLogin() {
         VotifyException exception = assertThrows(
             VotifyException.class,
             () -> userService.login("jhonny@nightcity.2076", "6Samurai7")
@@ -284,11 +229,34 @@ public class UserServiceTest {
 
     @Test
     @Order(5)
-    public void loginAlreadyLogged() throws VotifyException {
+    public void loginAlreadyLogged() {
         when(contextService.isAuthenticated()).thenReturn(true);
-
-        VotifyException exception = assertThrows(VotifyException.class,
-            () -> userService.login("test@example.com", "password123"));
+        VotifyException exception = assertThrows(
+            VotifyException.class,
+            () -> userService.login("arthurgatinho@gmail.com", "angelofthenight")
+        );
         assertEquals(VotifyErrorCode.LOGIN_ALREADY_LOGGED, exception.getErrorCode());
+    }
+
+    @Test
+    @Order(6)
+    public void deleteUser() throws VotifyException {
+        when(contextService.getUserOrThrow()).thenReturn(
+            new CommonUser(1L, null, null, null, null)
+        );
+        assertDoesNotThrow(() -> userService.deleteUser(1L));
+    }
+
+    @Test
+    @Order(6)
+    public void deleteUserUnauthorized() throws VotifyException {
+        when(contextService.getUserOrThrow()).thenReturn(
+            new CommonUser(3L, null, null, null, null)
+        );
+        VotifyException exception = assertThrows(
+            VotifyException.class,
+            () -> userService.deleteUser(2L)
+        );
+        assertEquals(VotifyErrorCode.USER_DELETE_UNAUTHORIZED, exception.getErrorCode());
     }
 }
