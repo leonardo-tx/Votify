@@ -43,6 +43,8 @@ public enum VotifyErrorCode {
     POLL_INVALID_CHOICE_LIMIT_PER_USER("poll.choice.limit.invalid", HttpStatus.BAD_REQUEST),
     POLL_DATE_EMPTY("poll.date.empty", HttpStatus.BAD_REQUEST),
     POLL_DATE_INVALID("poll.date.invalid", HttpStatus.BAD_REQUEST),
+    POLL_PAGE_INVALID_PAGE("poll.page.invalid.page", HttpStatus.BAD_REQUEST),
+    POLL_PAGE_LENGTH_INVALID("poll.page.length.invalid", HttpStatus.BAD_REQUEST),
     VOTE_OPTION_NAME_EMPTY("vote.option.name.empty", HttpStatus.BAD_REQUEST),
     VOTE_OPTION_NAME_INVALID_LENGTH("vote.option.name.invalid.length", HttpStatus.BAD_REQUEST),
     USER_DELETE_UNAUTHORIZED("user.delete.unauthorized", HttpStatus.FORBIDDEN),

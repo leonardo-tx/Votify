@@ -5,6 +5,7 @@ import br.com.votify.core.domain.entities.users.CommonUser;
 import br.com.votify.core.domain.entities.users.User;
 import br.com.votify.core.service.ContextService;
 import br.com.votify.core.service.PollService;
+import br.com.votify.core.utils.exceptions.VotifyException;
 import br.com.votify.dto.ApiResponse;
 import br.com.votify.dto.PageResponse;
 import br.com.votify.dto.poll.PollDetailedViewDTO;
@@ -107,13 +108,13 @@ public class PollControllerTest {
     }
     
     @Test
-    public void testGetUserPolls() {
+    public void testGetUserPolls() throws VotifyException {
         int page = 0;
         int size = 10;
         Pageable pageable = PageRequest.of(page, size);
         Page<Poll> pollPage = new PageImpl<>(testPolls, pageable, testPolls.size());
         
-        when(pollService.findAllByUserId(eq(1L), any(Pageable.class))).thenReturn(pollPage);
+        when(pollService.findAllByUserId(eq(1L), any(Integer.class), any(Integer.class))).thenReturn(pollPage);
         
         ResponseEntity<ApiResponse<PageResponse<PollListViewDTO>>> response = 
             pollController.getUserPolls(1L, page, size);
@@ -129,14 +130,14 @@ public class PollControllerTest {
     }
     
     @Test
-    public void testGetMyPollsWhenAuthenticated() {
+    public void testGetMyPollsWhenAuthenticated() throws VotifyException {
         int page = 0;
         int size = 10;
         Pageable pageable = PageRequest.of(page, size);
         Page<Poll> pollPage = new PageImpl<>(testPolls, pageable, testPolls.size());
         
         when(contextService.getUserOptional()).thenReturn(Optional.of(testUser));
-        when(pollService.findAllByUserId(eq(1L), any(Pageable.class))).thenReturn(pollPage);
+        when(pollService.findAllByUserId(eq(1L), any(Integer.class), any(Integer.class))).thenReturn(pollPage);
         
         ResponseEntity<ApiResponse<PageResponse<PollListViewDTO>>> response = 
             pollController.getMyPolls(page, size);
@@ -152,7 +153,7 @@ public class PollControllerTest {
     }
     
     @Test
-    public void testGetMyPollsWhenNotAuthenticated() {
+    public void testGetMyPollsWhenNotAuthenticated() throws VotifyException {
         int page = 0;
         int size = 10;
         

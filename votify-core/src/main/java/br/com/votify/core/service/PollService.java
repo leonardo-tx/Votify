@@ -8,6 +8,7 @@ import br.com.votify.core.utils.exceptions.VotifyErrorCode;
 import br.com.votify.core.utils.exceptions.VotifyException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -34,7 +35,14 @@ public class PollService {
         return pollRepository.save(poll);
     }
     
-    public Page<Poll> findAllByUserId(Long userId, Pageable pageable) {
+    public Page<Poll> findAllByUserId(Long userId, int page, int size) throws VotifyException {
+        if (page < 0) {
+            throw new VotifyException(VotifyErrorCode.POLL_PAGE_INVALID_PAGE);
+        }
+        if (size < 1 || size > Poll.PAGE_SIZE_LIMIT) {
+            throw new VotifyException(VotifyErrorCode.POLL_PAGE_LENGTH_INVALID, 1, Poll.PAGE_SIZE_LIMIT);
+        }
+        Pageable pageable = PageRequest.of(page, size);
         return pollRepository.findAllByResponsibleId(userId, pageable);
     }
 }

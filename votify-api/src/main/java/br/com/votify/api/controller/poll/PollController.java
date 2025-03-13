@@ -12,8 +12,6 @@ import br.com.votify.core.service.PollService;
 import br.com.votify.core.utils.exceptions.VotifyException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -28,7 +26,6 @@ import java.util.stream.Collectors;
 public class PollController {
     private final PollService pollService;
     private final ContextService contextService;
-    private static final int DEFAULT_PAGE_SIZE = 10;
 
     @PostMapping
     public ResponseEntity<ApiResponse<PollDetailedViewDTO>> insertPoll(@RequestBody PollInsertDTO pollInsertDTO) throws VotifyException {
@@ -40,34 +37,24 @@ public class PollController {
     
     @GetMapping("/user/{userId}")
     public ResponseEntity<ApiResponse<PageResponse<PollListViewDTO>>> getUserPolls(
-            @PathVariable("userId") Long userId,
-            @RequestParam(name = "page", defaultValue = "0") int page,
-            @RequestParam(name = "size", defaultValue = "10") int size) {
-        
-        if (size > DEFAULT_PAGE_SIZE) {
-            size = DEFAULT_PAGE_SIZE;
-        }
-        
-        Pageable pageable = PageRequest.of(page, size);
-        Page<Poll> pollPage = pollService.findAllByUserId(userId, pageable);
-        
+        @PathVariable("userId") Long userId,
+        @RequestParam(name = "page", defaultValue = "0") int page,
+        @RequestParam(name = "size", defaultValue = "10") int size
+    ) throws VotifyException {
+        Page<Poll> pollPage = pollService.findAllByUserId(userId, page, size);
         List<PollListViewDTO> pollDtos = pollPage.getContent().stream()
                 .map(PollListViewDTO::parse)
                 .collect(Collectors.toList());
         
         PageResponse<PollListViewDTO> pageResponse = PageResponse.from(pollPage, pollDtos);
-        
         return ResponseEntity.ok(ApiResponse.success(pageResponse));
     }
     
     @GetMapping("/my")
     public ResponseEntity<ApiResponse<PageResponse<PollListViewDTO>>> getMyPolls(
-            @RequestParam(name = "page", defaultValue = "0") int page,
-            @RequestParam(name = "size", defaultValue = "10") int size) {
-        
-        if (size > DEFAULT_PAGE_SIZE) {
-            size = DEFAULT_PAGE_SIZE;
-        }
+        @RequestParam(name = "page", defaultValue = "0") int page,
+        @RequestParam(name = "size", defaultValue = "10") int size
+    ) throws VotifyException {
         
         Optional<User> userOptional = contextService.getUserOptional();
         Long userId = userOptional.map(User::getId).orElse(null);
@@ -77,16 +64,13 @@ public class PollController {
                 new PageResponse<>(List.of(), 0, size, 0, 0, true, true)
             ));
         }
-        
-        Pageable pageable = PageRequest.of(page, size);
-        Page<Poll> pollPage = pollService.findAllByUserId(userId, pageable);
-        
+
+        Page<Poll> pollPage = pollService.findAllByUserId(userId, page, size);
         List<PollListViewDTO> pollDtos = pollPage.getContent().stream()
                 .map(PollListViewDTO::parse)
                 .collect(Collectors.toList());
         
         PageResponse<PollListViewDTO> pageResponse = PageResponse.from(pollPage, pollDtos);
-        
         return ResponseEntity.ok(ApiResponse.success(pageResponse));
     }
 }
