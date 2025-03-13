@@ -6,11 +6,14 @@ import br.com.votify.core.domain.entities.users.User;
 import br.com.votify.core.repository.PollRepository;
 import br.com.votify.core.utils.exceptions.VotifyErrorCode;
 import br.com.votify.core.utils.exceptions.VotifyException;
+import br.com.votify.dto.polls.PollQueryDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -19,12 +22,14 @@ import org.springframework.data.domain.Pageable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 public class PollServiceTest {
 
     @Mock
@@ -39,10 +44,7 @@ public class PollServiceTest {
 
     @BeforeEach
     public void setup() {
-        MockitoAnnotations.openMocks(this);
-
         testUser = new CommonUser(1L, "testuser", "Test User", "test@example.com", "password123");
-        
         testPoll = new Poll(
             "Test Poll",
             "Test Description",
@@ -99,5 +101,51 @@ public class PollServiceTest {
         assertEquals("Test Poll", result.getContent().get(0).getTitle());
         assertEquals(2L, result.getContent().get(1).getId());
         assertEquals("Test Poll 2", result.getContent().get(1).getTitle());
+    }
+
+    @Test
+    void shouldReturnPollWithUserVote() {
+        when(pollRepository.findById(1L)).thenReturn(Optional.of(pollMock));
+        when(voteRepository.findByPollIdAndUserId(1L, 100L)).thenReturn(Optional.of(voteMock));
+
+        PollQueryDto result = pollService.findSpecificPoll(1L, 100L);
+
+        assertNotNull(result);
+        assertEquals("Test Question", result.getQuestion());
+        assertEquals("Option A", result.getUserVote());
+        verify(pollRepository, times(1)).findById(1L);
+        verify(voteRepository, times(1)).findByPollIdAndUserId(1L, 100L);
+    }
+
+    @Test
+    void shouldReturnNoVoteWhenUserDidNotVote() {
+        when(pollRepository.findById(1L)).thenReturn(Optional.of(pollMock));
+        when(voteRepository.findByPollIdAndUserId(1L, 200L)).thenReturn(Optional.empty());
+
+        PollQueryDto result = pollService.findSpecificPoll(1L, 200L);
+
+        assertNotNull(result);
+        assertEquals("Test Question", result.getQuestion());
+        assertEquals("no vote", result.getUserVote());
+    }
+
+    @Test
+    void shouldThrowExceptionIfPollNotFound() {
+        when(pollRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThrows(RuntimeException.class, () ->
+                pollService.findSpecificPoll(99L, null)
+        );
+    }
+
+    @Test
+    void shouldReturnNoVoteForNullUser() {
+        when(pollRepository.findById(1L)).thenReturn(Optional.of(pollMock));
+
+        PollQueryDto result = pollService.findSpecificPoll(1L, null);
+
+        assertNotNull(result);
+        assertEquals("no vote", result.getUserVote());
+        verify(voteRepository,  never()).findByPollIdAndUserId(anyLong(), anyLong());
     }
 }
