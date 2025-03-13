@@ -10,10 +10,7 @@ import br.com.votify.dto.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -28,5 +25,13 @@ public class PollController {
         PollDetailedViewDTO pollDto = PollDetailedViewDTO.parse(poll);
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(ApiResponse.success(pollDto));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiResponse<PollDetailedViewDTO>> editPoll(@RequestBody PollInsertDTO pollInsertDTO, @PathVariable("id") Long id) throws VotifyException {
+        Poll updatePoll = pollService.editPoll(pollInsertDTO.convertToEntity(), contextService.getUserOrThrow(), id);
+        PollDetailedViewDTO pollDto = PollDetailedViewDTO.parse(updatePoll);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(ApiResponse.success(pollDto));
     }
 }
