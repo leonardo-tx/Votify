@@ -64,6 +64,13 @@ public class PollService {
         }
         return voteRepository.save(vote);
     }
+
+    public Vote getVote(Poll poll, User user) {
+        VoteIdentifier voteIdentifier = new VoteIdentifier(poll.getId(), user.getId());
+        Optional<Vote> vote = voteRepository.findById(voteIdentifier);
+
+        return vote.orElseGet(() -> new Vote(voteIdentifier, 0, poll, user));
+    }
     
     public Page<Poll> findAllByUserId(Long userId, int page, int size) throws VotifyException {
         if (page < 0) {
@@ -76,6 +83,11 @@ public class PollService {
         return pollRepository.findAllByResponsibleId(userId, pageable);
     }
 
+    /**
+     *
+     * @param id  ID da poll a buscar
+     * @return Poll
+     */
     public Poll getByIdOrThrow(Long id) throws VotifyException {
         Optional<Poll> optionalPoll = pollRepository.findById(id);
         if (optionalPoll.isEmpty()) {

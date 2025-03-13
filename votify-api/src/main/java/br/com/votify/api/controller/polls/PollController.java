@@ -12,6 +12,7 @@ import br.com.votify.core.service.ContextService;
 import br.com.votify.core.service.PollService;
 import br.com.votify.core.utils.exceptions.VotifyException;
 import br.com.votify.dto.polls.VoteInsertDTO;
+import br.com.votify.dto.polls.PollQueryDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -87,5 +88,17 @@ public class PollController {
         
         PageResponse<PollListViewDTO> pageResponse = PageResponse.from(pollPage, pollDtos);
         return ApiResponse.success(pageResponse, HttpStatus.OK).createResponseEntity();
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<PollQueryDto>> getPollById(
+        @PathVariable Long id
+    ) throws VotifyException {
+        User user = contextService.getUserOrThrow();
+        Poll poll = pollService.getByIdOrThrow(id);
+        Vote vote = pollService.getVote(poll, user);
+
+        PollQueryDto dto = PollQueryDto.parse(poll, vote);
+        return ApiResponse.success(dto, HttpStatus.OK).createResponseEntity();
     }
 }
