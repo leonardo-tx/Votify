@@ -1,4 +1,4 @@
-package br.com.votify.dto.poll;
+package br.com.votify.dto.polls;
 
 import br.com.votify.core.domain.entities.poll.Poll;
 import br.com.votify.core.domain.entities.vote.VoteOption;
