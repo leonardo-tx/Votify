@@ -7,6 +7,8 @@ import br.com.votify.core.repository.PollRepository;
 import br.com.votify.core.utils.exceptions.VotifyErrorCode;
 import br.com.votify.core.utils.exceptions.VotifyException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -30,5 +32,9 @@ public class PollService {
         }
 
         return pollRepository.save(poll);
+    }
+    
+    public Page<Poll> findAllByUserId(Long userId, Pageable pageable) {
+        return pollRepository.findAllByResponsibleId(userId, pageable);
     }
 }
