@@ -25,6 +25,7 @@ public class Poll {
     public static final int DESCRIPTION_MAX_LENGTH = 512;
     public static final int VOTE_OPTIONS_MIN = 1;
     public static final int VOTE_OPTIONS_MAX= 5;
+    public static final int PAGE_SIZE_LIMIT = 10;
 
     public Poll(
         String title,
