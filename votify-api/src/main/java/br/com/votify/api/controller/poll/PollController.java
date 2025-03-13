@@ -44,7 +44,6 @@ public class PollController {
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "10") int size) {
         
-        // Limitar o tamanho da página para o valor padrão se for maior
         if (size > DEFAULT_PAGE_SIZE) {
             size = DEFAULT_PAGE_SIZE;
         }
@@ -66,7 +65,6 @@ public class PollController {
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "10") int size) {
         
-        // Limitar o tamanho da página para o valor padrão se for maior
         if (size > DEFAULT_PAGE_SIZE) {
             size = DEFAULT_PAGE_SIZE;
         }
