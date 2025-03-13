@@ -57,6 +57,13 @@ public class UserService {
         return new AuthTokens(accessToken, refreshToken);
     }
 
+    public void logout() {
+        String refreshToken = context.getCookieValueOrDefault("refresh_token", null);
+        if (!context.isAuthenticated() || refreshToken == null) return;
+
+        tokenService.deleteRefreshTokenById(refreshToken);
+    }
+
     public User getUserById(long id) throws VotifyException {
         User user = userRepository.findById(id).orElse(null);
         if (user == null) {
