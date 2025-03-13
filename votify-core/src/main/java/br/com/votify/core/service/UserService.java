@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -66,5 +67,16 @@ public class UserService {
 
     public List<User> getAll() {
         return userRepository.findAll();
+    }
+
+    @Transactional
+    public void deleteUser(Long userId) throws VotifyException {
+        User user = getUserById(userId);
+        
+        User currentUser = context.getUserOrThrow();
+        if (!currentUser.getId().equals(userId)) {
+            throw new VotifyException(VotifyErrorCode.USER_DELETE_UNAUTHORIZED);
+        }
+        userRepository.delete(user);
     }
 }

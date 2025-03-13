@@ -9,7 +9,6 @@ import br.com.votify.core.utils.exceptions.VotifyException;
 import br.com.votify.core.utils.validators.TokenValidator;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;

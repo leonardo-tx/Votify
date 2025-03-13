@@ -3,7 +3,6 @@ package br.com.votify.api.controller.users;
 import br.com.votify.api.configuration.SecurityConfig;
 import br.com.votify.core.domain.entities.tokens.AuthTokens;
 import br.com.votify.core.domain.entities.users.User;
-import br.com.votify.core.service.ContextService;
 import br.com.votify.core.utils.exceptions.VotifyException;
 import br.com.votify.core.service.UserService;
 import br.com.votify.dto.ApiResponse;
@@ -25,7 +24,6 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
-    private final ContextService contextService;
     private final SecurityConfig securityConfig;
 
     @PostMapping

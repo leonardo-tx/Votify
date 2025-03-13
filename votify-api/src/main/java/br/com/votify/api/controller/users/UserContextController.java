@@ -45,4 +45,23 @@ public class UserContextController {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ApiResponse.success(null));
     }
+    
+    @DeleteMapping
+    public ResponseEntity<ApiResponse<?>> deleteAccount(
+        HttpServletResponse response
+    ) throws VotifyException {
+        contextService.deleteUser();
+        
+        Cookie refreshCookie = new Cookie("refresh_token", "");
+        Cookie accessCookie = new Cookie("access_token", "");
+        
+        refreshCookie.setMaxAge(0);
+        accessCookie.setMaxAge(0);
+        
+        response.addCookie(refreshCookie);
+        response.addCookie(accessCookie);
+
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(ApiResponse.success(null));
+    }
 }

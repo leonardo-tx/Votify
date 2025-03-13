@@ -2,12 +2,16 @@ package br.com.votify.dto;
 
 import br.com.votify.core.utils.exceptions.VotifyException;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
-@Data
-@NoArgsConstructor
+@Getter
 @AllArgsConstructor
+@NoArgsConstructor
+@ToString
+@EqualsAndHashCode
 public class ApiResponse<T> {
     private boolean success;
     private T data;
@@ -19,7 +23,11 @@ public class ApiResponse<T> {
     }
 
     public static <T> ApiResponse<T> error(VotifyException exception) {
-        return new ApiResponse<>(false, null,
-                exception.getErrorCode().getCode(), exception.getMessage());
+        return new ApiResponse<>(
+            false,
+            null,
+            exception.getErrorCode().getMessageKey(),
+            exception.getMessage()
+        );
     }
 }

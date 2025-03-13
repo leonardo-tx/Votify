@@ -24,6 +24,7 @@ public class ContextService {
     private final TokenService tokenService;
     private final Map<String, String> cookies;
     private final User user;
+    private final UserRepository userRepository;
 
     public ContextService(
         UserRepository userRepository,
@@ -31,6 +32,7 @@ public class ContextService {
         HttpServletRequest httpServletRequest
     ) throws VotifyException {
         this.tokenService = tokenService;
+        this.userRepository = userRepository;
         this.cookies = new HashMap<>();
         if (httpServletRequest.getCookies() == null) {
             this.user = null;
@@ -83,5 +85,10 @@ public class ContextService {
 
     public String getCookieValue(String key) {
         return cookies.get(key);
+    }
+
+    public void deleteUser() throws VotifyException {
+        User currentUser = getUserOrThrow();
+        userRepository.delete(currentUser);
     }
 }

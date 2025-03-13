@@ -44,13 +44,14 @@ public enum VotifyErrorCode {
     POLL_DATE_EMPTY("poll.date.empty", HttpStatus.BAD_REQUEST),
     POLL_DATE_INVALID("poll.date.invalid", HttpStatus.BAD_REQUEST),
     VOTE_OPTION_NAME_EMPTY("vote.option.name.empty", HttpStatus.BAD_REQUEST),
-    VOTE_OPTION_NAME_INVALID_LENGTH("vote.option.name.invalid.length", HttpStatus.BAD_REQUEST);
+    VOTE_OPTION_NAME_INVALID_LENGTH("vote.option.name.invalid.length", HttpStatus.BAD_REQUEST),
+    USER_DELETE_UNAUTHORIZED("user.delete.unauthorized", HttpStatus.FORBIDDEN);
 
-    private final String code;
+    private final String messageKey;
     private final HttpStatusCode httpStatusCode;
 
-    VotifyErrorCode(String code, HttpStatusCode httpStatusCode) {
-        this.code = code;
+    VotifyErrorCode(String messageKey, HttpStatusCode httpStatusCode) {
+        this.messageKey = messageKey;
         this.httpStatusCode = httpStatusCode;
     }
 }
