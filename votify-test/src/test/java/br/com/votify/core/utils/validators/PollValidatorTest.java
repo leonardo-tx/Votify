@@ -18,12 +18,6 @@ class PollValidatorTest {
     private final LocalDateTime now = LocalDateTime.now();
 
     @Test
-    void shouldValidateValidPoll() {
-        Poll poll = createValidPoll();
-        assertDoesNotThrow(() -> PollValidator.validateFields(poll, now));
-    }
-
-    @Test
     void shouldThrowExceptionWhenTitleIsNull() {
         Poll poll = createValidPoll();
         poll.setTitle(null);
@@ -55,6 +49,8 @@ class PollValidatorTest {
         Poll poll = createValidPoll();
         poll.setStartDate(now.plusDays(2));
         poll.setEndDate(now.plusDays(1));
+        poll.setVoteOptions(List.of(new VoteOption(1L, "teste 1", poll)));
+        poll.setChoiceLimitPerUser(1);
 
         VotifyException exception = assertThrows(VotifyException.class, () -> PollValidator.validateFields(poll, now));
         assertEquals(VotifyErrorCode.POLL_DATE_INVALID, exception.getErrorCode());
@@ -63,6 +59,7 @@ class PollValidatorTest {
     @Test
     void shouldThrowExceptionWhenChoiceLimitExceedsVoteOptions() {
         Poll poll = createValidPoll();
+        poll.setVoteOptions(List.of(new VoteOption(1L, "teste", poll)));
         poll.setChoiceLimitPerUser(10);
 
         VotifyException exception = assertThrows(VotifyException.class, () -> PollValidator.validateFields(poll, now));

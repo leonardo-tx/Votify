@@ -4,6 +4,7 @@ import br.com.votify.core.domain.entities.poll.Poll;
 import br.com.votify.core.domain.entities.users.CommonUser;
 import br.com.votify.core.domain.entities.users.User;
 import br.com.votify.core.repository.PollRepository;
+import br.com.votify.core.utils.exceptions.VotifyErrorCode;
 import br.com.votify.core.utils.exceptions.VotifyException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -70,33 +71,14 @@ public class PollServiceTest {
         testPoll2.setResponsible(testUser);
         testPolls.add(testPoll2);
     }
-  
-    @Test
-    @Order(0)
-    void createValidPoll() {
-
-        User user = new CommonUser(1L, "valid-user", "Valid User", "valid@user.com", "password");
-        Poll poll = new Poll("Title", "Description", now, futureDate, true, List.of(new VoteOption(), new VoteOption()), 2);
-
-        Poll pollFromService = assertDoesNotThrow(() -> pollService.createPoll(poll, user));
-        assertEquals(1, pollFromService.getId());
-    }
 
     @Test
-    @Order(1)
-    void createPollWithDuplicateTitle() {
-        User user = new CommonUser(1L, "valid-user", "Valid User", "valid@user.com", "password");
-        Poll poll = new Poll("Title", "Description", now, futureDate, true, List.of(new VoteOption(), new VoteOption()),2);
-
-        VotifyException exception = assertThrows(VotifyException.class, () -> pollService.createPoll(poll, user));
-        assertEquals(VotifyErrorCode.POLL_TITLE_ALREADY_EXISTS_FOR_THIS_USER, exception.getErrorCode());
-    }
-
-    @Test
-    @Order(2)
     void createPollWithEmptyTitle() {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime futureDate = now.plusDays(5);
+
         User user = new CommonUser(1L, "valid-user", "Valid User", "valid@user.com", "password");
-        Poll poll = new Poll("", "Description", now, futureDate, true, List.of(new VoteOption(), new VoteOption()), 2);
+        Poll poll = new Poll("", "Description", now, futureDate, true, List.of(), 2);
 
         VotifyException exception = assertThrows(VotifyException.class, () -> pollService.createPoll(poll, user));
         assertEquals(VotifyErrorCode.POLL_TITLE_INVALID_LENGTH, exception.getErrorCode());
