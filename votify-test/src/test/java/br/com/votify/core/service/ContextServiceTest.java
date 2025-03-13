@@ -14,8 +14,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class ContextServiceTest {
     @Test
@@ -178,5 +177,38 @@ public class ContextServiceTest {
         ContextService contextService = new ContextService(userRepository, tokenService, httpServletRequest);
         VotifyException exception = assertThrows(VotifyException.class, contextService::refreshTokens);
         assertEquals(VotifyErrorCode.REFRESH_TOKEN_EXPIRED, exception.getErrorCode());
+    }
+    
+    @Test
+    public void deleteUser_WhenAuthenticated_ShouldDeleteSuccessfully() throws VotifyException {
+        UserRepository userRepository = mock(UserRepository.class);
+        TokenService tokenService = mock(TokenService.class);
+        HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
+        
+        User testUser = new CommonUser(1L, "test-user", "Test User", "test@example.com", "password123");
+        
+        when(httpServletRequest.getCookies()).thenReturn(new Cookie[] {
+            new Cookie("access_token", "token1")
+        });
+        when(tokenService.getUserIdFromAccessToken(any(String.class))).thenReturn(1L);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
+        
+        ContextService contextService = new ContextService(userRepository, tokenService, httpServletRequest);
+        
+        contextService.deleteUser();
+
+        verify(userRepository).delete(testUser);
+    }
+    
+    @Test
+    public void deleteUser_WhenNotAuthenticated_ShouldThrowException() throws VotifyException {
+        UserRepository userRepository = mock(UserRepository.class);
+        TokenService tokenService = mock(TokenService.class);
+        HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
+        
+        ContextService contextService = new ContextService(userRepository, tokenService, httpServletRequest);
+        
+        VotifyException exception = assertThrows(VotifyException.class, contextService::deleteUser);
+        assertEquals(VotifyErrorCode.COMMON_UNAUTHORIZED, exception.getErrorCode());
     }
 }

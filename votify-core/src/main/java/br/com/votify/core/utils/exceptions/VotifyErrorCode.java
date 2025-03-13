@@ -27,12 +27,12 @@ public enum VotifyErrorCode {
     REFRESH_TOKEN_INVALID("refresh.token.invalid", HttpStatus.BAD_REQUEST),
     ACCESS_TOKEN_EXPIRED("access.token.expired", HttpStatus.UNAUTHORIZED),
     ACCESS_TOKEN_INVALID("access.token.invalid", HttpStatus.BAD_REQUEST),
-    LOGIN_UNAUTHORIZED("login.unauthorized", HttpStatus.UNAUTHORIZED),
+    LOGIN_UNAUTHORIZED("login.unauthorized", HttpStatus.BAD_REQUEST),
     LOGIN_ALREADY_LOGGED("login.already.logged", HttpStatus.BAD_REQUEST),
     COMMON_UNAUTHORIZED("common.unauthorized", HttpStatus.UNAUTHORIZED),
     INTERNAL("internal", HttpStatus.INTERNAL_SERVER_ERROR),
     BAD_REQUEST("bad.request", HttpStatus.BAD_REQUEST),
-    ENDPOINT_NOT_FOUND("endpoint.not.found", HttpStatus.BAD_REQUEST),
+    ENDPOINT_NOT_FOUND("endpoint.not.found", HttpStatus.NOT_FOUND),
     POLL_TITLE_ALREADY_EXISTS_FOR_THIS_USER("poll.title.duplicated", HttpStatus.BAD_REQUEST),
     POLL_TITLE_INVALID_LENGTH("poll.title.invalid.length", HttpStatus.BAD_REQUEST),
     POLL_TITLE_EMPTY("poll.title.empty", HttpStatus.BAD_REQUEST),
@@ -43,14 +43,20 @@ public enum VotifyErrorCode {
     POLL_INVALID_CHOICE_LIMIT_PER_USER("poll.choice.limit.invalid", HttpStatus.BAD_REQUEST),
     POLL_DATE_EMPTY("poll.date.empty", HttpStatus.BAD_REQUEST),
     POLL_DATE_INVALID("poll.date.invalid", HttpStatus.BAD_REQUEST),
+    POLL_PAGE_INVALID_PAGE("poll.page.invalid.page", HttpStatus.BAD_REQUEST),
+    POLL_PAGE_LENGTH_INVALID("poll.page.length.invalid", HttpStatus.BAD_REQUEST),
     VOTE_OPTION_NAME_EMPTY("vote.option.name.empty", HttpStatus.BAD_REQUEST),
-    VOTE_OPTION_NAME_INVALID_LENGTH("vote.option.name.invalid.length", HttpStatus.BAD_REQUEST);
+    VOTE_OPTION_NAME_INVALID_LENGTH("vote.option.name.invalid.length", HttpStatus.BAD_REQUEST),
+    USER_DELETE_UNAUTHORIZED("user.delete.unauthorized", HttpStatus.FORBIDDEN),
+    PASSWORD_RESET_CODE_INVALID("password.reset.code.invalid", HttpStatus.BAD_REQUEST),
+    PASSWORD_RESET_REQUEST_EXISTS("password.reset.request.exists", HttpStatus.BAD_REQUEST),
+    PASSWORD_RESET_EMAIL_NOT_FOUND("password.reset.email.not.found", HttpStatus.BAD_REQUEST);
 
-    private final String code;
+    private final String messageKey;
     private final HttpStatusCode httpStatusCode;
 
-    VotifyErrorCode(String code, HttpStatusCode httpStatusCode) {
-        this.code = code;
+    VotifyErrorCode(String messageKey, HttpStatusCode httpStatusCode) {
+        this.messageKey = messageKey;
         this.httpStatusCode = httpStatusCode;
     }
 }

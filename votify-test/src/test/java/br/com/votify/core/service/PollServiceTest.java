@@ -3,51 +3,74 @@ package br.com.votify.core.service;
 import br.com.votify.core.domain.entities.poll.Poll;
 import br.com.votify.core.domain.entities.users.CommonUser;
 import br.com.votify.core.domain.entities.users.User;
-import br.com.votify.core.domain.entities.vote.VoteOption;
 import br.com.votify.core.repository.PollRepository;
-import br.com.votify.core.utils.exceptions.VotifyErrorCode;
 import br.com.votify.core.utils.exceptions.VotifyException;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class PollServiceTest {
-    private static final List<Poll> polls = new ArrayList<>();
-    private static PollService pollService;
-    private static Long entityId = 1L;
-    private static final LocalDateTime now = LocalDateTime.now(ZoneId.of("UTC")).plusDays(1);
-    private static final LocalDateTime futureDate = now.plusDays(5);
+
+    @Mock
+    private PollRepository pollRepository;
+
+    @InjectMocks
+    private PollService pollService;
+
+    private User testUser;
+    private Poll testPoll;
+    private List<Poll> testPolls;
 
     @BeforeEach
-    void prepareBeforeEach() {
-        PollRepository pollRepository = mock(PollRepository.class);
+    public void setup() {
+        MockitoAnnotations.openMocks(this);
 
-        when(pollRepository.existsByTitleAndResponsibleId(any(String.class), any(Long.class)))
-                .thenAnswer((invocation) -> {
-                    String title = invocation.getArgument(0);
-                    Long userId = invocation.getArgument(1);
-                    return polls.stream().anyMatch(p -> p.getTitle().equals(title) && p.getResponsible().getId().equals(userId));
-                });
-
-        when(pollRepository.save(any(Poll.class))).thenAnswer((invocation) -> {
-            Poll createdPoll = invocation.getArgument(0);
-            createdPoll.setId(entityId++);
-            polls.add(createdPoll);
-            return createdPoll;
-        });
-
-        pollService = new PollService(pollRepository);
+        testUser = new CommonUser(1L, "testuser", "Test User", "test@example.com", "password123");
+        
+        testPoll = new Poll(
+            "Test Poll",
+            "Test Description",
+            LocalDateTime.now(),
+            LocalDateTime.now().plusDays(1),
+            false,
+            new ArrayList<>(),
+            1
+        );
+        testPoll.setId(1L);
+        testPoll.setResponsible(testUser);
+        
+        testPolls = new ArrayList<>();
+        testPolls.add(testPoll);
+        
+        Poll testPoll2 = new Poll(
+            "Test Poll 2",
+            "Test Description 2",
+            LocalDateTime.now(),
+            LocalDateTime.now().plusDays(2),
+            false,
+            new ArrayList<>(),
+            1
+        );
+        testPoll2.setId(2L);
+        testPoll2.setResponsible(testUser);
+        testPolls.add(testPoll2);
     }
-
+  
     @Test
     @Order(0)
     void createValidPoll() {
@@ -77,5 +100,22 @@ public class PollServiceTest {
 
         VotifyException exception = assertThrows(VotifyException.class, () -> pollService.createPoll(poll, user));
         assertEquals(VotifyErrorCode.POLL_TITLE_INVALID_LENGTH, exception.getErrorCode());
+    }
+    
+    @Test
+    public void testFindAllByUserId() throws VotifyException {
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Poll> pollPage = new PageImpl<>(testPolls, pageable, testPolls.size());
+        
+        when(pollRepository.findAllByResponsibleId(eq(1L), any(Pageable.class))).thenReturn(pollPage);
+        
+        Page<Poll> result = pollService.findAllByUserId(1L, 0, 10);
+        
+        assertNotNull(result);
+        assertEquals(2, result.getContent().size());
+        assertEquals(1L, result.getContent().get(0).getId());
+        assertEquals("Test Poll", result.getContent().get(0).getTitle());
+        assertEquals(2L, result.getContent().get(1).getId());
+        assertEquals("Test Poll 2", result.getContent().get(1).getTitle());
     }
 }

@@ -14,10 +14,14 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+
+@RestControllerAdvice
 @ControllerAdvice
 public class GlobalExceptionHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<?>> globalExceptionHandler(
@@ -78,4 +82,6 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
             .body(ApiResponse.error(new VotifyException(VotifyErrorCode.INTERNAL)));
     }
+
+
 }

@@ -14,6 +14,7 @@ public final class PollValidator {
     public static void validateFields(Poll poll, LocalDateTime now) throws VotifyException {
         validateTitle(poll.getTitle());
         validateDescription(poll.getDescription());
+        validateVoteOptions(poll.getVoteOptions());
         validateChoiceLimitPerUser(poll.getChoiceLimitPerUser(), poll.getVoteOptions());
         validateStartEndDate(poll.getStartDate(), poll.getEndDate(), now);
     }
@@ -73,10 +74,8 @@ public final class PollValidator {
     }
 
     public static void validateChoiceLimitPerUser(Integer choiceLimitPerUser, List<VoteOption> voteOptions) throws VotifyException {
-        if (Objects.nonNull(voteOptions) && choiceLimitPerUser > voteOptions.size()) {
-            throw new VotifyException(
-                VotifyErrorCode.POLL_INVALID_CHOICE_LIMIT_PER_USER
-            );
+        if (choiceLimitPerUser < Poll.VOTE_OPTIONS_MIN || choiceLimitPerUser > voteOptions.size()) {
+            throw new VotifyException(VotifyErrorCode.POLL_INVALID_CHOICE_LIMIT_PER_USER);
         }
     }
 }

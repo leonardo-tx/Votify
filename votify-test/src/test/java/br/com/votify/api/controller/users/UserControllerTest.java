@@ -1,7 +1,5 @@
 package br.com.votify.api.controller.users;
 
-import br.com.votify.core.utils.exceptions.VotifyErrorCode;
-import br.com.votify.core.utils.exceptions.VotifyException;
 import br.com.votify.dto.ApiResponse;
 import br.com.votify.dto.users.UserDetailedViewDTO;
 import br.com.votify.dto.users.UserLoginDTO;
@@ -17,6 +15,8 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.test.annotation.DirtiesContext;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.HashSet;
 import java.util.List;
@@ -26,6 +26,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@ExtendWith(MockitoExtension.class)
 public class UserControllerTest {
     @Autowired
     private TestRestTemplate restTemplate;
@@ -39,12 +40,6 @@ public class UserControllerTest {
             "123@gmail.com",
             "littledoge123"
         );
-        ApiResponse<UserDetailedViewDTO> expectedApiResponse = ApiResponse.success(new UserDetailedViewDTO(
-            1L,
-            "littledoge",
-            "Byces",
-            "123@gmail.com"
-        ));
 
         ResponseEntity<ApiResponse<UserDetailedViewDTO>> response = restTemplate.exchange(
             "/users",
@@ -55,54 +50,59 @@ public class UserControllerTest {
 
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertEquals(expectedApiResponse.toString(), response.getBody().toString());
+        assertTrue(response.getBody().isSuccess());
+
+        UserDetailedViewDTO data = response.getBody().getData();
+        assertEquals(1L, data.getId());
+        assertEquals(dtoRegister.getUserName(), data.getUserName());
+        assertEquals(dtoRegister.getName(), data.getName());
+        assertEquals(dtoRegister.getEmail(), data.getEmail());
     }
 
     @Test
     @Order(1)
     public void registerInvalidUser() {
         UserRegisterDTO dtoRegister = new UserRegisterDTO(
-            "littlecat123",
-            "Littlecat",
+            "littledoge",
+            "Byces",
             "123@gmail.com",
-            "ahsvdhgafvsdghasv"
+            "littledoge123"
         );
-        ApiResponse<UserDetailedViewDTO> expectedApiResponse = ApiResponse.error(new VotifyException(
-            VotifyErrorCode.EMAIL_ALREADY_EXISTS
-        ));
 
         ResponseEntity<ApiResponse<UserDetailedViewDTO>> response = restTemplate.exchange(
             "/users",
-            HttpMethod.POST,
-            new HttpEntity<>(dtoRegister),
-            new ParameterizedTypeReference<>() {}
+                HttpMethod.POST,
+                new HttpEntity<>(dtoRegister),
+                new ParameterizedTypeReference<>() {}
         );
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertEquals(expectedApiResponse.toString(), response.getBody().toString());
+        assertFalse(response.getBody().isSuccess());
+        assertEquals("email.already.exists", response.getBody().getErrorCode());
     }
 
     @Test
     @Order(2)
     public void loginUser() {
         UserLoginDTO dtoLogin = new UserLoginDTO("123@gmail.com", "littledoge123");
-        ApiResponse<?> expectedApiResponse = ApiResponse.success(null);
 
-        ResponseEntity<ApiResponse<UserDetailedViewDTO>> response = restTemplate.exchange(
+        ResponseEntity<ApiResponse<?>> response = restTemplate.exchange(
             "/users/login",
-            HttpMethod.POST,
-            new HttpEntity<>(dtoLogin),
-            new ParameterizedTypeReference<>() {}
+                HttpMethod.POST,
+                new HttpEntity<>(dtoLogin),
+                new ParameterizedTypeReference<>() {}
         );
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertEquals(expectedApiResponse.toString(), response.getBody().toString());
+        assertTrue(response.getBody().isSuccess());
+        assertNull(response.getBody().getData());
 
-        List<String> cookies = response.getHeaders().get("Set-Cookie");
-
+        HttpHeaders headers = response.getHeaders();
+        List<String> cookies = headers.get(HttpHeaders.SET_COOKIE);
         assertNotNull(cookies);
+
         assertEquals(2, cookies.size());
 
         HashSet<String> hashSet = new HashSet<>();
@@ -124,7 +124,7 @@ public class UserControllerTest {
             new ParameterizedTypeReference<>() {}
         );
         assertEquals(HttpStatus.OK, loginResponse.getStatusCode());
-        List<String> cookies = loginResponse.getHeaders().get("Set-Cookie");
+        List<String> cookies = loginResponse.getHeaders().get(HttpHeaders.SET_COOKIE);
         assertNotNull(cookies);
 
         HttpHeaders headers = new HttpHeaders();
@@ -155,7 +155,7 @@ public class UserControllerTest {
 
     @Test
     @Order(4)
-    public void getUserByIdAsCommonUser_NotLoggedIn() {
+    public void getUserByIdAsCommonUserNotLoggedIn() {
         UserRegisterDTO commonUser2 = new UserRegisterDTO(
             "common2",
             "Leonardo 2",

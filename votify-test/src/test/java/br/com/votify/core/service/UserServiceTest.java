@@ -58,6 +58,17 @@ public class UserServiceTest {
             }
             return Optional.empty();
         });
+        doAnswer((invocation) -> {
+            Long id = invocation.getArgument(0);
+            for (int i = 0; i < users.size(); i++) {
+                User user = users.get(i);
+                if (Objects.equals(user.getId(), id)) {
+                    users.remove(i);
+                    return null;
+                }
+            }
+            return null;
+        }).when(userRepository).deleteById(any(Long.class));
         when(userRepository.save(any(User.class))).thenAnswer((invocation) -> {
             User createdUser = invocation.getArgument(0);
             for (int i = 0; i < users.size(); i++) {
@@ -225,5 +236,27 @@ public class UserServiceTest {
             () -> userService.login("arthurgatinho@gmail.com", "angelofthenight")
         );
         assertEquals(VotifyErrorCode.LOGIN_ALREADY_LOGGED, exception.getErrorCode());
+    }
+
+    @Test
+    @Order(6)
+    public void deleteUser() throws VotifyException {
+        when(contextService.getUserOrThrow()).thenReturn(
+            new CommonUser(1L, null, null, null, null)
+        );
+        assertDoesNotThrow(() -> userService.deleteUser(1L));
+    }
+
+    @Test
+    @Order(6)
+    public void deleteUserUnauthorized() throws VotifyException {
+        when(contextService.getUserOrThrow()).thenReturn(
+            new CommonUser(3L, null, null, null, null)
+        );
+        VotifyException exception = assertThrows(
+            VotifyException.class,
+            () -> userService.deleteUser(2L)
+        );
+        assertEquals(VotifyErrorCode.USER_DELETE_UNAUTHORIZED, exception.getErrorCode());
     }
 }
