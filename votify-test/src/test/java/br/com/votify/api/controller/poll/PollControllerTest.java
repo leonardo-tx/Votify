@@ -168,4 +168,4 @@ public class PollControllerTest {
         assertEquals(0, response.getBody().getData().getContent().size());
         assertEquals(0, response.getBody().getData().getTotalElements());
     }
-} 
+}
