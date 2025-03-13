@@ -46,7 +46,8 @@ jobs:
             git add .
             git stash push -m "Temporary stash for coverage badge update"
             git checkout badges
-            git checkout stash@{0} -- .github/badges/*.svg || true
+            git stash pop || true
+            git checkout stash -- .github/badges/*.svg
             if [[ `git status --porcelain` ]]; then
                 git config --global user.name 'Leonardo Teixeira'
                 git config --global user.email 'leonardo-tx@users.noreply.github.com'

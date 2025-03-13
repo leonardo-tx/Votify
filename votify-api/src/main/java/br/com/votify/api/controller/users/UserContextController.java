@@ -26,11 +26,11 @@ public class UserContextController {
         User user = contextService.getUserOrThrow();
         UserDetailedViewDTO userDetailedViewDTO = UserDetailedViewDTO.parse(user);
 
-        return ApiResponse.success(userDetailedViewDTO, HttpStatus.OK).createResponseEntity();
+        return ResponseEntity.ok(ApiResponse.success(userDetailedViewDTO));
     }
 
     @PostMapping("/regenerate-tokens")
-    public ResponseEntity<ApiResponse<Object>> regenerateTokens(HttpServletResponse response) throws VotifyException {
+    public ResponseEntity<ApiResponse<?>> regenerateTokens(HttpServletResponse response) throws VotifyException {
         AuthTokens authTokens = contextService.refreshTokens();
 
         Cookie refreshCookie = new Cookie("refresh_token", authTokens.getRefreshToken().getId());
@@ -42,11 +42,12 @@ public class UserContextController {
         response.addCookie(refreshCookie);
         response.addCookie(accessCookie);
 
-        return ApiResponse.success(null, HttpStatus.OK).createResponseEntity();
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(ApiResponse.success(null));
     }
     
     @DeleteMapping
-    public ResponseEntity<ApiResponse<Object>> deleteAccount(
+    public ResponseEntity<ApiResponse<?>> deleteAccount(
         HttpServletResponse response
     ) throws VotifyException {
         contextService.deleteUser();
@@ -60,6 +61,7 @@ public class UserContextController {
         response.addCookie(refreshCookie);
         response.addCookie(accessCookie);
 
-        return ApiResponse.success(null, HttpStatus.OK).createResponseEntity();
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(ApiResponse.success(null));
     }
 }
