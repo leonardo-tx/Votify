@@ -34,7 +34,8 @@ public class UserController {
         User createdUser = userService.createUser(user);
         UserDetailedViewDTO userDTO = UserDetailedViewDTO.parse(createdUser);
 
-        return ApiResponse.success(userDTO, HttpStatus.CREATED).createResponseEntity();
+        return ResponseEntity.status(HttpStatus.CREATED)
+            .body(ApiResponse.success(userDTO));
     }
 
     @GetMapping("/{id}")
@@ -48,11 +49,11 @@ public class UserController {
             .map(requester -> UserQueryDTO.parse(targetUser, requester))
             .orElseGet(() -> UserQueryDTO.parse(targetUser, null));
 
-        return ApiResponse.success(dto, HttpStatus.OK).createResponseEntity();
+        return ResponseEntity.ok(ApiResponse.success(dto));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse<Object>> login(
+    public ResponseEntity<ApiResponse<?>> login(
         @RequestBody UserLoginDTO userLoginDTO,
         HttpServletResponse response
     ) throws VotifyException {
@@ -69,11 +70,12 @@ public class UserController {
         response.addCookie(refreshCookie);
         response.addCookie(accessCookie);
 
-        return ApiResponse.success(null, HttpStatus.OK).createResponseEntity();
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(ApiResponse.success(null));
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<ApiResponse<Object>> logout(HttpServletResponse response) {
+    public ResponseEntity<ApiResponse<?>> logout(HttpServletResponse response) {
         userService.logout();
 
         Cookie refreshCookie = new Cookie("refresh_token", "");
@@ -87,6 +89,7 @@ public class UserController {
         response.addCookie(refreshCookie);
         response.addCookie(accessCookie);
 
-        return ApiResponse.success(null, HttpStatus.OK).createResponseEntity();
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(ApiResponse.success(null));
     }
 }

@@ -86,7 +86,8 @@ public class UserControllerTest {
     @Order(2)
     public void loginUser() {
         UserLoginDTO dtoLogin = new UserLoginDTO("123@gmail.com", "littledoge123");
-        ResponseEntity<ApiResponse<Object>> response = restTemplate.exchange(
+
+        ResponseEntity<ApiResponse<?>> response = restTemplate.exchange(
             "/users/login",
                 HttpMethod.POST,
                 new HttpEntity<>(dtoLogin),

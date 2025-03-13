@@ -8,7 +8,6 @@ import br.com.votify.core.utils.exceptions.VotifyException;
 import br.com.votify.core.service.PasswordResetService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,14 +26,14 @@ public class PasswordResetController {
 
         String code = passwordResetService.createPasswordResetRequest(requestDTO.getEmail());
         PasswordResetResponseDTO responseDTO = new PasswordResetResponseDTO(code, expirationMinutes);
-        return ApiResponse.success(responseDTO, HttpStatus.OK).createResponseEntity();
+        return ResponseEntity.ok(ApiResponse.success(responseDTO));
     }
 
     @PostMapping("/reset")
-    public ResponseEntity<ApiResponse<Object>> resetPassword(
+    public ResponseEntity<ApiResponse<?>> resetPassword(
             @RequestBody PasswordResetConfirmDTO confirmDTO) throws VotifyException {
 
         passwordResetService.resetPassword(confirmDTO.getCode(), confirmDTO.getNewPassword());
-        return ApiResponse.success(null, HttpStatus.OK).createResponseEntity();
+        return ResponseEntity.ok(ApiResponse.success(null));
     }
 }
