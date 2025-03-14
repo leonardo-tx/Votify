@@ -61,15 +61,23 @@ cd votify
 spring.application.name=votify-api
 server.port=sua_porta
 
-#Configurações do banco de dados
-spring.datasource.url=jdbc:mysql://localhost:3306/votify?createDatabaseIfNotExist=true&useTimezone=true&serverTimezone=GMT
+# Configurações do banco de dados
+spring.datasource.url=jdbc:mysql://localhost:3306/votifydb?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&useTimezone=true&serverTimezone=UTC
 spring.datasource.username=seu_usuário
 spring.datasource.password=sua_senha
 spring.jpa.show-sql=true
 spring.jpa.generate-ddl=true
-#Para is primeiros passos usar o creat, depois atualizar para o "update".
-spring.jpa.hibernate.ddl-auto=create
+spring.jpa.hibernate.ddl-auto=create # Para testes usar o create, fora desse ambiente, utilize "update".
 spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQLDialect
+
+# Configurações do aplicativo
+app.token.access-token-max-age=900 # Tempo em segundos
+app.token.refresh-token-max-age=2419200 # Tempo em segundos
+app.token.refresh-token-secret=sua_chave_para_o_refresh_token
+app.cookie.http-only=true
+app.cookie.secure=true
+app.cookie.path=/
+app.password-reset.expiration-minutes=15
 ```
 ### 3.3 Build do Projeto
 #### Na raiz do projeto, execute:
@@ -81,9 +89,19 @@ mvn clean install
 <details>
   <summary><strong>4. Executar a API</strong></summary>
 
-#### Entre no diretório votify-api e execute:
+#### Entre no diretório raiz do projeto:
 ```
-cd votify-api
-mvn spring-boot:run
+mvn clean install -DskipTests
+mvn spring-boot:run -pl votify-api
+```
+</details>
+
+<details>
+  <summary><strong>5. Executar o Console</strong></summary>
+
+#### Entre no diretório raiz do projeto:
+```
+mvn clean install -DskipTests
+mvn clean compile exec:java -pl votify-console
 ```
 </details>
