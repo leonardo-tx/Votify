@@ -97,6 +97,8 @@ public class UserServiceTest {
             "12345678abacaxi#"
         );
 
+        user.setEmailConfirmed(true);
+
         User userFromService = assertDoesNotThrow(() -> userService.createUser(user));
         assertEquals(1, userFromService.getId());
     }
@@ -111,6 +113,8 @@ public class UserServiceTest {
             "jhonny@nightcity.2077",
             "6Samurai6"
         );
+
+        user.setEmailConfirmed(true);
 
         User userFromService = assertDoesNotThrow(() -> userService.createUser(user));
         assertEquals(2, userFromService.getId());
@@ -127,6 +131,8 @@ public class UserServiceTest {
             "angelofthenight"
         );
 
+        user.setEmailConfirmed(true);
+
         User userFromService = assertDoesNotThrow(() -> userService.createUser(user));
         assertEquals(3, userFromService.getId());
     }
@@ -141,6 +147,7 @@ public class UserServiceTest {
             "arthurgatinho@gmail.com",
             "aeaeaeaeaeaeaea"
         );
+
         VotifyException exception = assertThrows(
             VotifyException.class,
             () -> userService.createUser(user)

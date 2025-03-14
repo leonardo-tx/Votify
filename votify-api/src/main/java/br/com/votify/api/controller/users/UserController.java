@@ -6,10 +6,7 @@ import br.com.votify.core.domain.entities.users.User;
 import br.com.votify.core.utils.exceptions.VotifyException;
 import br.com.votify.core.service.UserService;
 import br.com.votify.dto.ApiResponse;
-import br.com.votify.dto.users.UserDetailedViewDTO;
-import br.com.votify.dto.users.UserLoginDTO;
-import br.com.votify.dto.users.UserQueryDTO;
-import br.com.votify.dto.users.UserRegisterDTO;
+import br.com.votify.dto.users.*;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -91,5 +88,19 @@ public class UserController {
 
         return ResponseEntity.status(HttpStatus.OK)
             .body(ApiResponse.success(null));
+    }
+
+    @PostMapping("/generate-email-confirmation")
+    public ResponseEntity<ApiResponse<?>> confirmEmail(@RequestBody String email) throws VotifyException {
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(ApiResponse.success(userService.generateEmailConfirmationCode(email)));
+    }
+
+    @PostMapping("/confirm-email")
+    public ResponseEntity<ApiResponse<?>> confirmEmail(@RequestBody EmailConfirmationDto emailConfirmationDto) throws VotifyException {
+        userService.confirmEmail(emailConfirmationDto.getCode(), emailConfirmationDto.getEmail());
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(ApiResponse.success(null));
     }
 }
