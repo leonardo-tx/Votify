@@ -4,11 +4,9 @@ import br.com.votify.core.domain.entities.tokens.RefreshToken;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -57,15 +55,6 @@ public abstract class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private List<RefreshToken> refreshTokens;
-
-    @Column(name = "email_confirmation_code")
-    private int emailConfirmationCode;
-
-    @Column(name = "email_confirmation_expiration")
-    private LocalDateTime emailConfirmationExpiration;
-
-    @Column(name = "email_confirmed", nullable = false, columnDefinition = "TINYINT(1) DEFAULT 0")
-    private boolean emailConfirmed = false;
 
     public int getPermissions() {
         return PermissionFlags.NONE;

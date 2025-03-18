@@ -11,5 +11,5 @@ import lombok.Setter;
 @AllArgsConstructor
 public class EmailConfirmationDto {
     private String email;
-    private int code;
+    private String code;
 }

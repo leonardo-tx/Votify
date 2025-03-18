@@ -3,6 +3,7 @@ package br.com.votify.api.controller.users;
 import br.com.votify.api.configuration.SecurityConfig;
 import br.com.votify.core.domain.entities.tokens.AuthTokens;
 import br.com.votify.core.domain.entities.users.User;
+import br.com.votify.core.service.EmailConfirmationService;
 import br.com.votify.core.utils.exceptions.VotifyException;
 import br.com.votify.core.service.UserService;
 import br.com.votify.dto.ApiResponse;
@@ -21,6 +22,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
+    private final EmailConfirmationService emailConfirmationService;
     private final SecurityConfig securityConfig;
 
     @PostMapping
@@ -29,6 +31,9 @@ public class UserController {
     ) throws VotifyException {
         User user = userRegisterDTO.convertToEntity();
         User createdUser = userService.createUser(user);
+
+        emailConfirmationService.addUser(createdUser);
+
         UserDetailedViewDTO userDTO = UserDetailedViewDTO.parse(createdUser);
 
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -91,14 +96,14 @@ public class UserController {
     }
 
     @PostMapping("/generate-email-confirmation")
-    public ResponseEntity<ApiResponse<?>> confirmEmail(@RequestBody String email) throws VotifyException {
+    public ResponseEntity<ApiResponse<?>> generateEmailConfirmation(@RequestBody EmailConfirmationDto email) throws VotifyException {
         return ResponseEntity.status(HttpStatus.OK)
-                .body(ApiResponse.success(userService.generateEmailConfirmationCode(email)));
+                .body(ApiResponse.success(emailConfirmationService.generateEmailConfirmationCode(email.getEmail())));
     }
 
     @PostMapping("/confirm-email")
     public ResponseEntity<ApiResponse<?>> confirmEmail(@RequestBody EmailConfirmationDto emailConfirmationDto) throws VotifyException {
-        userService.confirmEmail(emailConfirmationDto.getCode(), emailConfirmationDto.getEmail());
+        emailConfirmationService.confirmEmail(emailConfirmationDto.getCode(), emailConfirmationDto.getEmail());
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(ApiResponse.success(null));

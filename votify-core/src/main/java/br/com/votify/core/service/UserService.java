@@ -3,7 +3,6 @@ package br.com.votify.core.service;
 import br.com.votify.core.domain.entities.tokens.AuthTokens;
 import br.com.votify.core.domain.entities.tokens.RefreshToken;
 import br.com.votify.core.domain.entities.users.User;
-import br.com.votify.core.utils.EmailCodeGeneratorUtils;
 import br.com.votify.core.utils.validators.UserValidator;
 import br.com.votify.core.utils.exceptions.VotifyErrorCode;
 import br.com.votify.core.utils.exceptions.VotifyException;
@@ -16,9 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -28,9 +25,8 @@ public class UserService {
     private final ContextService context;
     private final PasswordEncoderService passwordEncoderService;
     private final UserRepository userRepository;
+    private final EmailConfirmationService emailConfirmationService;
     private final TokenService tokenService;
-
-    private static final int emailConfirmationExpiration = 7;
 
     public User createUser(User user) throws VotifyException {
         UserValidator.validateFields(user);
@@ -57,7 +53,10 @@ public class UserService {
         if (user == null || !passwordEncoderService.checkPassword(user, password)) {
             throw new VotifyException(VotifyErrorCode.LOGIN_UNAUTHORIZED);
         }
-        if (!user.isEmailConfirmed()) {
+        var entity = emailConfirmationService.findByEmail(email)
+                .orElseThrow(() -> new VotifyException(VotifyErrorCode.INTERNAL));
+
+        if (!entity.isEmailConfirmed()) {
             throw new VotifyException(VotifyErrorCode.PENDING_EMAIL_CONFIRMATION);
         }
 
@@ -95,49 +94,6 @@ public class UserService {
             throw new VotifyException(VotifyErrorCode.USER_DELETE_UNAUTHORIZED);
         }
         userRepository.delete(user);
-    }
-
-    public int generateEmailConfirmationCode(String email) throws VotifyException {
-        var entity = userRepository.findByEmail(email)
-                .orElseThrow(() -> new VotifyException(VotifyErrorCode.USER_NOT_FOUND));
-
-        if (entity.isEmailConfirmed()) {
-            throw new VotifyException(VotifyErrorCode.EMAIL_ALREADY_CONFIRMED);
-        }
-
-        if (entity.getEmailConfirmationExpiration() == null || entity.getEmailConfirmationExpiration().isBefore(LocalDateTime.now())) {
-            int codeGenerated = EmailCodeGeneratorUtils.generateEmailConfirmationCode();
-            entity.setEmailConfirmationExpiration(LocalDateTime.now().plusDays(emailConfirmationExpiration));
-            entity.setEmailConfirmationCode(codeGenerated);
-            userRepository.save(entity);
-            return codeGenerated;
-        }
-
-        return entity.getEmailConfirmationCode();
-    }
-
-    public void confirmEmail(int code, String email) throws VotifyException {
-        var entity = userRepository.findByEmail(email)
-                .orElseThrow(() -> new VotifyException(VotifyErrorCode.USER_NOT_FOUND));
-
-        if (entity.isEmailConfirmed()) {
-            throw new VotifyException(VotifyErrorCode.EMAIL_ALREADY_CONFIRMED);
-        }
-
-        if (entity.getEmailConfirmationExpiration() == null
-                || entity.getEmailConfirmationExpiration().isBefore(LocalDateTime.now())) {
-            throw new VotifyException(VotifyErrorCode.EMAIL_CONFIRMATION_CODE_EXPIRED);
-        }
-
-        if (!Objects.equals(entity.getEmailConfirmationCode(), code)) {
-            throw new VotifyException(VotifyErrorCode.EMAIL_CONFIRMATION_CODE_INVALID);
-        }
-
-        entity.setEmailConfirmed(true);
-        entity.setEmailConfirmationExpiration(null);
-        entity.setEmailConfirmationCode(0);
-
-        userRepository.save(entity);
     }
 
 }
