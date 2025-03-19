@@ -1,6 +1,7 @@
 package br.com.votify.core.service;
 
 import br.com.votify.core.domain.entities.tokens.AuthTokens;
+import br.com.votify.core.domain.entities.tokens.EmailConfirmation;
 import br.com.votify.core.domain.entities.users.*;
 import br.com.votify.core.repository.UserRepository;
 import br.com.votify.core.utils.exceptions.VotifyErrorCode;
@@ -22,6 +23,7 @@ public class UserServiceTest {
     private static UserService userService;
     private static ContextService contextService;
     private static Long entityId = 1L;
+    private static EmailConfirmation emailConfirmation = new EmailConfirmation();
 
     @BeforeAll
     public static void prepareBeforeAll() {
@@ -29,6 +31,7 @@ public class UserServiceTest {
         PasswordEncoderService passwordEncoderService = new PasswordEncoderService();
         UserRepository userRepository = mock(UserRepository.class);
         TokenService tokenService = mock(TokenService.class);
+        EmailConfirmationService emailConfirmationService = mock(EmailConfirmationService.class);
 
         when(userRepository.existsByEmail(any(String.class))).thenAnswer((invocation) -> {
             String email = invocation.getArgument(0);
@@ -83,7 +86,11 @@ public class UserServiceTest {
             return createdUser;
         });
         when(userRepository.findAll()).thenAnswer((invocation) -> users);
-        userService = new UserService(contextService, passwordEncoderService, userRepository, tokenService);
+
+        when(emailConfirmationService.findByEmail(any(String.class))).thenReturn(Optional.of(emailConfirmation));
+        emailConfirmation.setEmailConfirmed(true);
+
+        userService = new UserService(contextService, passwordEncoderService, userRepository, emailConfirmationService, tokenService);
     }
 
     @Test
@@ -96,8 +103,6 @@ public class UserServiceTest {
             "marcos@proton.me",
             "12345678abacaxi#"
         );
-
-        user.setEmailConfirmed(true);
 
         User userFromService = assertDoesNotThrow(() -> userService.createUser(user));
         assertEquals(1, userFromService.getId());
@@ -114,8 +119,6 @@ public class UserServiceTest {
             "6Samurai6"
         );
 
-        user.setEmailConfirmed(true);
-
         User userFromService = assertDoesNotThrow(() -> userService.createUser(user));
         assertEquals(2, userFromService.getId());
     }
@@ -130,8 +133,6 @@ public class UserServiceTest {
             "arthurgatinho@gmail.com",
             "angelofthenight"
         );
-
-        user.setEmailConfirmed(true);
 
         User userFromService = assertDoesNotThrow(() -> userService.createUser(user));
         assertEquals(3, userFromService.getId());
