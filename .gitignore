@@ -37,3 +37,43 @@ build/
 
 ### Mac OS ###
 .DS_Store
+
+# dependencies
+votify-web/node_modules
+votify-web/.pnp
+votify-web/.pnp.*
+votify-web/.yarn/*
+votify-web/!.yarn/patches
+votify-web/!.yarn/plugins
+votify-web/!.yarn/releases
+votify-web/!.yarn/versions
+
+# testing
+votify-web/coverage
+
+# next.js
+votify-web/.next/
+votify-web/out/
+
+# production
+votify-web/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+votify-web/npm-debug.log*
+votify-web/yarn-debug.log*
+votify-web/yarn-error.log*
+votify-web/.pnpm-debug.log*
+
+# env files (can opt-in for committing if needed)
+.env*
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+votify-web/next-env.d.ts
