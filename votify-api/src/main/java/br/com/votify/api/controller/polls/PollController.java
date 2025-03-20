@@ -1,11 +1,11 @@
-package br.com.votify.api.controller.poll;
+package br.com.votify.api.controller.polls;
 
 import br.com.votify.dto.ApiResponse;
 import br.com.votify.dto.PageResponse;
-import br.com.votify.dto.poll.PollDetailedViewDTO;
-import br.com.votify.dto.poll.PollInsertDTO;
-import br.com.votify.dto.poll.PollListViewDTO;
-import br.com.votify.core.domain.entities.poll.Poll;
+import br.com.votify.dto.polls.PollDetailedViewDTO;
+import br.com.votify.dto.polls.PollInsertDTO;
+import br.com.votify.dto.polls.PollListViewDTO;
+import br.com.votify.core.domain.entities.polls.Poll;
 import br.com.votify.core.domain.entities.users.User;
 import br.com.votify.core.service.ContextService;
 import br.com.votify.core.service.PollService;
@@ -50,7 +50,7 @@ public class PollController {
         return ApiResponse.success(pageResponse, HttpStatus.OK).createResponseEntity();
     }
     
-    @GetMapping("/my")
+    @GetMapping("/me")
     public ResponseEntity<ApiResponse<PageResponse<PollListViewDTO>>> getMyPolls(
         @RequestParam(name = "page", defaultValue = "0") int page,
         @RequestParam(name = "size", defaultValue = "10") int size

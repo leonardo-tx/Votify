@@ -1,14 +1,13 @@
 package br.com.votify.core.utils.validators;
 
-import br.com.votify.core.domain.entities.poll.Poll;
-import br.com.votify.core.domain.entities.vote.VoteOption;
+import br.com.votify.core.domain.entities.polls.Poll;
+import br.com.votify.core.domain.entities.polls.VoteOption;
 import br.com.votify.core.utils.exceptions.VotifyErrorCode;
 import br.com.votify.core.utils.exceptions.VotifyException;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;

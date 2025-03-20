@@ -1,6 +1,5 @@
-package br.com.votify.core.domain.entities.vote;
+package br.com.votify.core.domain.entities.polls;
 
-import br.com.votify.core.domain.entities.poll.Poll;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

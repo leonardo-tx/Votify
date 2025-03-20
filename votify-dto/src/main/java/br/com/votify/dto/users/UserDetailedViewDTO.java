@@ -13,13 +13,15 @@ public class UserDetailedViewDTO {
     private String userName;
     private String name;
     private String email;
+    private String role;
 
     public static UserDetailedViewDTO parse(User entity) {
         return new UserDetailedViewDTO(
             entity.getId(),
             entity.getUserName(),
             entity.getName(),
-            entity.getEmail()
+            entity.getEmail(),
+            entity.getClass().getSimpleName()
         );
     }
 }
