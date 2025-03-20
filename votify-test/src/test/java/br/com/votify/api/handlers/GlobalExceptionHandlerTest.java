@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +18,10 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
+
+import java.lang.reflect.Method;
 
 public class GlobalExceptionHandlerTest {
 
@@ -104,5 +108,26 @@ public class GlobalExceptionHandlerTest {
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
         assertNotNull(response.getBody());
         assertEquals(VotifyErrorCode.INTERNAL.getMessageKey(), response.getBody().getErrorCode());
+    }
+
+    @Test
+    public void testGlobalMethodArgumentTypeMismatchExceptionHandler() throws NoSuchMethodException {
+        Object value = "invalidValue";
+        Class<?> requiredType = Integer.class;
+        String name = "parameterName";
+        Method method = this.getClass().getDeclaredMethod("dummyMethod", Integer.class);
+        MethodParameter param = new MethodParameter(method, 0);
+        Throwable cause = new Throwable("Root cause");
+
+        MethodArgumentTypeMismatchException exception = new MethodArgumentTypeMismatchException(value, requiredType, name, param, cause);
+
+        ResponseEntity<ApiResponse<Object>> response = globalExceptionHandler.globalMethodArgumentTypeMismatchExceptionHandler(exception, webRequest);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(VotifyErrorCode.BAD_REQUEST.getMessageKey(), response.getBody().getErrorCode());
+    }
+
+    public void dummyMethod(Integer param) {
     }
 }

@@ -9,6 +9,9 @@ import br.com.votify.core.utils.exceptions.VotifyException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 
@@ -16,13 +19,19 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 public class ContextServiceTest {
+    @Mock
+    private UserRepository userRepository;
+
+    @Mock
+    private TokenService tokenService;
+
+    @Mock
+    private HttpServletRequest httpServletRequest;
+
     @Test
     public void testConstructorWithNullCookies() {
-        UserRepository userRepository = mock(UserRepository.class);
-        TokenService tokenService = mock(TokenService.class);
-        HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
-
         assertDoesNotThrow(
             () -> new ContextService(userRepository, tokenService, httpServletRequest)
         );
@@ -30,10 +39,6 @@ public class ContextServiceTest {
 
     @Test
     public void testConstructorWithAccessTokenNull() {
-        UserRepository userRepository = mock(UserRepository.class);
-        TokenService tokenService = mock(TokenService.class);
-        HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
-
         when(httpServletRequest.getCookies()).thenReturn(new Cookie[] {
             new Cookie("refresh_token", "token2")
         });
@@ -47,10 +52,6 @@ public class ContextServiceTest {
 
     @Test
     public void testConstructorWithRefreshTokenNull() throws VotifyException {
-        UserRepository userRepository = mock(UserRepository.class);
-        TokenService tokenService = mock(TokenService.class);
-        HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
-
         when(httpServletRequest.getCookies()).thenReturn(new Cookie[] {
             new Cookie("access_token", "token1")
         });
@@ -66,10 +67,6 @@ public class ContextServiceTest {
 
     @Test
     public void testConstructorWithAllCookies() throws VotifyException {
-        UserRepository userRepository = mock(UserRepository.class);
-        TokenService tokenService = mock(TokenService.class);
-        HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
-
         when(httpServletRequest.getCookies()).thenReturn(new Cookie[] {
             new Cookie("access_token", "token1"),
             new Cookie("refresh_token", "token2")
@@ -87,10 +84,6 @@ public class ContextServiceTest {
 
     @Test
     public void throwIfNotAuthenticated() throws VotifyException {
-        UserRepository userRepository = mock(UserRepository.class);
-        TokenService tokenService = mock(TokenService.class);
-        HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
-
         ContextService contextService = new ContextService(userRepository, tokenService, httpServletRequest);
         VotifyException exception = assertThrows(
             VotifyException.class, contextService::throwIfNotAuthenticated
@@ -100,10 +93,6 @@ public class ContextServiceTest {
 
     @Test
     public void doesNotThrowIfAuthenticated() throws VotifyException {
-        UserRepository userRepository = mock(UserRepository.class);
-        TokenService tokenService = mock(TokenService.class);
-        HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
-
         when(httpServletRequest.getCookies()).thenReturn(new Cookie[] {
             new Cookie("access_token", "token1")
         });
@@ -116,10 +105,6 @@ public class ContextServiceTest {
 
     @Test
     public void throwIfUserIsNull() throws VotifyException {
-        UserRepository userRepository = mock(UserRepository.class);
-        TokenService tokenService = mock(TokenService.class);
-        HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
-
         ContextService contextService = new ContextService(userRepository, tokenService, httpServletRequest);
         VotifyException exception = assertThrows(
             VotifyException.class, contextService::getUserOrThrow
@@ -129,10 +114,6 @@ public class ContextServiceTest {
 
     @Test
     public void doesNotThrowIfUserIsNotNull() throws VotifyException {
-        UserRepository userRepository = mock(UserRepository.class);
-        TokenService tokenService = mock(TokenService.class);
-        HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
-
         when(httpServletRequest.getCookies()).thenReturn(new Cookie[] {
             new Cookie("access_token", "token1")
         });
@@ -147,27 +128,19 @@ public class ContextServiceTest {
 
     @Test
     public void refreshTokens() throws VotifyException {
-        UserRepository userRepository = mock(UserRepository.class);
-        TokenService tokenService = mock(TokenService.class);
-        HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
-
         when(httpServletRequest.getCookies()).thenReturn(new Cookie[] {
             new Cookie("refresh_token", "token2")
         });
-        when(tokenService.getUserIdFromAccessToken(any(String.class))).thenReturn(1L);
-        when(userRepository.findById(1L)).thenReturn(Optional.of(new CommonUser()));
 
         ContextService contextService = new ContextService(userRepository, tokenService, httpServletRequest);
         AuthTokens authTokens = assertDoesNotThrow(contextService::refreshTokens);
         assertNotNull(authTokens);
+
+        verify(tokenService).increaseRefreshTokenExpiration("token2");
     }
 
     @Test
     public void refreshTokensWithRefreshTokenNull() throws VotifyException {
-        UserRepository userRepository = mock(UserRepository.class);
-        TokenService tokenService = mock(TokenService.class);
-        HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
-
         when(httpServletRequest.getCookies()).thenReturn(new Cookie[] {
             new Cookie("access_token", "token1")
         });
@@ -181,10 +154,6 @@ public class ContextServiceTest {
     
     @Test
     public void deleteUser_WhenAuthenticated_ShouldDeleteSuccessfully() throws VotifyException {
-        UserRepository userRepository = mock(UserRepository.class);
-        TokenService tokenService = mock(TokenService.class);
-        HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
-        
         User testUser = new CommonUser(1L, "test-user", "Test User", "test@example.com", "password123");
         
         when(httpServletRequest.getCookies()).thenReturn(new Cookie[] {
@@ -194,21 +163,22 @@ public class ContextServiceTest {
         when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
         
         ContextService contextService = new ContextService(userRepository, tokenService, httpServletRequest);
-        
-        contextService.deleteUser();
 
-        verify(userRepository).delete(testUser);
+        assertDoesNotThrow(contextService::deleteUser);
+        verify(userRepository).delete(any(User.class));
     }
-    
+
     @Test
-    public void deleteUser_WhenNotAuthenticated_ShouldThrowException() throws VotifyException {
-        UserRepository userRepository = mock(UserRepository.class);
-        TokenService tokenService = mock(TokenService.class);
-        HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
-        
+    public void userFromContextIsClone() throws VotifyException {
+        User testUser = new CommonUser(1L, "test-user", "Test User", "test@example.com", "password123");
+
+        when(httpServletRequest.getCookies()).thenReturn(new Cookie[] {
+                new Cookie("access_token", "token1")
+        });
+        when(tokenService.getUserIdFromAccessToken(any(String.class))).thenReturn(1L);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
+
         ContextService contextService = new ContextService(userRepository, tokenService, httpServletRequest);
-        
-        VotifyException exception = assertThrows(VotifyException.class, contextService::deleteUser);
-        assertEquals(VotifyErrorCode.COMMON_UNAUTHORIZED, exception.getErrorCode());
+        assertNotSame(testUser, contextService.getUserOrThrow());
     }
 }
