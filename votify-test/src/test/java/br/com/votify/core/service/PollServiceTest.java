@@ -8,9 +8,10 @@ import br.com.votify.core.utils.exceptions.VotifyErrorCode;
 import br.com.votify.core.utils.exceptions.VotifyException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -25,6 +26,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 public class PollServiceTest {
 
     @Mock
@@ -33,17 +35,13 @@ public class PollServiceTest {
     @InjectMocks
     private PollService pollService;
 
-    private User testUser;
-    private Poll testPoll;
     private List<Poll> testPolls;
 
     @BeforeEach
-    public void setup() {
-        MockitoAnnotations.openMocks(this);
+    public void setupBeforeEach() {
+        User testUser = new CommonUser(1L, "testuser", "Test User", "test@example.com", "password123");
 
-        testUser = new CommonUser(1L, "testuser", "Test User", "test@example.com", "password123");
-        
-        testPoll = new Poll(
+        Poll testPoll = new Poll(
             "Test Poll",
             "Test Description",
             LocalDateTime.now(),
