@@ -20,10 +20,7 @@ public class CreatePollMenu extends Menu {
 
     @Override
     public void run() {
-        ConsoleUtils.clear();
-        System.out.println("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-");
-        System.out.println("                 Criar enquete                 ");
-        System.out.println("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-");
+        printBanner();
 
         PollInsertDTO dto = new PollInsertDTO();
 

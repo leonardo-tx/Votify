@@ -14,10 +14,7 @@ public class GetMyPollsMenu extends Menu {
 
     @Override
     public void run() {
-        ConsoleUtils.clear();
-        System.out.println("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-");
-        System.out.println("           Resgatar minhas enquetes            ");
-        System.out.println("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-");
+        printBanner();
 
         ApiResponse<PageResponse<PollListViewDTO>> response = VotifyApiCaller.POLLS.getMyPolls();
         ConsoleUtils.clear();
