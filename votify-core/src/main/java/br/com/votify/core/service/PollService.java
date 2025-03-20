@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -44,5 +45,18 @@ public class PollService {
         }
         Pageable pageable = PageRequest.of(page, size);
         return pollRepository.findAllByResponsibleId(userId, pageable);
+    }
+
+    /**
+     *
+     * @param pollId  ID da poll a buscar
+     * @return Poll
+     */
+    public Poll findSpecificPoll(Long pollId) {
+        Optional<Poll> opPoll = pollRepository.findById(pollId);
+        if (opPoll.isEmpty()) {
+            throw new RuntimeException("Poll not found"); // TODO: Necessário implementar um VotifyException
+        }
+        return opPoll.get();
     }
 }

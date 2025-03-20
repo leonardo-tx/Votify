@@ -2,14 +2,15 @@ package br.com.votify.api.controller.poll;
 
 import br.com.votify.dto.ApiResponse;
 import br.com.votify.dto.PageResponse;
-import br.com.votify.dto.poll.PollDetailedViewDTO;
-import br.com.votify.dto.poll.PollInsertDTO;
-import br.com.votify.dto.poll.PollListViewDTO;
-import br.com.votify.core.domain.entities.poll.Poll;
+import br.com.votify.dto.polls.PollDetailedViewDTO;
+import br.com.votify.dto.polls.PollInsertDTO;
+import br.com.votify.dto.polls.PollListViewDTO;
 import br.com.votify.core.domain.entities.users.User;
+import br.com.votify.core.domain.entities.poll.Poll;
 import br.com.votify.core.service.ContextService;
 import br.com.votify.core.service.PollService;
 import br.com.votify.core.utils.exceptions.VotifyException;
+import br.com.votify.dto.polls.PollQueryDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -71,5 +72,21 @@ public class PollController {
         
         PageResponse<PollListViewDTO> pageResponse = PageResponse.from(pollPage, pollDtos);
         return ApiResponse.success(pageResponse, HttpStatus.OK).createResponseEntity();
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<PollQueryDto>> getPollById(
+        @PathVariable Long id
+    ) {
+        Optional<User> user = contextService.getUserOptional();
+        Poll poll = pollService.findSpecificPoll(id);
+
+        if (user.isEmpty()) {
+            PollQueryDto dto = PollQueryDto.parse(poll, List.of());
+            return ApiResponse.success(dto, HttpStatus.OK).createResponseEntity();
+        }
+
+        PollQueryDto dto = PollQueryDto.parse(poll);
+        ApiResponse.success(dto, HttpStatus.OK).createResponseEntity();
     }
 }
