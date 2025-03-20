@@ -5,7 +5,7 @@ import br.com.votify.console.menus.Menu;
 import br.com.votify.console.utils.ConsoleUtils;
 import br.com.votify.dto.ApiResponse;
 import br.com.votify.dto.PageResponse;
-import br.com.votify.dto.poll.PollListViewDTO;
+import br.com.votify.dto.polls.PollListViewDTO;
 
 import java.util.Scanner;
 

@@ -17,7 +17,7 @@ public final class UserRegisterDTO implements DTOInput<User> {
     private String password;
 
     @Override
-    public User convertToEntity() {
+    public CommonUser convertToEntity() {
         return new CommonUser(null, userName, name, email, password);
     }
 }

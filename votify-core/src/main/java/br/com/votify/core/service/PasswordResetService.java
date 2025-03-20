@@ -1,5 +1,6 @@
 package br.com.votify.core.service;
 
+import br.com.votify.core.domain.entities.password.PasswordResetProperties;
 import br.com.votify.core.domain.entities.password.PasswordResetToken;
 import br.com.votify.core.domain.entities.users.User;
 import br.com.votify.core.repository.PasswordResetTokenRepository;
@@ -24,9 +25,7 @@ public class PasswordResetService {
     private final UserRepository userRepository;
     private final PasswordResetTokenRepository passwordResetTokenRepository;
     private final PasswordEncoderService passwordEncoderService;
-
-    @Value("${app.password-reset.expiration-minutes:15}")
-    private int expirationMinutes;
+    private final PasswordResetProperties passwordResetProperties;
 
     public String createPasswordResetRequest(String email) throws VotifyException {
         Optional<User> userOptional = userRepository.findByEmail(email);
@@ -38,14 +37,14 @@ public class PasswordResetService {
         Date now = new Date();
 
         List<PasswordResetToken> activeTokens =
-                passwordResetTokenRepository.findByUserAndExpiryDateAfter(user, now);
+            passwordResetTokenRepository.findByUserAndExpiryDateAfter(user, now);
 
         if (!activeTokens.isEmpty()) {
             throw new VotifyException(VotifyErrorCode.PASSWORD_RESET_REQUEST_EXISTS);
         }
 
         String code = generateRandomCode();
-        Date expiryDate = new Date(now.getTime() + TimeUnit.MINUTES.toMillis(expirationMinutes));
+        Date expiryDate = Date.from(now.toInstant().plusSeconds(passwordResetProperties.getExpirationMinutes()));
 
         PasswordResetToken token = new PasswordResetToken(code, user, expiryDate);
         passwordResetTokenRepository.save(token);

@@ -1,6 +1,6 @@
 package br.com.votify.core.service;
 
-import br.com.votify.core.domain.entities.poll.Poll;
+import br.com.votify.core.domain.entities.polls.Poll;
 import br.com.votify.core.utils.validators.PollValidator;
 import br.com.votify.core.domain.entities.users.User;
 import br.com.votify.core.repository.PollRepository;

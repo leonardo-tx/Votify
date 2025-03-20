@@ -2,6 +2,7 @@ package br.com.votify.core.service;
 
 import br.com.votify.core.domain.entities.tokens.AuthTokens;
 import br.com.votify.core.domain.entities.tokens.RefreshToken;
+import br.com.votify.core.domain.entities.users.CommonUser;
 import br.com.votify.core.domain.entities.users.User;
 import br.com.votify.core.utils.validators.UserValidator;
 import br.com.votify.core.utils.exceptions.VotifyErrorCode;
@@ -9,17 +10,12 @@ import br.com.votify.core.utils.exceptions.VotifyException;
 import br.com.votify.core.repository.UserRepository;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.Scope;
-import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Service;
-import org.springframework.web.context.WebApplicationContext;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-@Scope(value = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class UserService {
     @Getter
     private final ContextService context;
@@ -27,10 +23,8 @@ public class UserService {
     private final UserRepository userRepository;
     private final TokenService tokenService;
 
-    public User createUser(User user) throws VotifyException {
+    public User register(CommonUser user) throws VotifyException {
         UserValidator.validateFields(user);
-        user.setId(null);
-
         if (userRepository.existsByEmail(user.getEmail())) {
             throw new VotifyException(VotifyErrorCode.EMAIL_ALREADY_EXISTS);
         }
@@ -39,6 +33,7 @@ public class UserService {
         }
         String encryptedPassword = passwordEncoderService.encryptPassword(user.getPassword());
         user.setPassword(encryptedPassword);
+        user.setId(null);
 
         return userRepository.save(user);
     }
@@ -65,25 +60,14 @@ public class UserService {
     }
 
     public User getUserById(long id) throws VotifyException {
-        User user = userRepository.findById(id).orElse(null);
-        if (user == null) {
+        Optional<User> optionalUser = userRepository.findById(id);
+        if (optionalUser.isEmpty()) {
             throw new VotifyException(VotifyErrorCode.USER_NOT_FOUND);
         }
-        return user;
+        return optionalUser.get();
     }
 
-    public List<User> getAll() {
-        return userRepository.findAll();
-    }
-
-    @Transactional
-    public void deleteUser(Long userId) throws VotifyException {
-        User user = getUserById(userId);
-        
-        User currentUser = context.getUserOrThrow();
-        if (!currentUser.getId().equals(userId)) {
-            throw new VotifyException(VotifyErrorCode.USER_DELETE_UNAUTHORIZED);
-        }
+    public void deleteUser(User user) {
         userRepository.delete(user);
     }
 }
