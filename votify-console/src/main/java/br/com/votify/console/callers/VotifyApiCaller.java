@@ -13,10 +13,8 @@ public final class VotifyApiCaller {
 
     public static final VotifyApiUsersCaller USERS =
         new VotifyApiUsersCaller(restTemplate, cookies);
-    public static final VotifyApiUserContextCaller CONTEXT =
-        new VotifyApiUserContextCaller(restTemplate, cookies);
     public static final VotifyApiPollsCaller POLLS =
         new VotifyApiPollsCaller(restTemplate, cookies);
-    public static final VotifyApiPasswordResetCaller PASSWORD =
-        new VotifyApiPasswordResetCaller(restTemplate);
+    public static final VotifyApiAuthCaller AUTH =
+            new VotifyApiAuthCaller(restTemplate, cookies);
 }

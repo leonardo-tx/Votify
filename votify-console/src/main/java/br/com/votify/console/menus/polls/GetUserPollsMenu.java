@@ -14,10 +14,7 @@ public class GetUserPollsMenu extends Menu {
 
     @Override
     public void run() {
-        ConsoleUtils.clear();
-        System.out.println("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-");
-        System.out.println("         Resgatar enquetes do usuário          ");
-        System.out.println("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-");
+        printBanner();
 
         System.out.print("Insira o ID: ");
         String id = scanner.nextLine();

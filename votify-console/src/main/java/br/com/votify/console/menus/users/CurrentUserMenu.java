@@ -4,24 +4,20 @@ import br.com.votify.console.callers.VotifyApiCaller;
 import br.com.votify.console.menus.Menu;
 import br.com.votify.console.utils.ConsoleUtils;
 import br.com.votify.dto.ApiResponse;
-import br.com.votify.dto.users.UserQueryDTO;
+import br.com.votify.dto.users.UserDetailedViewDTO;
 
 import java.util.Scanner;
 
-public class GetByIdUserMenu extends Menu {
+public class CurrentUserMenu extends Menu {
     private final Scanner scanner = new Scanner(System.in);
 
     @Override
     public void run() {
         printBanner();
 
-        System.out.print("Insira o ID: ");
-        String id = scanner.nextLine();
-
-        ApiResponse<UserQueryDTO> response = VotifyApiCaller.USERS.getUserById(id);
-        ConsoleUtils.clear();
+        ApiResponse<UserDetailedViewDTO> response = VotifyApiCaller.USERS.getUser();
         if (response.isSuccess()) {
-            System.out.println("Usuário encontrado: " + response.getData());
+            System.out.println("Suas informações: " + response.getData());
         } else {
             System.out.println("Erro: " + response.getErrorMessage());
         }
@@ -30,6 +26,6 @@ public class GetByIdUserMenu extends Menu {
 
     @Override
     public String getOptionName() {
-        return "Procurar usuário pelo ID";
+        return "Minhas informações";
     }
 }
