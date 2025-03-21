@@ -2,10 +2,7 @@ package br.com.votify.core.domain.entities.polls;
 
 import br.com.votify.core.domain.entities.users.User;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 
 import java.time.LocalDateTime;
@@ -17,6 +14,7 @@ import java.util.List;
 @Table(name = "TB_POLL")
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class Poll {
     public static final int TITLE_MIN_LENGTH = 5;
     public static final int TITLE_MAX_LENGTH = 50;
@@ -25,24 +23,6 @@ public class Poll {
     public static final int VOTE_OPTIONS_MIN = 1;
     public static final int VOTE_OPTIONS_MAX= 5;
     public static final int PAGE_SIZE_LIMIT = 10;
-
-    public Poll(
-            String title,
-            String description,
-            LocalDateTime startDate,
-            LocalDateTime endDate,
-            boolean userRegistration,
-            List<VoteOption> voteOptions,
-            Integer choiceLimitPerUser
-    ) {
-        this.title = title;
-        this.description = description;
-        this.startDate = startDate;
-        this.endDate = endDate;
-        this.userRegistration = userRegistration;
-        this.voteOptions = voteOptions;
-        this.choiceLimitPerUser = choiceLimitPerUser;
-    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -66,6 +46,9 @@ public class Poll {
 
     @OneToMany(mappedBy = "poll", cascade = CascadeType.ALL)
     private List<VoteOption> voteOptions;
+
+    @OneToMany(mappedBy = "poll", cascade = CascadeType.ALL)
+    private List<Vote> votes;
 
     @Column(name = "choice_limit_per_user", nullable = false)
     private Integer choiceLimitPerUser;

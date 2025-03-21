@@ -3,7 +3,6 @@ package br.com.votify.dto.polls;
 import br.com.votify.core.domain.entities.polls.Poll;
 import br.com.votify.core.domain.entities.polls.VoteOption;
 import br.com.votify.dto.DTOInput;
-import br.com.votify.dto.vote.VoteOptionInsertDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -34,6 +33,7 @@ public final class PollInsertDTO implements DTOInput<Poll> {
             endDate,
             userRegistration,
             new ArrayList<>(),
+            null,
             choiceLimitPerUser,
             null
         );

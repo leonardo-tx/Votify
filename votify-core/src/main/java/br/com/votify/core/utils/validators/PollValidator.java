@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Objects;
 
 public final class PollValidator {
-
     public static void validateFields(Poll poll, LocalDateTime now) throws VotifyException {
         validateTitle(poll.getTitle());
         validateDescription(poll.getDescription());

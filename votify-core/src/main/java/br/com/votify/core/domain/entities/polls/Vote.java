@@ -14,23 +14,19 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Vote {
+    @EmbeddedId
+    private VoteIdentifier id;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @ManyToOne
-    @JoinColumn(
-        name = "vote_option_id",
-        foreignKey = @ForeignKey(name = "fk_vote_option_vote"),
-        nullable = false
-    )
-    private VoteOption voteOption;
+    @Column(nullable = false)
+    private int option;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(
-        name = "user_id",
-        foreignKey = @ForeignKey(name = "fk_user_vote")
-    )
+    @MapsId("pollId")
+    @JoinColumn(name = "poll_id", foreignKey = @ForeignKey(name = "fk_poll_vote"))
+    private Poll poll;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("userId")
+    @JoinColumn(name = "user_id", foreignKey = @ForeignKey(name = "fk_user_vote"))
     private User user;
 }

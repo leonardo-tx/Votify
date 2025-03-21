@@ -6,7 +6,7 @@ import br.com.votify.console.utils.ConsoleUtils;
 import br.com.votify.dto.ApiResponse;
 import br.com.votify.dto.polls.PollInsertDTO;
 import br.com.votify.dto.users.UserDetailedViewDTO;
-import br.com.votify.dto.vote.VoteOptionInsertDTO;
+import br.com.votify.dto.polls.VoteOptionInsertDTO;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
