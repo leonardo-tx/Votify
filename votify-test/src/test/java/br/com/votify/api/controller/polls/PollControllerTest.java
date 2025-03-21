@@ -1,7 +1,9 @@
 package br.com.votify.api.controller.polls;
 
+import br.com.votify.core.utils.exceptions.VotifyErrorCode;
 import br.com.votify.dto.polls.PollInsertDTO;
-import br.com.votify.dto.vote.VoteOptionInsertDTO;
+import br.com.votify.dto.polls.VoteInsertDTO;
+import br.com.votify.dto.polls.VoteOptionInsertDTO;
 import br.com.votify.test.MockMvcHelper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.Cookie;
@@ -99,6 +101,7 @@ public class PollControllerTest {
     }
 
     @Test
+    @Order(1)
     public void testGetMyPollsWhenAuthenticated() throws Exception {
         Cookie[] cookies = MockMvcHelper.login(
                 mockMvc, objectMapper, "common@votify.com.br", "password123"
@@ -123,6 +126,7 @@ public class PollControllerTest {
     }
 
     @Test
+    @Order(1)
     public void testGetMyPollsWhenNotAuthenticated() throws Exception {
         ResultActions resultActions = mockMvc.perform(get("/polls/me"));
         MockMvcHelper.testSuccessfulResponse(resultActions, HttpStatus.OK)
@@ -133,5 +137,76 @@ public class PollControllerTest {
                 .andExpect(jsonPath("data.first", is(true)))
                 .andExpect(jsonPath("data.last", is(true)))
                 .andExpect(jsonPath("data.content", hasSize(0)));
+    }
+
+    @Test
+    @Order(1)
+    public void testVotePoll() throws Exception {
+        Cookie[] cookies = MockMvcHelper.login(
+                mockMvc, objectMapper, "common@votify.com.br", "password123"
+        );
+
+        VoteInsertDTO voteInsertDTO = new VoteInsertDTO(16);
+        ResultActions resultActions = mockMvc.perform(post("/polls/{id}/vote", 1)
+                .cookie(cookies)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(voteInsertDTO)));
+        MockMvcHelper.testSuccessfulResponse(resultActions, HttpStatus.CREATED)
+                .andExpect(jsonPath("data", is(16)));
+    }
+
+    @Test
+    @Order(1)
+    public void testInvalidVotePoll() throws Exception {
+        Cookie[] cookies = MockMvcHelper.login(
+                mockMvc, objectMapper, "common@votify.com.br", "password123"
+        );
+
+        VoteInsertDTO voteInsertDTO = new VoteInsertDTO(31);
+        ResultActions resultActions = mockMvc.perform(post("/polls/{id}/vote", 1)
+                .cookie(cookies)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(voteInsertDTO)));
+        MockMvcHelper.testUnsuccessfulResponse(resultActions, VotifyErrorCode.POLL_VOTE_INVALID);
+    }
+
+    @Test
+    @Order(1)
+    public void testEmptyVotePoll() throws Exception {
+        Cookie[] cookies = MockMvcHelper.login(
+                mockMvc, objectMapper, "common@votify.com.br", "password123"
+        );
+
+        VoteInsertDTO voteInsertDTO = new VoteInsertDTO(0);
+        ResultActions resultActions = mockMvc.perform(post("/polls/{id}/vote", 1)
+                .cookie(cookies)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(voteInsertDTO)));
+        MockMvcHelper.testUnsuccessfulResponse(resultActions, VotifyErrorCode.POLL_VOTE_EMPTY);
+    }
+
+    @Test
+    @Order(1)
+    public void testVoteWhenNotAuthenticated() throws Exception {
+        VoteInsertDTO voteInsertDTO = new VoteInsertDTO(1);
+        ResultActions resultActions = mockMvc.perform(post("/polls/{id}/vote", 1)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(voteInsertDTO)));
+        MockMvcHelper.testUnsuccessfulResponse(resultActions, VotifyErrorCode.COMMON_UNAUTHORIZED);
+    }
+
+    @Test
+    @Order(2)
+    public void testVotePollDuplicated() throws Exception {
+        Cookie[] cookies = MockMvcHelper.login(
+                mockMvc, objectMapper, "common@votify.com.br", "password123"
+        );
+
+        VoteInsertDTO voteInsertDTO = new VoteInsertDTO(4);
+        ResultActions resultActions = mockMvc.perform(post("/polls/{id}/vote", 1)
+                .cookie(cookies)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(voteInsertDTO)));
+        MockMvcHelper.testUnsuccessfulResponse(resultActions, VotifyErrorCode.POLL_VOTED_ALREADY);
     }
 }
