@@ -10,16 +10,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface PollRepository extends JpaRepository<Poll, Long> {
-
-    @Query("""
-        SELECT COUNT(p) > 0
-        FROM Poll p
-        INNER JOIN p.responsible u
-        WHERE u.id = :userId
-        AND p.title = :title
-        """)
-    boolean existsByTitleAndResponsibleId(@Param("title") String title, @Param("userId") Long userId);
-    
     @Query("""
         SELECT p
         FROM Poll p

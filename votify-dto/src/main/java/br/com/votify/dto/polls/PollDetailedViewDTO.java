@@ -1,11 +1,14 @@
 package br.com.votify.dto.polls;
 
 import br.com.votify.core.domain.entities.polls.Poll;
+import br.com.votify.core.domain.entities.polls.VoteOption;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 
 @Data
@@ -20,8 +23,15 @@ public class PollDetailedViewDTO {
     private boolean userRegistration;
     private Integer choiceLimitPerUser;
     private Long responsibleId;
+    private int votedOption;
+    private List<VoteOptionDetailedViewDTO> voteOptions;
 
-    public static PollDetailedViewDTO parse(Poll entity) {
+    public static PollDetailedViewDTO parse(Poll entity, int votedOption) {
+        List<VoteOptionDetailedViewDTO> voteOptions = new ArrayList<>();
+        for (VoteOption voteOption : entity.getVoteOptions()) {
+            voteOptions.add(VoteOptionDetailedViewDTO.parse(voteOption));
+        }
+
         return new PollDetailedViewDTO(
             entity.getId(),
             entity.getTitle(),
@@ -30,7 +40,9 @@ public class PollDetailedViewDTO {
             entity.getEndDate(),
             entity.isUserRegistration(),
             entity.getChoiceLimitPerUser(),
-            entity.getResponsible().getId()
+            entity.getResponsible().getId(),
+            votedOption,
+            voteOptions
         );
     }
 }
