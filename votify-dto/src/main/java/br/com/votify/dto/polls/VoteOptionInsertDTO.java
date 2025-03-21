@@ -1,4 +1,4 @@
-package br.com.votify.dto.vote;
+package br.com.votify.dto.polls;
 
 import br.com.votify.core.domain.entities.polls.VoteOption;
 import br.com.votify.dto.DTOInput;
@@ -14,6 +14,6 @@ public class VoteOptionInsertDTO implements DTOInput<VoteOption> {
 
     @Override
     public VoteOption convertToEntity() {
-        return new VoteOption(null, name, null);
+        return new VoteOption(null, name, 0, null);
     }
 }

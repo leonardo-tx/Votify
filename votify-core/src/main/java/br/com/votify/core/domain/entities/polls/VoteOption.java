@@ -16,14 +16,25 @@ public class VoteOption {
     public static final int NAME_MIN_LENGTH = 3;
     public static final int NAME_MAX_LENGTH = 30;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @EmbeddedId
+    private VoteOptionIdentifier id;
 
     @Column(name = "name", nullable = false, length = NAME_MAX_LENGTH)
     private String name;
 
+    @Column(nullable = false)
+    private int count;
+
     @ManyToOne
+    @MapsId("pollId")
     @JoinColumn(name = "poll_id", nullable = false)
     private Poll poll;
+
+    public void incrementCount() {
+        count += 1;
+    }
+
+    public boolean hasBeenVoted(Vote vote) {
+        return (vote.getOption() & 1 << id.getSequence()) != 0;
+    }
 }
