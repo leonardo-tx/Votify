@@ -49,7 +49,9 @@ public class ContextService {
             return;
         }
         long id = tokenService.getUserIdFromAccessToken(accessToken);
-        this.user = userRepository.findById(id).orElse(null);
+        Optional<User> userOptional = userRepository.findById(id);
+
+        this.user = userOptional.map(User::clone).orElse(null);
     }
 
     public Optional<User> getUserOptional() {

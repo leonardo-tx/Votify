@@ -2,8 +2,8 @@ package br.com.votify.console.callers;
 
 import br.com.votify.dto.ApiResponse;
 import br.com.votify.dto.PageResponse;
-import br.com.votify.dto.poll.PollInsertDTO;
-import br.com.votify.dto.poll.PollListViewDTO;
+import br.com.votify.dto.polls.PollInsertDTO;
+import br.com.votify.dto.polls.PollListViewDTO;
 import br.com.votify.dto.users.UserDetailedViewDTO;
 import lombok.AllArgsConstructor;
 import org.springframework.boot.test.web.client.TestRestTemplate;

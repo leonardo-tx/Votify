@@ -1,6 +1,6 @@
 package br.com.votify.core.utils.validators;
 
-import br.com.votify.core.domain.entities.vote.VoteOption;
+import br.com.votify.core.domain.entities.polls.VoteOption;
 import br.com.votify.core.utils.exceptions.VotifyErrorCode;
 import br.com.votify.core.utils.exceptions.VotifyException;
 

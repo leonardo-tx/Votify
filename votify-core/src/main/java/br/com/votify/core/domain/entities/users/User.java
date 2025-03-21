@@ -12,10 +12,10 @@ import java.util.List;
 @Entity
 @Getter
 @Setter
-@Table(name = "TB_USER")
+@Table(name = "TB_USER", indexes = { @Index(columnList = "userName", unique = true) })
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "USER_TYPE", discriminatorType = DiscriminatorType.STRING)
-public abstract class User {
+public abstract class User implements Cloneable {
     public static final int USER_NAME_MIN_LENGTH = 3;
     public static final int USER_NAME_MAX_LENGTH = 40;
     public static final int EMAIL_MIN_LENGTH = 5;
@@ -52,7 +52,7 @@ public abstract class User {
     @Column(nullable = false)
     private String password;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private List<RefreshToken> refreshTokens;
 
@@ -62,5 +62,14 @@ public abstract class User {
 
     public boolean hasPermission(int permissionFlags) {
         return (getPermissions() & permissionFlags) != 0;
+    }
+
+    @Override
+    public User clone() {
+        try {
+            return (User)super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError();
+        }
     }
 }

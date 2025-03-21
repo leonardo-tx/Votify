@@ -1,6 +1,6 @@
 package br.com.votify.core.repository;
 
-import br.com.votify.core.domain.entities.poll.Poll;
+import br.com.votify.core.domain.entities.polls.Poll;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

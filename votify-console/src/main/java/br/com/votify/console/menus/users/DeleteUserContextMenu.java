@@ -1,4 +1,4 @@
-package br.com.votify.console.menus.context;
+package br.com.votify.console.menus.users;
 
 import br.com.votify.console.callers.VotifyApiCaller;
 import br.com.votify.console.menus.Menu;
@@ -12,15 +12,12 @@ public class DeleteUserContextMenu extends Menu {
 
     @Override
     public void run() {
-        ConsoleUtils.clear();
-        System.out.println("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-");
-        System.out.println("                 Deletar conta                 ");
-        System.out.println("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-");
-        System.out.print("Tem certeza? [S ou N]: ");
+        printBanner();
 
+        System.out.print("Tem certeza? [S ou N]: ");
         if (!ConsoleUtils.getBooleanFromInput(scanner)) return;
 
-        ApiResponse<?> response = VotifyApiCaller.CONTEXT.delete();
+        ApiResponse<?> response = VotifyApiCaller.USERS.delete();
         if (response.isSuccess()) {
             System.out.println("Conta deletada com sucesso");
         } else {

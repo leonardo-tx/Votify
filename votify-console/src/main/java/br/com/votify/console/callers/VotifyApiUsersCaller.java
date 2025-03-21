@@ -23,32 +23,6 @@ public final class VotifyApiUsersCaller {
     private final TestRestTemplate restTemplate;
     private final List<String> cookies;
 
-    public ApiResponse<UserDetailedViewDTO> register(UserRegisterDTO userRegisterDTO) {
-        ResponseEntity<ApiResponse<UserDetailedViewDTO>> response = restTemplate.exchange(
-            baseUrl,
-            HttpMethod.POST,
-            new HttpEntity<>(userRegisterDTO),
-            new ParameterizedTypeReference<>() {}
-        );
-        return response.getBody();
-    }
-
-    public ApiResponse<?> login(UserLoginDTO userLoginDTO) {
-        ResponseEntity<ApiResponse<UserDetailedViewDTO>> response = restTemplate.exchange(
-            baseUrl + "/login",
-            HttpMethod.POST,
-            new HttpEntity<>(userLoginDTO),
-            new ParameterizedTypeReference<>() {}
-        );
-        ApiResponse<?> responseBody = response.getBody();
-        if (responseBody.isSuccess()) {
-            List<String> cookiesFromApi = response.getHeaders().get("Set-Cookie");
-            cookies.clear();
-            cookies.addAll(cookiesFromApi);
-        }
-        return responseBody;
-    }
-
     public ApiResponse<UserQueryDTO> getUserById(String id) {
         HttpHeaders headers = new HttpHeaders();
         for (String cookie : cookies) {
@@ -56,30 +30,42 @@ public final class VotifyApiUsersCaller {
         }
 
         ResponseEntity<ApiResponse<UserQueryDTO>> response = restTemplate.exchange(
-            baseUrl + "/{id}",
-            HttpMethod.GET,
-            new HttpEntity<>(headers),
-            new ParameterizedTypeReference<>() {},
-            id
+                baseUrl + "/{id}",
+                HttpMethod.GET,
+                new HttpEntity<>(headers),
+                new ParameterizedTypeReference<>() {},
+                id
         );
         return response.getBody();
     }
 
-    public ApiResponse<?> logout() {
+    public ApiResponse<UserDetailedViewDTO> getUser() {
         HttpHeaders headers = new HttpHeaders();
         for (String cookie : cookies) {
             headers.add(HttpHeaders.COOKIE, cookie);
         }
 
         ResponseEntity<ApiResponse<UserDetailedViewDTO>> response = restTemplate.exchange(
-                baseUrl + "/logout",
-                HttpMethod.POST,
+                baseUrl + "/me",
+                HttpMethod.GET,
                 new HttpEntity<>(headers),
                 new ParameterizedTypeReference<>() {}
         );
-        if (response.getBody().isSuccess()) {
-            cookies.clear();
+        return response.getBody();
+    }
+
+    public ApiResponse<?> delete() {
+        HttpHeaders headers = new HttpHeaders();
+        for (String cookie : cookies) {
+            headers.add(HttpHeaders.COOKIE, cookie);
         }
+
+        ResponseEntity<ApiResponse<UserDetailedViewDTO>> response = restTemplate.exchange(
+                baseUrl + "/me",
+                HttpMethod.DELETE,
+                new HttpEntity<>(headers),
+                new ParameterizedTypeReference<>() {}
+        );
         return response.getBody();
     }
 }
