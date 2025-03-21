@@ -48,7 +48,7 @@ class PollValidatorTest {
         Poll poll = createValidPoll();
         poll.setStartDate(now.plusDays(2));
         poll.setEndDate(now.plusDays(1));
-        poll.setVoteOptions(List.of(new VoteOption(1L, "teste 1", poll)));
+        poll.setVoteOptions(List.of(new VoteOption(null, "teste 1", 0, poll)));
         poll.setChoiceLimitPerUser(1);
 
         VotifyException exception = assertThrows(VotifyException.class, () -> PollValidator.validateFields(poll, now));
@@ -58,7 +58,7 @@ class PollValidatorTest {
     @Test
     void shouldThrowExceptionWhenChoiceLimitExceedsVoteOptions() {
         Poll poll = createValidPoll();
-        poll.setVoteOptions(List.of(new VoteOption(1L, "teste", poll)));
+        poll.setVoteOptions(List.of(new VoteOption(null, "teste", 0, poll)));
         poll.setChoiceLimitPerUser(10);
 
         VotifyException exception = assertThrows(VotifyException.class, () -> PollValidator.validateFields(poll, now));
@@ -66,10 +66,15 @@ class PollValidatorTest {
     }
 
     private Poll createValidPoll() {
-        return new Poll("Valid Title", "Valid Description", now.plusDays(1), now.plusDays(5), true, List.of(
-                new VoteOption(),
-                new VoteOption()
-        ), 2);
+        return Poll.builder()
+                .title("Valid Title")
+                .description("Valid Description")
+                .startDate(now.plusDays(1))
+                .endDate(now.plusDays(5))
+                .userRegistration(true)
+                .voteOptions(List.of(new VoteOption(), new VoteOption()))
+                .choiceLimitPerUser(2)
+                .build();
     }
 
     @Test
@@ -94,7 +99,10 @@ class PollValidatorTest {
     @Test
     void validateVoteOptions_shouldNotThrowException_whenVoteOptionsAreValid() {
         Poll poll = new Poll();
-        List<VoteOption> voteOptions = Arrays.asList(new VoteOption(1L, "vote option 1", poll), new VoteOption(2L, "vote option 2", poll));
+        List<VoteOption> voteOptions = Arrays.asList(
+                new VoteOption(null, "vote option 1", 0, poll),
+                new VoteOption(null, "vote option 2", 0, poll)
+        );
 
         assertDoesNotThrow(() -> PollValidator.validateVoteOptions(voteOptions));
     }
