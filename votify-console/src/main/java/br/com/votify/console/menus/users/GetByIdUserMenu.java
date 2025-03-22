@@ -13,10 +13,7 @@ public class GetByIdUserMenu extends Menu {
 
     @Override
     public void run() {
-        ConsoleUtils.clear();
-        System.out.println("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-");
-        System.out.println("           Procurar usuário pelo ID            ");
-        System.out.println("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-");
+        printBanner();
 
         System.out.print("Insira o ID: ");
         String id = scanner.nextLine();

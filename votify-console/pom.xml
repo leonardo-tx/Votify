@@ -7,27 +7,23 @@
     <parent>
         <groupId>br.com.votify</groupId>
         <artifactId>votify</artifactId>
-        <version>0.0.1-SNAPSHOT</version>
+        <version>0.1.0</version>
     </parent>
 
     <artifactId>votify-console</artifactId>
     <packaging>jar</packaging>
 
     <dependencies>
-        <!-- Spring Boot Starter Web para utilizar o RestTemplate -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
         <dependency>
             <groupId>br.com.votify</groupId>
             <artifactId>votify-dto</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>0.1.0</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-test</artifactId>
+            <version>${spring.boot.version}</version>
         </dependency>
     </dependencies>
 
@@ -41,7 +37,6 @@
                     <mainClass>br.com.votify.console.ConsoleApp</mainClass>
                 </configuration>
             </plugin>
-            <!-- Plugin de compilação -->
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>

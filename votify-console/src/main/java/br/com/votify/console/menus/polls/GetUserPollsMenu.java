@@ -5,7 +5,7 @@ import br.com.votify.console.menus.Menu;
 import br.com.votify.console.utils.ConsoleUtils;
 import br.com.votify.dto.ApiResponse;
 import br.com.votify.dto.PageResponse;
-import br.com.votify.dto.poll.PollListViewDTO;
+import br.com.votify.dto.polls.PollListViewDTO;
 
 import java.util.Scanner;
 
@@ -14,10 +14,7 @@ public class GetUserPollsMenu extends Menu {
 
     @Override
     public void run() {
-        ConsoleUtils.clear();
-        System.out.println("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-");
-        System.out.println("         Resgatar enquetes do usuário          ");
-        System.out.println("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-");
+        printBanner();
 
         System.out.print("Insira o ID: ");
         String id = scanner.nextLine();
