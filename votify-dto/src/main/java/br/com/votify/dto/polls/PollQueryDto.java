@@ -7,7 +7,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -25,16 +24,20 @@ public class PollQueryDto {
     private int myChoices;
 
     public static PollQueryDto parse(Poll poll, Vote vote) {
+        List<VoteOptionViewDTO> optionsDto = poll.getVoteOptions()
+                .stream()
+                .map(VoteOptionViewDTO::parse)
+                .toList();
         return new PollQueryDto(
-            poll.getId(),
-            poll.getTitle(),
-            poll.getDescription(),
-            poll.getStartDate(),
-            poll.getEndDate(),
-            poll.getChoiceLimitPerUser(),
-            poll.getResponsible().getId(),
-            new ArrayList<>(),
-            vote.getOption()
+                poll.getId(),
+                poll.getTitle(),
+                poll.getDescription(),
+                poll.getStartDate(),
+                poll.getEndDate(),
+                poll.getChoiceLimitPerUser(),
+                poll.getResponsible().getId(),
+                optionsDto,
+                vote.getOption()
         );
     }
 }
