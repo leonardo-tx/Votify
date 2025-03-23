@@ -36,6 +36,17 @@ public class UserController {
 
         return ApiResponse.success(dto, HttpStatus.OK).createResponseEntity();
     }
+    @GetMapping("/username/{userName}")
+    public ResponseEntity<ApiResponse<UserQueryDTO>> getUserByUserName(@PathVariable("userName") String userName) throws VotifyException {
+        Optional<User> requesterOpt = userService.getContext().getUserOptional();
+        User targetUser = userService.getUserByUserName(userName);
+
+        UserQueryDTO dto = requesterOpt
+                .map(requester -> UserQueryDTO.parse(targetUser, requester))
+                .orElseGet(() -> UserQueryDTO.parse(targetUser, null));
+
+        return ApiResponse.success(dto, HttpStatus.OK).createResponseEntity();
+    }
 
     @GetMapping("/me")
     public ResponseEntity<ApiResponse<UserDetailedViewDTO>> getSelf() throws VotifyException {

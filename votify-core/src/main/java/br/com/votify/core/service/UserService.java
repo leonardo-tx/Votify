@@ -66,6 +66,12 @@ public class UserService {
         }
         return optionalUser.get();
     }
+    public User getUserByUserName(String userName) throws VotifyException {
+        return userRepository.findByUserName(userName)
+                .orElseThrow(() -> new VotifyException(VotifyErrorCode.USER_NOT_FOUND));
+    }
+
+
 
     public void deleteUser(User user) {
         userRepository.delete(user);
