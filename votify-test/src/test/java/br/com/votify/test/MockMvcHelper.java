@@ -11,7 +11,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-
+import com.jayway.jsonpath.JsonPath;
+import org.springframework.test.web.servlet.ResultActions;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -58,5 +59,9 @@ public class MockMvcHelper {
                 .andExpect(jsonPath("errorCode", is(votifyErrorCode.getMessageKey())))
                 .andExpect(jsonPath("errorMessage", is(votifyException.getMessage())));
         return resultActions;
+    }
+    public static int extractId(ResultActions resultActions, String jsonPath) throws Exception {
+        String response = resultActions.andReturn().getResponse().getContentAsString();
+        return JsonPath.parse(response).read(jsonPath, Integer.class);
     }
 }
