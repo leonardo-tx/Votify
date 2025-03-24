@@ -4,6 +4,7 @@ import br.com.votify.core.domain.entities.users.User;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
+import java.util.ArrayList;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -45,13 +46,19 @@ public class Poll {
     private boolean userRegistration = false;
 
     @OneToMany(mappedBy = "poll", cascade = CascadeType.ALL)
-    private List<VoteOption> voteOptions;
+    private List<VoteOption> voteOptions = new ArrayList<>();
 
     @OneToMany(mappedBy = "poll", cascade = CascadeType.ALL)
-    private List<Vote> votes;
+    private List<Vote> votes = new ArrayList<>();
 
     @Column(name = "choice_limit_per_user", nullable = false)
     private Integer choiceLimitPerUser;
+
+    @Column(name = "canceled", nullable = false)
+    private boolean canceled = false;
+
+    @Column(name = "archived", nullable = false)
+    private boolean archived = false;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(

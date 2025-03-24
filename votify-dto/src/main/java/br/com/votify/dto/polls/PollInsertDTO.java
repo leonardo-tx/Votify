@@ -25,26 +25,26 @@ public final class PollInsertDTO implements DTOInput<Poll> {
 
     @Override
     public Poll convertToEntity() {
-        Poll poll = new Poll(
-            null,
-            title,
-            description,
-            startDate,
-            endDate,
-            userRegistration,
-            new ArrayList<>(),
-            null,
-            choiceLimitPerUser,
-            null
-        );
-        if (voteOptions == null) {
-            return poll;
-        }
-        for (VoteOptionInsertDTO voteOptionDTO : voteOptions) {
-            VoteOption voteOption = voteOptionDTO.convertToEntity();
-            voteOption.setPoll(poll);
+        Poll poll = Poll.builder()
+                .id(null)
+                .title(title)
+                .description(description)
+                .startDate(startDate)
+                .endDate(endDate)
+                .userRegistration(userRegistration)
+                .choiceLimitPerUser(choiceLimitPerUser)
+                .archived(false) // novo campo, definido como false inicialmente
+                .voteOptions(new ArrayList<>())
+                .votes(null)
+                .responsible(null)
+                .build();
 
-            poll.getVoteOptions().add(voteOption);
+        if (voteOptions != null) {
+            for (VoteOptionInsertDTO voteOptionDTO : voteOptions) {
+                VoteOption voteOption = voteOptionDTO.convertToEntity();
+                voteOption.setPoll(poll);
+                poll.getVoteOptions().add(voteOption);
+            }
         }
         return poll;
     }
