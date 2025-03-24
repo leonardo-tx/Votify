@@ -4,6 +4,7 @@ import br.com.votify.api.configuration.SecurityConfig;
 import br.com.votify.core.domain.entities.tokens.AuthTokens;
 import br.com.votify.core.domain.entities.users.CommonUser;
 import br.com.votify.core.domain.entities.users.User;
+import br.com.votify.core.service.EmailConfirmationService;
 import br.com.votify.core.service.PasswordResetService;
 import br.com.votify.core.service.UserService;
 import br.com.votify.core.utils.exceptions.VotifyException;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
     private final UserService userService;
     private final PasswordResetService passwordResetService;
+    private final EmailConfirmationService emailConfirmationService;
     private final SecurityConfig securityConfig;
 
     @PostMapping("/register")
@@ -34,6 +36,7 @@ public class AuthController {
         CommonUser user = userRegisterDTO.convertToEntity();
         User createdUser = userService.register(user);
         UserDetailedViewDTO userDTO = UserDetailedViewDTO.parse(createdUser);
+        emailConfirmationService.addUser(createdUser);
 
         return ApiResponse.success(userDTO, HttpStatus.CREATED).createResponseEntity();
     }

@@ -1,13 +1,12 @@
 package br.com.votify.api.controller.users;
 
 import br.com.votify.api.configuration.SecurityConfig;
-import br.com.votify.core.domain.entities.tokens.AuthTokens;
 import br.com.votify.core.domain.entities.users.User;
 import br.com.votify.core.service.EmailConfirmationService;
-import br.com.votify.core.utils.exceptions.VotifyException;
 import br.com.votify.core.service.UserService;
+import br.com.votify.core.utils.exceptions.VotifyException;
 import br.com.votify.dto.ApiResponse;
-import br.com.votify.dto.users.*;
+import br.com.votify.dto.users.EmailConfirmationDto;
 import br.com.votify.dto.users.UserDetailedViewDTO;
 import br.com.votify.dto.users.UserQueryDTO;
 import jakarta.servlet.http.Cookie;
@@ -26,21 +25,6 @@ public class UserController {
     private final UserService userService;
     private final EmailConfirmationService emailConfirmationService;
     private final SecurityConfig securityConfig;
-
-    @PostMapping
-    public ResponseEntity<ApiResponse<UserDetailedViewDTO>> registerUser(
-        @RequestBody UserRegisterDTO userRegisterDTO
-    ) throws VotifyException {
-        User user = userRegisterDTO.convertToEntity();
-        User createdUser = userService.createUser(user);
-
-        emailConfirmationService.addUser(createdUser);
-
-        UserDetailedViewDTO userDTO = UserDetailedViewDTO.parse(createdUser);
-
-        return ResponseEntity.status(HttpStatus.CREATED)
-            .body(ApiResponse.success(userDTO));
-    }
 
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<UserQueryDTO>> getUserById(
@@ -64,48 +48,6 @@ public class UserController {
         return ApiResponse.success(userDetailedViewDTO, HttpStatus.OK).createResponseEntity();
     }
 
-
-    @PostMapping("/login")
-    public ResponseEntity<ApiResponse<?>> login(
-            @RequestBody UserLoginDTO userLoginDTO,
-            HttpServletResponse response
-    ) throws VotifyException {
-        AuthTokens authTokens = userService.login(
-                userLoginDTO.getEmail(),
-                userLoginDTO.getPassword()
-        );
-        Cookie refreshCookie = new Cookie("refresh_token", authTokens.getRefreshToken().getId());
-        Cookie accessCookie = new Cookie("access_token", authTokens.getAccessToken());
-
-        securityConfig.configureRefreshTokenCookie(refreshCookie);
-        securityConfig.configureAccessTokenCookie(accessCookie);
-
-        response.addCookie(refreshCookie);
-        response.addCookie(accessCookie);
-
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(ApiResponse.success(null));
-    }
-
-    @PostMapping("/logout")
-    public ResponseEntity<ApiResponse<?>> logout(HttpServletResponse response) {
-        userService.logout();
-
-        Cookie refreshCookie = new Cookie("refresh_token", "");
-        Cookie accessCookie = new Cookie("access_token", "");
-
-        refreshCookie.setMaxAge(0);
-        accessCookie.setMaxAge(0);
-        refreshCookie.setPath("/");
-        accessCookie.setPath("/");
-
-        response.addCookie(refreshCookie);
-        response.addCookie(accessCookie);
-
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(ApiResponse.success(null));
-    }
-
     @DeleteMapping("/me")
     public ResponseEntity<ApiResponse<Object>> deleteSelf(
         HttpServletResponse response
@@ -122,13 +64,13 @@ public class UserController {
         response.addCookie(accessCookie);
 
         return ResponseEntity.status(HttpStatus.OK)
-            .body(ApiResponse.success(null));
+            .body(ApiResponse.success(null, HttpStatus.OK));
     }
 
     @PostMapping("/generate-email-confirmation")
     public ResponseEntity<ApiResponse<?>> generateEmailConfirmation(@RequestBody EmailConfirmationDto email) throws VotifyException {
         return ResponseEntity.status(HttpStatus.OK)
-                .body(ApiResponse.success(emailConfirmationService.generateEmailConfirmationCode(email.getEmail())));
+                .body(ApiResponse.success(emailConfirmationService.generateEmailConfirmationCode(email.getEmail()), HttpStatus.OK));
     }
 
     @PostMapping("/confirm-email")
@@ -136,6 +78,6 @@ public class UserController {
         emailConfirmationService.confirmEmail(emailConfirmationDto.getCode(), emailConfirmationDto.getEmail());
 
         return ResponseEntity.status(HttpStatus.OK)
-                .body(ApiResponse.success(null));
+                .body(ApiResponse.success(null, HttpStatus.OK));
     }
 }

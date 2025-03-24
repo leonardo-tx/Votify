@@ -51,8 +51,6 @@ public class UserServiceTest {
             "jhonny@nightcity.2077",
             "6Samurai6"
         );
-        when(emailConfirmationService.findByEmail(any(String.class))).thenReturn(Optional.of(emailConfirmation));
-        emailConfirmation.setEmailConfirmed(true);
     }
 
     @Test
@@ -114,6 +112,8 @@ public class UserServiceTest {
     public void login() throws VotifyException {
         RefreshToken refreshToken = new RefreshToken();
 
+        when(emailConfirmationService.findByEmail(any(String.class))).thenReturn(Optional.of(emailConfirmation));
+        emailConfirmation.setEmailConfirmed(true);
         when(contextService.isAuthenticated()).thenReturn(false);
         when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
         when(passwordEncoderService.checkPassword(user, user.getPassword())).thenReturn(true);

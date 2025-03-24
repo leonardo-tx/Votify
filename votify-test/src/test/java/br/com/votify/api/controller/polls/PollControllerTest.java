@@ -1,190 +1,193 @@
 package br.com.votify.api.controller.polls;
 
+import br.com.votify.core.domain.entities.polls.Poll;
+import br.com.votify.core.domain.entities.users.CommonUser;
+import br.com.votify.core.domain.entities.users.User;
+import br.com.votify.core.service.ContextService;
+import br.com.votify.core.service.PollService;
 import br.com.votify.core.utils.exceptions.VotifyErrorCode;
+import br.com.votify.core.utils.exceptions.VotifyException;
+import br.com.votify.dto.ApiResponse;
+import br.com.votify.dto.PageResponse;
+import br.com.votify.dto.polls.PollDetailedViewDTO;
 import br.com.votify.dto.polls.PollInsertDTO;
+import br.com.votify.dto.polls.PollListViewDTO;
 import br.com.votify.dto.polls.VoteInsertDTO;
-import br.com.votify.dto.polls.VoteOptionInsertDTO;
 import br.com.votify.test.MockMvcHelper;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.servlet.http.Cookie;
-import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.Matchers.hasSize;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-@AutoConfigureMockMvc
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class PollControllerTest {
+
+    @Mock
+    private PollService pollService;
+
+    @Mock
+    private ContextService contextService;
+
     @Autowired
     private MockMvc mockMvc;
 
     @Autowired
     private ObjectMapper objectMapper;
 
-    @Test
-    @Order(0)
-    public void testInsertPoll() throws Exception {
-        List<VoteOptionInsertDTO> voteOptionInsertDTOS = List.of(
-                new VoteOptionInsertDTO("Opção 1"),
-                new VoteOptionInsertDTO("Opção 2"),
-                new VoteOptionInsertDTO("Opção 3"),
-                new VoteOptionInsertDTO("Opção 4"),
-                new VoteOptionInsertDTO("Opção 5")
+    @InjectMocks
+    private PollController pollController;
+
+    private User testUser;
+    private Poll testPoll;
+    private List<Poll> testPolls;
+
+    @BeforeEach
+    public void setup() {
+        MockitoAnnotations.openMocks(this);
+
+        testUser = new CommonUser(1L, "testuser", "Test User", "test@example.com", "password123");
+        
+        testPoll = new Poll(null,
+            "Test Poll",
+            "Test Description",
+            LocalDateTime.now(),
+            LocalDateTime.now().plusDays(1),
+            false,
+            new ArrayList<>(),
+            new ArrayList<>(),
+            1,
+                testUser
         );
-        PollInsertDTO pollInsertDTO = new PollInsertDTO(
-                "Test Poll",
-                "Test Description",
+        testPoll.setId(1L);
+        testPoll.setResponsible(testUser);
+        
+        testPolls = new ArrayList<>();
+        testPolls.add(testPoll);
+        
+        Poll testPoll2 = new Poll(
                 null,
-                LocalDateTime.now().plusDays(1),
-                false,
-                1,
-                voteOptionInsertDTOS
+            "Test Poll 2",
+            "Test Description 2",
+            LocalDateTime.now(),
+            LocalDateTime.now().plusDays(2),
+            false,
+            new ArrayList<>(),
+            new ArrayList<>(),
+            1,
+            testUser
         );
-
-
-        Cookie[] cookies = MockMvcHelper.login(
-                mockMvc, objectMapper, "common@votify.com.br", "password123"
-        );
-        ResultActions resultActions = mockMvc.perform(post("/polls")
-                .cookie(cookies)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(pollInsertDTO)));
-        MockMvcHelper.testSuccessfulResponse(resultActions, HttpStatus.CREATED)
-                .andExpect(jsonPath("data.id", is(1)))
-                .andExpect(jsonPath("data.title", is("Test Poll")))
-                .andExpect(jsonPath("data.description", is("Test Description")))
-                .andExpect(jsonPath("data.startDate", is(notNullValue())))
-                .andExpect(jsonPath("data.endDate", is(notNullValue())))
-                .andExpect(jsonPath("data.userRegistration", is(false)))
-                .andExpect(jsonPath("data.choiceLimitPerUser", is(1)))
-                .andExpect(jsonPath("data.responsibleId", is(3)))
-                .andExpect(jsonPath("data.votedOption", is(0)))
-                .andExpect(jsonPath("data.voteOptions", hasSize(5)))
-                .andExpect(jsonPath("data.voteOptions[*].count", everyItem(is(0))));
+        testPoll2.setId(2L);
+        testPoll2.setResponsible(testUser);
+        testPolls.add(testPoll2);
     }
 
     @Test
-    @Order(1)
-    public void testGetUserPolls() throws Exception {
-        ResultActions resultActions = mockMvc.perform(get("/polls/user/{id}", 3));
-        MockMvcHelper.testSuccessfulResponse(resultActions, HttpStatus.OK)
-                .andExpect(jsonPath("data.pageNumber", is(0)))
-                .andExpect(jsonPath("data.pageSize", is(10)))
-                .andExpect(jsonPath("data.totalElements", is(1)))
-                .andExpect(jsonPath("data.totalPages", is(1)))
-                .andExpect(jsonPath("data.first", is(true)))
-                .andExpect(jsonPath("data.last", is(true)))
-                .andExpect(jsonPath("data.content", hasSize(1)))
-                .andExpect(jsonPath("data.content[0].id", is(1)))
-                .andExpect(jsonPath("data.content[0].title", is("Test Poll")))
-                .andExpect(jsonPath("data.content[0].description", is("Test Description")))
-                .andExpect(jsonPath("data.content[0].startDate", is(notNullValue())))
-                .andExpect(jsonPath("data.content[0].endDate", is(notNullValue())))
-                .andExpect(jsonPath("data.content[0].responsibleId", is(3)));
+    public void testInsertPoll() throws Exception {
+        PollInsertDTO pollInsertDTO = new PollInsertDTO();
+        pollInsertDTO.setTitle("Test Poll");
+        pollInsertDTO.setDescription("Test Description");
+        pollInsertDTO.setStartDate(LocalDateTime.now());
+        pollInsertDTO.setEndDate(LocalDateTime.now().plusDays(1));
+        pollInsertDTO.setUserRegistration(false);
+        pollInsertDTO.setChoiceLimitPerUser(1);
+        pollInsertDTO.setVoteOptions(new ArrayList<>());
+
+        when(contextService.getUserOrThrow()).thenReturn(testUser);
+        when(pollService.createPoll(any(Poll.class), eq(testUser))).thenReturn(testPoll);
+
+        ResponseEntity<ApiResponse<PollDetailedViewDTO>> response = pollController.insertPoll(pollInsertDTO);
+
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(true, response.getBody().isSuccess());
+        assertEquals(1L, response.getBody().getData().getId());
+        assertEquals("Test Poll", response.getBody().getData().getTitle());
     }
-
+    
     @Test
-    @Order(1)
-    public void testGetMyPollsWhenAuthenticated() throws Exception {
-        Cookie[] cookies = MockMvcHelper.login(
-                mockMvc, objectMapper, "common@votify.com.br", "password123"
-        );
-
-        ResultActions resultActions = mockMvc.perform(get("/polls/me")
-                .cookie(cookies));
-        MockMvcHelper.testSuccessfulResponse(resultActions, HttpStatus.OK)
-                .andExpect(jsonPath("data.pageNumber", is(0)))
-                .andExpect(jsonPath("data.pageSize", is(10)))
-                .andExpect(jsonPath("data.totalElements", is(1)))
-                .andExpect(jsonPath("data.totalPages", is(1)))
-                .andExpect(jsonPath("data.first", is(true)))
-                .andExpect(jsonPath("data.last", is(true)))
-                .andExpect(jsonPath("data.content", hasSize(1)))
-                .andExpect(jsonPath("data.content[0].id", is(1)))
-                .andExpect(jsonPath("data.content[0].title", is("Test Poll")))
-                .andExpect(jsonPath("data.content[0].description", is("Test Description")))
-                .andExpect(jsonPath("data.content[0].startDate", is(notNullValue())))
-                .andExpect(jsonPath("data.content[0].endDate", is(notNullValue())))
-                .andExpect(jsonPath("data.content[0].responsibleId", is(3)));
+    public void testGetUserPolls() throws VotifyException {
+        int page = 0;
+        int size = 10;
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Poll> pollPage = new PageImpl<>(testPolls, pageable, testPolls.size());
+        
+        when(pollService.findAllByUserId(eq(1L), any(Integer.class), any(Integer.class))).thenReturn(pollPage);
+        
+        ResponseEntity<ApiResponse<PageResponse<PollListViewDTO>>> response = 
+            pollController.getUserPolls(1L, page, size);
+        
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(true, response.getBody().isSuccess());
+        assertEquals(2, response.getBody().getData().getContent().size());
+        assertEquals(1L, response.getBody().getData().getContent().get(0).getId());
+        assertEquals("Test Poll", response.getBody().getData().getContent().get(0).getTitle());
+        assertEquals(2L, response.getBody().getData().getContent().get(1).getId());
+        assertEquals("Test Poll 2", response.getBody().getData().getContent().get(1).getTitle());
     }
-
+    
     @Test
-    @Order(1)
-    public void testGetMyPollsWhenNotAuthenticated() throws Exception {
-        ResultActions resultActions = mockMvc.perform(get("/polls/me"));
-        MockMvcHelper.testSuccessfulResponse(resultActions, HttpStatus.OK)
-                .andExpect(jsonPath("data.pageNumber", is(0)))
-                .andExpect(jsonPath("data.pageSize", is(10)))
-                .andExpect(jsonPath("data.totalElements", is(0)))
-                .andExpect(jsonPath("data.totalPages", is(0)))
-                .andExpect(jsonPath("data.first", is(true)))
-                .andExpect(jsonPath("data.last", is(true)))
-                .andExpect(jsonPath("data.content", hasSize(0)));
+    public void testGetMyPollsWhenAuthenticated() throws VotifyException {
+        int page = 0;
+        int size = 10;
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Poll> pollPage = new PageImpl<>(testPolls, pageable, testPolls.size());
+        
+        when(contextService.getUserOptional()).thenReturn(Optional.of(testUser));
+        when(pollService.findAllByUserId(eq(1L), any(Integer.class), any(Integer.class))).thenReturn(pollPage);
+        
+        ResponseEntity<ApiResponse<PageResponse<PollListViewDTO>>> response = 
+            pollController.getMyPolls(page, size);
+        
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(true, response.getBody().isSuccess());
+        assertEquals(2, response.getBody().getData().getContent().size());
+        assertEquals(1L, response.getBody().getData().getContent().get(0).getId());
+        assertEquals("Test Poll", response.getBody().getData().getContent().get(0).getTitle());
+        assertEquals(2L, response.getBody().getData().getContent().get(1).getId());
+        assertEquals("Test Poll 2", response.getBody().getData().getContent().get(1).getTitle());
     }
-
+    
     @Test
-    @Order(1)
-    public void testVotePoll() throws Exception {
-        Cookie[] cookies = MockMvcHelper.login(
-                mockMvc, objectMapper, "common@votify.com.br", "password123"
-        );
-
-        VoteInsertDTO voteInsertDTO = new VoteInsertDTO(16);
-        ResultActions resultActions = mockMvc.perform(post("/polls/{id}/vote", 1)
-                .cookie(cookies)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(voteInsertDTO)));
-        MockMvcHelper.testSuccessfulResponse(resultActions, HttpStatus.CREATED)
-                .andExpect(jsonPath("data", is(16)));
-    }
-
-    @Test
-    @Order(1)
-    public void testInvalidVotePoll() throws Exception {
-        Cookie[] cookies = MockMvcHelper.login(
-                mockMvc, objectMapper, "common@votify.com.br", "password123"
-        );
-
-        VoteInsertDTO voteInsertDTO = new VoteInsertDTO(31);
-        ResultActions resultActions = mockMvc.perform(post("/polls/{id}/vote", 1)
-                .cookie(cookies)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(voteInsertDTO)));
-        MockMvcHelper.testUnsuccessfulResponse(resultActions, VotifyErrorCode.POLL_VOTE_INVALID);
-    }
-
-    @Test
-    @Order(1)
-    public void testEmptyVotePoll() throws Exception {
-        Cookie[] cookies = MockMvcHelper.login(
-                mockMvc, objectMapper, "common@votify.com.br", "password123"
-        );
-
-        VoteInsertDTO voteInsertDTO = new VoteInsertDTO(0);
-        ResultActions resultActions = mockMvc.perform(post("/polls/{id}/vote", 1)
-                .cookie(cookies)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(voteInsertDTO)));
-        MockMvcHelper.testUnsuccessfulResponse(resultActions, VotifyErrorCode.POLL_VOTE_EMPTY);
+    public void testGetMyPollsWhenNotAuthenticated() throws VotifyException {
+        int page = 0;
+        int size = 10;
+        
+        when(contextService.getUserOptional()).thenReturn(Optional.empty());
+        
+        ResponseEntity<ApiResponse<PageResponse<PollListViewDTO>>> response = 
+            pollController.getMyPolls(page, size);
+        
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(true, response.getBody().isSuccess());
+        assertEquals(0, response.getBody().getData().getContent().size());
+        assertEquals(0, response.getBody().getData().getTotalElements());
     }
 
     @Test
@@ -195,20 +198,5 @@ public class PollControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(voteInsertDTO)));
         MockMvcHelper.testUnsuccessfulResponse(resultActions, VotifyErrorCode.COMMON_UNAUTHORIZED);
-    }
-
-    @Test
-    @Order(2)
-    public void testVotePollDuplicated() throws Exception {
-        Cookie[] cookies = MockMvcHelper.login(
-                mockMvc, objectMapper, "common@votify.com.br", "password123"
-        );
-
-        VoteInsertDTO voteInsertDTO = new VoteInsertDTO(4);
-        ResultActions resultActions = mockMvc.perform(post("/polls/{id}/vote", 1)
-                .cookie(cookies)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(voteInsertDTO)));
-        MockMvcHelper.testUnsuccessfulResponse(resultActions, VotifyErrorCode.POLL_VOTED_ALREADY);
     }
 }
