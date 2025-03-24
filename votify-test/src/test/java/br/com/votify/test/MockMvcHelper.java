@@ -6,16 +6,14 @@ import br.com.votify.dto.users.UserLoginDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.Cookie;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Service;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-
+import com.jayway.jsonpath.JsonPath;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -80,5 +78,10 @@ public class MockMvcHelper {
                 .content(objectMapper.writeValueAsString(userLoginDTO))
         );
         testUnsuccessfulResponse(resultActions, expectedErrorCode);
+    }
+
+    public int extractId(ResultActions resultActions, String jsonPath) throws Exception {
+        String response = resultActions.andReturn().getResponse().getContentAsString();
+        return JsonPath.parse(response).read(jsonPath, Integer.class);
     }
 }
