@@ -214,11 +214,11 @@ public class PollServiceTest {
     public void findAllByUserId() throws VotifyException {
         Pageable pageable = PageRequest.of(0, 10);
         Page<Poll> pollPage = new PageImpl<>(testPolls, pageable, testPolls.size());
-        
+
         when(pollRepository.findAllByResponsibleId(eq(1L), any(Pageable.class))).thenReturn(pollPage);
-        
+
         Page<Poll> result = pollService.findAllByUserId(1L, 0, 10);
-        
+
         assertNotNull(result);
         assertEquals(4, result.getContent().size());
     }
@@ -242,4 +242,50 @@ public class PollServiceTest {
         );
         assertEquals(VotifyErrorCode.POLL_NOT_FOUND, exception.getErrorCode());
     }
+/*
+    @Test
+    void shouldReturnPollWithUserVote() {
+        when(pollRepository.findById(1L)).thenReturn(Optional.of(pollMock));
+        when(voteRepository.findByPollIdAndUserId(1L, 100L)).thenReturn(Optional.of(voteMock));
+
+        PollQueryDto result = pollService.findSpecificPoll(1L, 100L);
+
+        assertNotNull(result);
+        assertEquals("Test Question", result.getQuestion());
+        assertEquals("Option A", result.getUserVote());
+        verify(pollRepository, times(1)).findById(1L);
+        verify(voteRepository, times(1)).findByPollIdAndUserId(1L, 100L);
+    }
+
+    @Test
+    void shouldReturnNoVoteWhenUserDidNotVote() {
+        when(pollRepository.findById(1L)).thenReturn(Optional.of(pollMock));
+        when(voteRepository.findByPollIdAndUserId(1L, 200L)).thenReturn(Optional.empty());
+
+        PollQueryDto result = pollService.findSpecificPoll(1L, 200L);
+
+        assertNotNull(result);
+        assertEquals("Test Question", result.getQuestion());
+        assertEquals("no vote", result.getUserVote());
+    }
+
+    @Test
+    void shouldThrowExceptionIfPollNotFound() {
+        when(pollRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThrows(RuntimeException.class, () ->
+                pollService.findSpecificPoll(99L, null)
+        );
+    }
+
+    @Test
+    void shouldReturnNoVoteForNullUser() {
+        when(pollRepository.findById(1L)).thenReturn(Optional.of(pollMock));
+
+        PollQueryDto result = pollService.findSpecificPoll(1L, null);
+
+        assertNotNull(result);
+        assertEquals("no vote", result.getUserVote());
+        verify(voteRepository,  never()).findByPollIdAndUserId(anyLong(), anyLong());
+    }*/
 }
