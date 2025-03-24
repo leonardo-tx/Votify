@@ -16,27 +16,27 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class UserValidatorTest {
     private final char[] isoChars;
-    private final char[] validIdChars;
+    private final char[] validUserNameChars;
 
     public UserValidatorTest() {
         List<Character> charList = new ArrayList<>();
-        List<Character> validIdCharsList = new ArrayList<>();
+        List<Character> validUserNameCharsList = new ArrayList<>();
         for (int i = 0; i < Character.MAX_VALUE; i++) {
             char c = (char)i;
             if (Character.isISOControl(c)) {
                 charList.add(c);
             }
             if (c == '-' || CharacterUtils.isOneByteDigit(c) || CharacterUtils.isOneByteLowercaseLetter(c)) {
-                validIdCharsList.add(c);
+                validUserNameCharsList.add(c);
             }
         }
         isoChars = new char[charList.size()];
-        validIdChars = new char[validIdCharsList.size()];
+        validUserNameChars = new char[validUserNameCharsList.size()];
         for (int i = 0; i < charList.size(); i++) {
             isoChars[i] = charList.get(i);
         }
-        for (int i = 0; i < validIdCharsList.size(); i++) {
-            validIdChars[i] = validIdCharsList.get(i);
+        for (int i = 0; i < validUserNameCharsList.size(); i++) {
+            validUserNameChars[i] = validUserNameCharsList.get(i);
         }
     }
 
@@ -211,20 +211,20 @@ public class UserValidatorTest {
     @SuppressWarnings("unused")
     private Arbitrary<String> validUserNames() {
         return Arbitraries.strings()
-            .withChars(validIdChars)
+            .withChars(validUserNameChars)
             .ofMinLength(User.USER_NAME_MIN_LENGTH)
             .ofMaxLength(User.USER_NAME_MAX_LENGTH)
-            .filter(id -> !id.startsWith("-") && !id.endsWith("-"));
+            .filter(userName -> !userName.startsWith("-") && !userName.endsWith("-"));
     }
 
     @Provide
     @SuppressWarnings("unused")
     private Arbitrary<String> userNamesWithInvalidLength() {
         return Arbitraries.strings()
-            .withChars(validIdChars)
-            .filter(id ->
-                !id.startsWith("-") && !id.endsWith("-") &&
-                (id.length() < User.USER_NAME_MIN_LENGTH || id.length() > User.USER_NAME_MAX_LENGTH)
+            .withChars(validUserNameChars)
+            .filter(userName ->
+                !userName.startsWith("-") && !userName.endsWith("-") &&
+                (userName.length() < User.USER_NAME_MIN_LENGTH || userName.length() > User.USER_NAME_MAX_LENGTH)
             );
     }
 
@@ -232,10 +232,10 @@ public class UserValidatorTest {
     @SuppressWarnings("unused")
     private Arbitrary<String> invalidUserNames() {
         return Arbitraries.strings()
-            .withChars(validIdChars)
+            .withChars(validUserNameChars)
             .ofMinLength(User.USER_NAME_MIN_LENGTH)
             .ofMaxLength(User.USER_NAME_MAX_LENGTH)
-            .filter(id -> id.startsWith("-") || id.endsWith("-"));
+            .filter(userName -> userName.startsWith("-") || userName.endsWith("-"));
     }
 
     @Provide
@@ -244,9 +244,9 @@ public class UserValidatorTest {
         return Arbitraries.strings()
             .ofMinLength(User.USER_NAME_MIN_LENGTH)
             .ofMaxLength(User.USER_NAME_MAX_LENGTH)
-            .filter(id ->
-                !id.startsWith("-") && !id.endsWith("-") &&
-                id.chars().anyMatch(c -> Arrays.binarySearch(validIdChars, (char)c) < 0)
+            .filter(userName ->
+                !userName.startsWith("-") && !userName.endsWith("-") &&
+                userName.chars().anyMatch(c -> Arrays.binarySearch(validUserNameChars, (char)c) < 0)
             );
     }
 
@@ -329,7 +329,7 @@ public class UserValidatorTest {
     private Arbitrary<String> invalidNames() {
         List<String> names = List.of(
             " Jorel", "Samuel ", " Byces ", "Henrique  Mendonça",
-            "João\nPedro", "Te\0ste", "123a\taa", "LittleDoge\f", "\baaa"
+            "João\nPedro", "Te\0ste", "123a\taa", "LittleDoge\f", "\baaa", "Espaço Inválido"
         );
         return Arbitraries.of(names);
     }
@@ -372,14 +372,18 @@ public class UserValidatorTest {
     }
 
     private boolean nameHasValidWhitespaces(String name) {
-        if (Character.isSpaceChar(name.charAt(0)) ||
-            Character.isSpaceChar(name.charAt(name.length() - 1))) {
+        if (name.charAt(0) == ' ' || name.charAt(name.length() - 1) == ' ') {
             return false;
         }
         int whitespaceSequence = 0;
         for (int i = 0; i < name.length(); i++) {
             char c = name.charAt(i);
-            if (!Character.isSpaceChar(c)) {
+            if (Character.isISOControl(c)) {
+                return false;
+            }
+            if (c != ' ') {
+                if (Character.isWhitespace(c)) return false;
+
                 whitespaceSequence = 0;
                 continue;
             }

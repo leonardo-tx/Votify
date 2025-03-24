@@ -112,6 +112,8 @@ public final class UserValidator {
                 return true;
             }
             if (c != ' ') {
+                if (Character.isWhitespace(c)) return true;
+
                 whitespaceSequence = 0;
                 continue;
             }

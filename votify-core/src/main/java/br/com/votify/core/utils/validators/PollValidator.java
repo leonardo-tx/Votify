@@ -1,7 +1,7 @@
 package br.com.votify.core.utils.validators;
 
-import br.com.votify.core.domain.entities.poll.Poll;
-import br.com.votify.core.domain.entities.vote.VoteOption;
+import br.com.votify.core.domain.entities.polls.Poll;
+import br.com.votify.core.domain.entities.polls.VoteOption;
 import br.com.votify.core.utils.exceptions.VotifyErrorCode;
 import br.com.votify.core.utils.exceptions.VotifyException;
 
@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Objects;
 
 public final class PollValidator {
-
     public static void validateFields(Poll poll, LocalDateTime now) throws VotifyException {
         validateTitle(poll.getTitle());
         validateDescription(poll.getDescription());

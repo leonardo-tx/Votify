@@ -1,18 +1,19 @@
 package br.com.votify.core.service;
 
+import br.com.votify.core.domain.entities.password.PasswordResetProperties;
 import br.com.votify.core.domain.entities.password.PasswordResetToken;
 import br.com.votify.core.domain.entities.users.CommonUser;
 import br.com.votify.core.domain.entities.users.User;
+import br.com.votify.core.utils.exceptions.VotifyErrorCode;
 import br.com.votify.core.utils.exceptions.VotifyException;
 import br.com.votify.core.repository.PasswordResetTokenRepository;
 import br.com.votify.core.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.springframework.test.util.ReflectionTestUtils;
-import br.com.votify.dto.ApiResponse;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.*;
 
@@ -20,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 public class PasswordResetServiceTest {
 
     @Mock
@@ -31,23 +33,24 @@ public class PasswordResetServiceTest {
     @Mock
     private PasswordEncoderService passwordEncoderService;
 
+    @Mock
+    private PasswordResetProperties passwordResetProperties;
+
     @InjectMocks
     private PasswordResetService passwordResetService;
 
     private User testUser;
-    private String testEmail = "test@example.com";
+    private final String testEmail = "test@example.com";
 
     @BeforeEach
     public void setup() {
-        MockitoAnnotations.openMocks(this);
-        ReflectionTestUtils.setField(passwordResetService, "expirationMinutes", 15);
         testUser = new CommonUser(1L, "testuser", "Test User", testEmail, "encodedPassword");
-        when(userRepository.findByEmail(testEmail)).thenReturn(Optional.of(testUser));
-        when(userRepository.findByEmail("nonexistent@example.com")).thenReturn(Optional.empty());
     }
 
     @Test
     public void createPasswordResetRequest_Success() throws VotifyException {
+        when(userRepository.findByEmail(testEmail)).thenReturn(Optional.of(testUser));
+        when(passwordResetProperties.getExpirationMinutes()).thenReturn(15);
         when(passwordResetTokenRepository.findByUserAndExpiryDateAfter(eq(testUser), any(Date.class)))
                 .thenReturn(Collections.emptyList());
 
@@ -62,28 +65,30 @@ public class PasswordResetServiceTest {
 
     @Test
     public void createPasswordResetRequest_UserNotFound() {
-        VotifyException exception = assertThrows(VotifyException.class, () -> {
-            passwordResetService.createPasswordResetRequest("nonexistent@example.com");
-        });
+        when(userRepository.findByEmail("nonexistent@example.com")).thenReturn(Optional.empty());
 
-        assertEquals("password.reset.email.not.found", exception.getErrorCode().getMessageKey());
-        assertTrue(exception.getMessage().contains("Email not found."));
+        VotifyException exception = assertThrows(
+                VotifyException.class,
+                () -> passwordResetService.createPasswordResetRequest("nonexistent@example.com")
+        );
+
+        assertEquals(VotifyErrorCode.PASSWORD_RESET_EMAIL_NOT_FOUND, exception.getErrorCode());
     }
 
     @Test
     public void createPasswordResetRequest_ActiveTokenExists() {
+        when(userRepository.findByEmail(testEmail)).thenReturn(Optional.of(testUser));
+
         List<PasswordResetToken> activeTokens = new ArrayList<>();
         activeTokens.add(new PasswordResetToken("CODE123", testUser, new Date(System.currentTimeMillis() + 600000)));
 
         when(passwordResetTokenRepository.findByUserAndExpiryDateAfter(eq(testUser), any(Date.class)))
                 .thenReturn(activeTokens);
 
-        VotifyException exception = assertThrows(VotifyException.class, () -> {
-            passwordResetService.createPasswordResetRequest(testEmail);
-        });
-        assertEquals("password.reset.request.exists", exception.getErrorCode().getMessageKey());
-        assertTrue(exception.getMessage().contains("There is already an active password reset request."));
-
+        VotifyException exception = assertThrows(VotifyException.class,
+                () -> passwordResetService.createPasswordResetRequest(testEmail)
+        );
+        assertEquals(VotifyErrorCode.PASSWORD_RESET_REQUEST_EXISTS, exception.getErrorCode());
     }
 
     @Test
@@ -106,12 +111,12 @@ public class PasswordResetServiceTest {
     public void resetPassword_InvalidCode() {
         when(passwordResetTokenRepository.findByCode("INVALID")).thenReturn(Optional.empty());
 
-        Exception exception = assertThrows(VotifyException.class, () -> {
-            passwordResetService.resetPassword("INVALID", "newPassword");
-        });
+        VotifyException exception = assertThrows(
+                VotifyException.class,
+                () -> passwordResetService.resetPassword("INVALID", "newPassword")
+        );
 
-        String expectedMessage = "The provided password reset code is invalid.";
-        assertTrue(exception.getMessage().contains(expectedMessage));
+        assertEquals(VotifyErrorCode.PASSWORD_RESET_CODE_INVALID, exception.getErrorCode());
         verify(userRepository, never()).save(any(User.class));
     }
 
@@ -123,12 +128,12 @@ public class PasswordResetServiceTest {
 
         when(passwordResetTokenRepository.findByCode(testCode)).thenReturn(Optional.of(token));
 
-        Exception exception = assertThrows(VotifyException.class, () -> {
-            passwordResetService.resetPassword(testCode, "newPassword");
-        });
-        String expectedMessage = "The provided password reset code is invalid.";
-        assertTrue(exception.getMessage().contains(expectedMessage));
+        VotifyException exception = assertThrows(
+                VotifyException.class,
+                () -> passwordResetService.resetPassword(testCode, "newPassword")
+        );
 
+        assertEquals(VotifyErrorCode.PASSWORD_RESET_CODE_INVALID, exception.getErrorCode());
         verify(userRepository, never()).save(any(User.class));
     }
 }

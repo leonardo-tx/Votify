@@ -8,6 +8,8 @@ import br.com.votify.core.utils.exceptions.VotifyException;
 import br.com.votify.core.service.UserService;
 import br.com.votify.dto.ApiResponse;
 import br.com.votify.dto.users.*;
+import br.com.votify.dto.users.UserDetailedViewDTO;
+import br.com.votify.dto.users.UserQueryDTO;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -51,17 +53,26 @@ public class UserController {
             .map(requester -> UserQueryDTO.parse(targetUser, requester))
             .orElseGet(() -> UserQueryDTO.parse(targetUser, null));
 
-        return ResponseEntity.ok(ApiResponse.success(dto));
+        return ApiResponse.success(dto, HttpStatus.OK).createResponseEntity();
     }
+
+    @GetMapping("/me")
+    public ResponseEntity<ApiResponse<UserDetailedViewDTO>> getSelf() throws VotifyException {
+        User user = userService.getContext().getUserOrThrow();
+        UserDetailedViewDTO userDetailedViewDTO = UserDetailedViewDTO.parse(user);
+
+        return ApiResponse.success(userDetailedViewDTO, HttpStatus.OK).createResponseEntity();
+    }
+
 
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<?>> login(
-        @RequestBody UserLoginDTO userLoginDTO,
-        HttpServletResponse response
+            @RequestBody UserLoginDTO userLoginDTO,
+            HttpServletResponse response
     ) throws VotifyException {
         AuthTokens authTokens = userService.login(
-            userLoginDTO.getEmail(),
-            userLoginDTO.getPassword()
+                userLoginDTO.getEmail(),
+                userLoginDTO.getPassword()
         );
         Cookie refreshCookie = new Cookie("refresh_token", authTokens.getRefreshToken().getId());
         Cookie accessCookie = new Cookie("access_token", authTokens.getAccessToken());
@@ -73,7 +84,7 @@ public class UserController {
         response.addCookie(accessCookie);
 
         return ResponseEntity.status(HttpStatus.OK)
-            .body(ApiResponse.success(null));
+                .body(ApiResponse.success(null));
     }
 
     @PostMapping("/logout")
@@ -87,6 +98,25 @@ public class UserController {
         accessCookie.setMaxAge(0);
         refreshCookie.setPath("/");
         accessCookie.setPath("/");
+
+        response.addCookie(refreshCookie);
+        response.addCookie(accessCookie);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(ApiResponse.success(null));
+    }
+
+    @DeleteMapping("/me")
+    public ResponseEntity<ApiResponse<Object>> deleteSelf(
+        HttpServletResponse response
+    ) throws VotifyException {
+        userService.getContext().deleteUser();
+
+        Cookie refreshCookie = new Cookie("refresh_token", "");
+        Cookie accessCookie = new Cookie("access_token", "");
+
+        refreshCookie.setMaxAge(0);
+        accessCookie.setMaxAge(0);
 
         response.addCookie(refreshCookie);
         response.addCookie(accessCookie);
