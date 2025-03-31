@@ -23,7 +23,7 @@ public class EmailConfirmationService {
 
 
     public void confirmEmail(String code, String email) throws VotifyException {
-        var entity = repository.findByUserEmail(email)
+        EmailConfirmation entity = repository.findByUserEmail(email)
                 .orElseThrow(() -> new VotifyException(VotifyErrorCode.USER_NOT_FOUND));
 
         if (entity.isEmailConfirmed()) {
@@ -52,7 +52,7 @@ public class EmailConfirmationService {
 
     public EmailConfirmation addUser(User createdUser) {
         String codeGenerated = EmailCodeGeneratorUtils.generateEmailConfirmationCode();
-        var entity = new EmailConfirmation(null, createdUser, codeGenerated, LocalDateTime.now().plusDays(emailConfirmationExpiration), false);
+        EmailConfirmation entity = new EmailConfirmation(null, createdUser, codeGenerated, LocalDateTime.now().plusDays(emailConfirmationExpiration), false);
         return repository.save(entity);
     }
 }

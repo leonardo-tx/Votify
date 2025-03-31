@@ -1,6 +1,7 @@
 package br.com.votify.core.service;
 
 import br.com.votify.core.domain.entities.tokens.AuthTokens;
+import br.com.votify.core.domain.entities.tokens.EmailConfirmation;
 import br.com.votify.core.domain.entities.tokens.RefreshToken;
 import br.com.votify.core.domain.entities.users.CommonUser;
 import br.com.votify.core.domain.entities.users.User;
@@ -48,7 +49,7 @@ public class UserService {
         if (user == null || !passwordEncoderService.checkPassword(user, password)) {
             throw new VotifyException(VotifyErrorCode.LOGIN_UNAUTHORIZED);
         }
-        var entity = emailConfirmationService.findByEmail(email)
+        EmailConfirmation entity = emailConfirmationService.findByEmail(email)
                 .orElseThrow(() -> new VotifyException(VotifyErrorCode.INTERNAL));
 
         if (!entity.isEmailConfirmed()) {

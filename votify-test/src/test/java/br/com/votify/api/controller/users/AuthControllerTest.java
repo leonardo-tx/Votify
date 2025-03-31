@@ -117,7 +117,7 @@ public class AuthControllerTest {
     @Order(1)
     public void login_WhenEmailNotConfirmed_ShouldReturnError() throws Exception {
         // Simulando e-mail NÃO confirmado
-        var mockConfirmation = new EmailConfirmation();
+        EmailConfirmation mockConfirmation = new EmailConfirmation();
         mockConfirmation.setEmailConfirmed(false);
 
         when(emailConfirmationService.findByEmail("123@gmail.com"))
