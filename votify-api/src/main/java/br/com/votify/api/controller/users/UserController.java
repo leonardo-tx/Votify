@@ -67,12 +67,6 @@ public class UserController {
             .body(ApiResponse.success(null, HttpStatus.OK));
     }
 
-    @PostMapping("/generate-email-confirmation")
-    public ResponseEntity<ApiResponse<?>> generateEmailConfirmation(@RequestBody EmailConfirmationDto email) throws VotifyException {
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(ApiResponse.success(emailConfirmationService.generateEmailConfirmationCode(email.getEmail()), HttpStatus.OK));
-    }
-
     @PostMapping("/confirm-email")
     public ResponseEntity<ApiResponse<?>> confirmEmail(@RequestBody EmailConfirmationDto emailConfirmationDto) throws VotifyException {
         emailConfirmationService.confirmEmail(emailConfirmationDto.getCode(), emailConfirmationDto.getEmail());

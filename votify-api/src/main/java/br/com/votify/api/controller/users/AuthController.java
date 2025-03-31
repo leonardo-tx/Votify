@@ -2,6 +2,7 @@ package br.com.votify.api.controller.users;
 
 import br.com.votify.api.configuration.SecurityConfig;
 import br.com.votify.core.domain.entities.tokens.AuthTokens;
+import br.com.votify.core.domain.entities.tokens.EmailConfirmation;
 import br.com.votify.core.domain.entities.users.CommonUser;
 import br.com.votify.core.domain.entities.users.User;
 import br.com.votify.core.service.EmailConfirmationService;
@@ -35,8 +36,10 @@ public class AuthController {
     ) throws VotifyException {
         CommonUser user = userRegisterDTO.convertToEntity();
         User createdUser = userService.register(user);
-        UserDetailedViewDTO userDTO = UserDetailedViewDTO.parse(createdUser);
-        emailConfirmationService.addUser(createdUser);
+
+        EmailConfirmation emailConfirmation = emailConfirmationService.addUser(createdUser);
+
+        UserDetailedViewDTO userDTO = UserDetailedViewDTO.parse(createdUser, emailConfirmation.getEmailConfirmationCode());
 
         return ApiResponse.success(userDTO, HttpStatus.CREATED).createResponseEntity();
     }
