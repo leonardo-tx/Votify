@@ -1,0 +1,11 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Votify API PROD" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
+    <module name="votify-api" />
+    <option name="SPRING_BOOT_MAIN_CLASS" value="br.com.votify.VotifyApiApplication" />
+    <option name="ACTIVE_PROFILES" value="prod" />
+    <option name="ALTERNATIVE_JRE_PATH" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component> 
