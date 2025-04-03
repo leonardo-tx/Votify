@@ -1,9 +1,8 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Votify API DEV" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
+  <configuration default="false" name="Votify API DEV" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="br.com.votify.api.VotifyApiApplication" />
     <module name="votify-api" />
-    <option name="SPRING_BOOT_MAIN_CLASS" value="br.com.votify.VotifyApiApplication" />
-    <option name="ACTIVE_PROFILES" value="dev" />
-    <option name="ALTERNATIVE_JRE_PATH" />
+    <option name="VM_PARAMETERS" value="-Dspring.profiles.active=dev" />
     <method v="2">
       <option name="Make" enabled="true" />
     </method>
