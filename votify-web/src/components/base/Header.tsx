@@ -1,3 +1,5 @@
+import { useState, useEffect } from "react";
+import { useRouter } from "next/router";
 import styles from "./styles/Header.module.css";
 import Button from "../shared/Button";
 import BrandIcon from "@/assets/icon.svg";
@@ -15,6 +17,28 @@ const navItems: NavItem[] = [
 ];
 
 export default function Header() {
+  const router = useRouter();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  const checkAuth = () => {
+    const token = localStorage.getItem("accessToken");
+    setIsLoggedIn(!!token);
+  };
+
+  useEffect(() => {
+    checkAuth();
+    router.events.on("routeChangeComplete", checkAuth);
+    return () => {
+      router.events.off("routeChangeComplete", checkAuth);
+    };
+  }, [router.events]);
+
+  const handleLogout = () => {
+    localStorage.removeItem("accessToken");
+    setIsLoggedIn(false);
+    router.push("/home");
+  };
+
   return (
     <header className={styles.header}>
       <Button
@@ -29,13 +53,7 @@ export default function Header() {
       </Button>
       <nav className="flex items-center gap-6 text-md font-semibold">
         {navItems.map((item, i) => (
-          <Button
-            as="Link"
-            variant="text"
-            key={i}
-            id={item.id}
-            href={item.href}
-          >
+          <Button as="Link" variant="text" key={i} id={item.id} href={item.href}>
             {item.text}
           </Button>
         ))}
@@ -48,20 +66,34 @@ export default function Header() {
         />
       </nav>
       <div className="flex gap-6 text-base font-semibold">
-        <Button
-          as="Link"
-          variant="outline"
-          scheme="primary"
-          id="signin-link"
-          href="/home"
-        >
-          <IoLogInOutline size={20} />
-          Entrar
-        </Button>
-        <Button as="Link" id="signup-link" scheme="primary" href="/home">
-          <IoPerson size={20} />
-          Criar Conta
-        </Button>
+        {isLoggedIn ? (
+          <Button
+            onClick={handleLogout}
+            variant="outline"
+            scheme="primary"
+            id="signin-link"
+          >
+            <IoLogInOutline size={20} />
+            Logout
+          </Button>
+        ) : (
+          <Button
+            as="Link"
+            variant="outline"
+            scheme="primary"
+            id="signin-link"
+            href="/login"
+          >
+            <IoLogInOutline size={20} />
+            Entrar
+          </Button>
+        )}
+        {!isLoggedIn && (
+          <Button as="Link" id="signup-link" scheme="primary" href="/home">
+            <IoPerson size={20} />
+            Criar Conta
+          </Button>
+        )}
       </div>
     </header>
   );
