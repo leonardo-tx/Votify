@@ -18,4 +18,19 @@ public interface PollRepository extends JpaRepository<Poll, Long> {
         ORDER BY p.startDate DESC
         """)
     Page<Poll> findAllByResponsibleId(@Param("userId") Long userId, Pageable pageable);
+
+
+//    @Query("""
+//        SELECT p
+//        FROM Poll p
+//        WHERE
+//        ORDER BY p.endDate ASC
+//        """)
+//
+//    Page<Poll> findAllByActives(Pageable pageable);
 }
+
+
+
+// find allActive p.endDate & p.endDate   (Busca por enquetes que ainda nao foram finalizadas.
+// ORDER BY p.endDate ASC  ordenar por enquetes mais proximas de serem encerradas.
