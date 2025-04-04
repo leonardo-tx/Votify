@@ -10,8 +10,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class VoteOptionViewDTO {
     private String name;
+    private int voteCount;
 
     public static VoteOptionViewDTO parse(VoteOption entity) {
-        return new VoteOptionViewDTO(entity.getName());
+        return new VoteOptionViewDTO(entity.getName(), entity.getCount());
     }
+
 }

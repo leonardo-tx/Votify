@@ -88,12 +88,16 @@ public class PollController {
 
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<PollQueryDto>> getPollById(
-        @PathVariable Long id
+        @PathVariable("id") Long id
     ) throws VotifyException {
-        User user = contextService.getUserOrThrow();
+        Optional<User> userOptional = contextService.getUserOptional();
         Poll poll = pollService.getByIdOrThrow(id);
-        Vote vote = pollService.getVote(poll, user);
-
+        if (userOptional.isPresent()) {
+            Vote vote = pollService.getVote(poll, userOptional.get());
+            PollQueryDto dto = PollQueryDto.parse(poll, vote);
+            return ApiResponse.success(dto, HttpStatus.OK).createResponseEntity();
+        }
+        Vote vote = new Vote();
         PollQueryDto dto = PollQueryDto.parse(poll, vote);
         return ApiResponse.success(dto, HttpStatus.OK).createResponseEntity();
     }
