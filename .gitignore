@@ -4,11 +4,12 @@ target/
 !**/src/test/**/target/
 *.jqwik-database
 
-.idea
-.idea/modules.xml
-.idea/jarRepositories.xml
-.idea/compiler.xml
-.idea/libraries/
+# IntelliJ IDEA files - excluir arquivos pessoais, mas manter configurações de execução
+.idea/*
+!.idea/runConfigurations/
+!.idea/encodings.xml
+!.idea/codeStyles/
+!.idea/copyright/
 *.iws
 *.iml
 *.ipr

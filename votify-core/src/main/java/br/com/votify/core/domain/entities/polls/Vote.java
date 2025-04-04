@@ -17,7 +17,7 @@ public class Vote {
     @EmbeddedId
     private VoteIdentifier id;
 
-    @Column(nullable = false)
+    @Column(name = "option_value", nullable = false)
     private int option;
 
     @ManyToOne(fetch = FetchType.LAZY)

@@ -1,0 +1,10 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Votify Tests" type="JUnit" factoryName="JUnit">
+    <module name="votify-test" />
+    <option name="PACKAGE_NAME" value="br.com.votify" />
+    <option name="TEST_OBJECT" value="package" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component> 
