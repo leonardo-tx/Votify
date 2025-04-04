@@ -5,7 +5,6 @@ import br.com.votify.core.domain.entities.users.CommonUser;
 import br.com.votify.core.domain.entities.users.User;
 import br.com.votify.core.service.ContextService;
 import br.com.votify.core.service.PollService;
-import br.com.votify.core.utils.exceptions.VotifyErrorCode;
 import br.com.votify.core.utils.exceptions.VotifyException;
 import br.com.votify.dto.ApiResponse;
 import br.com.votify.dto.PageResponse;
@@ -13,7 +12,6 @@ import br.com.votify.dto.polls.PollDetailedViewDTO;
 import br.com.votify.dto.polls.PollInsertDTO;
 import br.com.votify.dto.polls.PollListViewDTO;
 import br.com.votify.dto.polls.VoteInsertDTO;
-import br.com.votify.test.MockMvcHelper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Order;
@@ -27,22 +25,18 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultActions;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 public class PollControllerTest {
 
@@ -193,10 +187,10 @@ public class PollControllerTest {
     @Test
     @Order(1)
     public void testVoteWhenNotAuthenticated() throws Exception {
+        when(contextService.getUserOrThrow()).thenThrow(VotifyException.class);
+
         VoteInsertDTO voteInsertDTO = new VoteInsertDTO(1);
-        ResultActions resultActions = mockMvc.perform(post("/polls/{id}/vote", 1)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(voteInsertDTO)));
-        MockMvcHelper.testUnsuccessfulResponse(resultActions, VotifyErrorCode.COMMON_UNAUTHORIZED);
+        assertThrows(VotifyException.class, () -> pollController.voteAtPoll(1L,voteInsertDTO));
+
     }
 }

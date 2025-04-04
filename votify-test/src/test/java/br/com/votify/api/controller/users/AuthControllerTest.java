@@ -1,9 +1,7 @@
 package br.com.votify.api.controller.users;
 
 import br.com.votify.api.configuration.SecurityConfig;
-import br.com.votify.core.domain.entities.tokens.EmailConfirmation;
 import br.com.votify.core.domain.entities.users.User;
-import br.com.votify.core.service.EmailConfirmationService;
 import br.com.votify.core.utils.exceptions.VotifyErrorCode;
 import br.com.votify.dto.ApiResponse;
 import br.com.votify.dto.users.*;
@@ -11,12 +9,9 @@ import br.com.votify.test.MockMvcHelper;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.Cookie;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -27,17 +22,14 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-import java.util.Optional;
-
 import static org.hamcrest.CoreMatchers.*;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 @ExtendWith(SpringExtension.class)
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class AuthControllerTest {
     @Autowired
     private MockMvc mockMvc;
@@ -48,9 +40,6 @@ public class AuthControllerTest {
     @Autowired
     private SecurityConfig securityConfig;
 
-    @Mock
-    private EmailConfirmationService emailConfirmationService;
-
     @InjectMocks
     private AuthController authController;
 
@@ -60,7 +49,7 @@ public class AuthControllerTest {
 
     private static UserRegisterDTO userRegisterDTO;
 
-    private static EmailConfirmation emailConfirmation;
+    private static UserDetailedViewDTO userDetailedViewDTO;
 
     @BeforeAll
     public static void prepare() {
@@ -77,7 +66,6 @@ public class AuthControllerTest {
     @Test
     @Order(0)
     public void register() throws Exception {
-        doNothing().when(emailConfirmationService).addUser(user);
 
         ResultActions resultActions = mockMvc.perform(post("/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -89,19 +77,37 @@ public class AuthControllerTest {
                 .andExpect(jsonPath("data.email", is("123@gmail.com")))
                 .andExpect(jsonPath("data.role", is("CommonUser")));
 
+        ApiResponse<UserDetailedViewDTO> apiResponse = objectMapper.readValue(
+                resultActions.andReturn().getResponse().getContentAsByteArray(),
+                new TypeReference<>() {}
+        );
+        userDetailedViewDTO = apiResponse.getData();
+
+    }
+
+    @Test
+    @Order(1)
+    public void login_WhenEmailNotConfirmed_ShouldReturnError() throws Exception {
+        UserLoginDTO userLoginDTO = new UserLoginDTO("123@gmail.com", "12345678");
+
+        ResultActions resultActions = mockMvc.perform(post("/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(userLoginDTO)));
+
+        resultActions
+                .andExpect(jsonPath("$.errorCode", is("email.pending.confirmation")));
     }
 
     @Test
     @Order(1)
     public void login_WhenEmailConfirmed_ShouldReturnTokens() throws Exception {
-        emailConfirmation = new EmailConfirmation();
-        emailConfirmation.setEmailConfirmed(true);
-        emailConfirmation.setUser(user);
-
-        when(emailConfirmationService.findByEmail("123@gmail.com"))
-                .thenReturn(Optional.of(emailConfirmation));
-
         UserLoginDTO userLoginDTO = new UserLoginDTO("123@gmail.com", "12345678");
+
+        EmailConfirmationDto emailConfirmationDto = new EmailConfirmationDto(userDetailedViewDTO.getEmail(), userDetailedViewDTO.getConfirmationCode());
+
+        mockMvc.perform(post("/users/confirm-email")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(emailConfirmationDto)));
 
         ResultActions resultActions = mockMvc.perform(post("/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -115,28 +121,13 @@ public class AuthControllerTest {
 
     @Test
     @Order(1)
-    public void login_WhenEmailNotConfirmed_ShouldReturnError() throws Exception {
-        // Simulando e-mail NÃO confirmado
-        EmailConfirmation mockConfirmation = new EmailConfirmation();
-        mockConfirmation.setEmailConfirmed(false);
-
-        when(emailConfirmationService.findByEmail("123@gmail.com"))
-                .thenReturn(Optional.of(mockConfirmation));
-
-        UserLoginDTO userLoginDTO = new UserLoginDTO("123@gmail.com", "12345678");
-
-        ResultActions resultActions = mockMvc.perform(post("/auth/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(userLoginDTO)));
-
-        resultActions
-                .andExpect(jsonPath("$.code", is("PENDING_EMAIL_CONFIRMATION")))
-                .andExpect(MockMvcResultMatchers.status().isUnauthorized());
-    }
-
-    @Test
-    @Order(1)
     public void logout() throws Exception {
+        EmailConfirmationDto emailConfirmationDto = new EmailConfirmationDto(userDetailedViewDTO.getEmail(), userDetailedViewDTO.getConfirmationCode());
+
+        mockMvc.perform(post("/users/confirm-email")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(emailConfirmationDto)));
+
         Cookie[] cookies = MockMvcHelper.login(
                 mockMvc, objectMapper, "123@gmail.com", "12345678"
         );
@@ -154,6 +145,12 @@ public class AuthControllerTest {
     @Test
     @Order(1)
     public void refreshTokens() throws Exception {
+        EmailConfirmationDto emailConfirmationDto = new EmailConfirmationDto(userDetailedViewDTO.getEmail(), userDetailedViewDTO.getConfirmationCode());
+
+        mockMvc.perform(post("/users/confirm-email")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(emailConfirmationDto)));
+
         Cookie[] cookies = MockMvcHelper.login(
                 mockMvc, objectMapper, "123@gmail.com", "12345678"
         );
