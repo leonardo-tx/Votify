@@ -88,7 +88,18 @@ public class AuthControllerTest {
     @Test
     @Order(1)
     public void login_WhenEmailNotConfirmed_ShouldReturnError() throws Exception {
-        UserLoginDTO userLoginDTO = new UserLoginDTO("123@gmail.com", "12345678");
+        userRegisterDTO = new UserRegisterDTO(
+                "byces2",
+                "Byces2",
+                "1234@gmail.com",
+                "12345678"
+        );
+
+        mockMvc.perform(post("/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(userRegisterDTO)));
+
+        UserLoginDTO userLoginDTO = new UserLoginDTO(userRegisterDTO.getEmail(), userRegisterDTO.getPassword());
 
         ResultActions resultActions = mockMvc.perform(post("/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
