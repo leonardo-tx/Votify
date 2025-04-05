@@ -5,7 +5,6 @@ import Input from '@/components/shared/Input';
 import { IoMailOutline, IoLockClosedOutline } from 'react-icons/io5';
 import { login } from '@/libs/api';
 import UserLoginView from '@/libs/users/UserLoginView';
-import Head from 'next/head';
 
 export default function LoginPage() {
   const router = useRouter();
