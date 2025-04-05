@@ -1,8 +1,11 @@
+import { useState, useEffect } from "react";
+import { useRouter } from "next/router";
 import styles from "./styles/Header.module.css";
 import Button from "../shared/Button";
 import BrandIcon from "@/assets/icon.svg";
 import Input from "../shared/Input";
 import { IoLogInOutline, IoPerson, IoSearch } from "react-icons/io5";
+import { getCurrentUser, logout } from "@/libs/api";
 
 interface NavItem {
   text: string;
@@ -15,6 +18,41 @@ const navItems: NavItem[] = [
 ];
 
 export default function Header() {
+  const router = useRouter();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  const checkAuth = async () => {
+    try {
+      const response = await getCurrentUser();
+      setIsLoggedIn(response.success);
+    } catch {
+      setIsLoggedIn(false);
+    }
+  };
+
+  useEffect(() => {
+    checkAuth();
+    router.events.on("routeChangeComplete", checkAuth);
+    return () => {
+      router.events.off("routeChangeComplete", checkAuth);
+    };
+  }, [router.events]);
+
+  const handleLogout = async () => {
+    try {
+      const response = await logout();
+
+      if (response.success) {
+        setIsLoggedIn(false);
+        router.push("/home");
+      } else {
+        throw new Error(response.errorMessage || "Falha ao realizar logout");
+      }
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
+  };
+
   return (
     <header className={styles.header}>
       <Button
@@ -29,13 +67,7 @@ export default function Header() {
       </Button>
       <nav className="flex items-center gap-6 text-md font-semibold">
         {navItems.map((item, i) => (
-          <Button
-            as="Link"
-            variant="text"
-            key={i}
-            id={item.id}
-            href={item.href}
-          >
+          <Button as="Link" variant="text" key={i} id={item.id} href={item.href}>
             {item.text}
           </Button>
         ))}
@@ -48,20 +80,39 @@ export default function Header() {
         />
       </nav>
       <div className="flex gap-6 text-base font-semibold">
-        <Button
-          as="Link"
-          variant="outline"
-          scheme="primary"
-          id="signin-link"
-          href="/home"
-        >
-          <IoLogInOutline size={20} />
-          Entrar
-        </Button>
-        <Button as="Link" id="signup-link" scheme="primary" href="/home">
-          <IoPerson size={20} />
-          Criar Conta
-        </Button>
+        {isLoggedIn ? (
+          <Button
+            onClick={handleLogout}
+            variant="outline"
+            scheme="primary"
+            id="logout-button"
+          >
+            <IoLogInOutline size={20} />
+            Logout
+          </Button>
+        ) : (
+          <Button
+            as="Link"
+            variant="outline"
+            scheme="primary"
+            id="login-button"
+            href="/login"
+          >
+            <IoLogInOutline size={20} />
+            Entrar
+          </Button>
+        )}
+        {!isLoggedIn && (
+          <Button 
+            as="Link" 
+            id="signup-button" 
+            scheme="primary" 
+            href="/home"
+          >
+            <IoPerson size={20} />
+            Criar Conta
+          </Button>
+        )}
       </div>
     </header>
   );

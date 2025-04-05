@@ -79,8 +79,8 @@ public abstract class BaseTest {
         WebElement header = elements.get(0);
 
         assertEquals(1, header.findElements(By.id("logo-home-anchor")).size());
-        assertEquals(1, header.findElements(By.id("signin-link")).size());
-        assertEquals(1, header.findElements(By.id("signup-link")).size());
+        assertEquals(1, header.findElements(By.id("login-button")).size());
+        assertEquals(1, header.findElements(By.id("signup-button")).size());
 
         List<WebElement> navigators = header.findElements(By.tagName("nav"));
         assertEquals(1, navigators.size());
