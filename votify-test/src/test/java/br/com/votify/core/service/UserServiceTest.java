@@ -1,6 +1,7 @@
 package br.com.votify.core.service;
 
 import br.com.votify.core.domain.entities.tokens.AuthTokens;
+import br.com.votify.core.domain.entities.tokens.EmailConfirmation;
 import br.com.votify.core.domain.entities.tokens.RefreshToken;
 import br.com.votify.core.domain.entities.users.*;
 import br.com.votify.core.repository.UserRepository;
@@ -35,6 +36,11 @@ public class UserServiceTest {
     private UserService userService;
 
     private CommonUser user;
+
+    private static EmailConfirmation emailConfirmation = new EmailConfirmation();
+
+    @Mock
+    private EmailConfirmationService emailConfirmationService;
 
     @BeforeEach
     public void setupBeforeEach() {
@@ -106,6 +112,8 @@ public class UserServiceTest {
     public void login() throws VotifyException {
         RefreshToken refreshToken = new RefreshToken();
 
+        when(emailConfirmationService.findByEmail(any(String.class))).thenReturn(Optional.of(emailConfirmation));
+        emailConfirmation.setEmailConfirmed(true);
         when(contextService.isAuthenticated()).thenReturn(false);
         when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
         when(passwordEncoderService.checkPassword(user, user.getPassword())).thenReturn(true);

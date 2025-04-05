@@ -1,6 +1,7 @@
 package br.com.votify.core.service;
 
 import br.com.votify.core.domain.entities.tokens.AuthTokens;
+import br.com.votify.core.domain.entities.tokens.EmailConfirmation;
 import br.com.votify.core.domain.entities.tokens.RefreshToken;
 import br.com.votify.core.domain.entities.users.CommonUser;
 import br.com.votify.core.domain.entities.users.User;
@@ -21,6 +22,7 @@ public class UserService {
     private final ContextService context;
     private final PasswordEncoderService passwordEncoderService;
     private final UserRepository userRepository;
+    private final EmailConfirmationService emailConfirmationService;
     private final TokenService tokenService;
 
     public User register(CommonUser user) throws VotifyException {
@@ -42,10 +44,18 @@ public class UserService {
         if (context.isAuthenticated()) {
             throw new VotifyException(VotifyErrorCode.LOGIN_ALREADY_LOGGED);
         }
+
         User user = userRepository.findByEmail(email).orElse(null);
         if (user == null || !passwordEncoderService.checkPassword(user, password)) {
             throw new VotifyException(VotifyErrorCode.LOGIN_UNAUTHORIZED);
         }
+        EmailConfirmation entity = emailConfirmationService.findByEmail(email)
+                .orElseThrow(() -> new VotifyException(VotifyErrorCode.INTERNAL));
+
+        if (!entity.isEmailConfirmed()) {
+            throw new VotifyException(VotifyErrorCode.PENDING_EMAIL_CONFIRMATION);
+        }
+
         RefreshToken refreshToken = tokenService.createRefreshToken(user);
         String accessToken = tokenService.createAccessToken(refreshToken);
 
@@ -70,4 +80,5 @@ public class UserService {
     public void deleteUser(User user) {
         userRepository.delete(user);
     }
+
 }

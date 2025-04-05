@@ -6,6 +6,7 @@ import br.com.votify.core.domain.entities.users.User;
 import br.com.votify.core.repository.PollRepository;
 import br.com.votify.core.repository.VoteRepository;
 import br.com.votify.core.utils.exceptions.VotifyErrorCode;
+import br.com.votify.core.utils.exceptions.VotifyErrorCode;
 import br.com.votify.core.utils.exceptions.VotifyException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

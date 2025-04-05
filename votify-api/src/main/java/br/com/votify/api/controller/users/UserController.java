@@ -2,9 +2,11 @@ package br.com.votify.api.controller.users;
 
 import br.com.votify.api.configuration.SecurityConfig;
 import br.com.votify.core.domain.entities.users.User;
-import br.com.votify.core.utils.exceptions.VotifyException;
+import br.com.votify.core.service.EmailConfirmationService;
 import br.com.votify.core.service.UserService;
+import br.com.votify.core.utils.exceptions.VotifyException;
 import br.com.votify.dto.ApiResponse;
+import br.com.votify.dto.users.EmailConfirmationDto;
 import br.com.votify.dto.users.UserDetailedViewDTO;
 import br.com.votify.dto.users.UserQueryDTO;
 import jakarta.servlet.http.Cookie;
@@ -21,6 +23,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
+    private final EmailConfirmationService emailConfirmationService;
     private final SecurityConfig securityConfig;
 
     @GetMapping("/{id}")
@@ -60,6 +63,15 @@ public class UserController {
         response.addCookie(refreshCookie);
         response.addCookie(accessCookie);
 
-        return ApiResponse.success(null, HttpStatus.OK).createResponseEntity();
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(ApiResponse.success(null, HttpStatus.OK));
+    }
+
+    @PostMapping("/confirm-email")
+    public ResponseEntity<ApiResponse<?>> confirmEmail(@RequestBody EmailConfirmationDto emailConfirmationDto) throws VotifyException {
+        emailConfirmationService.confirmEmail(emailConfirmationDto.getCode(), emailConfirmationDto.getEmail());
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(ApiResponse.success(null, HttpStatus.OK));
     }
 }
