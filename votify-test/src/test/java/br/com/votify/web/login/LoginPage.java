@@ -24,10 +24,4 @@ public class LoginPage extends BasePage {
 
     @FindBy(id = "create-account-link")
     public WebElement createAccountLink;
-
-    public void login(String email, String password) {
-        emailInput.sendKeys(email);
-        passwordInput.sendKeys(password);
-        submitButton.click();
-    }
 } 
