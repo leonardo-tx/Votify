@@ -5,6 +5,7 @@ import Button from "../shared/Button";
 import BrandIcon from "@/assets/icon.svg";
 import Input from "../shared/Input";
 import { IoLogInOutline, IoPerson, IoSearch } from "react-icons/io5";
+import { getCurrentUser, logout } from "@/libs/api";
 
 interface NavItem {
   text: string;
@@ -19,16 +20,12 @@ const navItems: NavItem[] = [
 export default function Header() {
   const router = useRouter();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const apiUrl = "http://localhost:8081";
 
   const checkAuth = async () => {
     try {
-      const response = await fetch(`${apiUrl}/users/me`, {
-        method: "GET",
-        credentials: "include",
-      });
-      setIsLoggedIn(response.ok);
-    } catch (error) {
+      const response = await getCurrentUser();
+      setIsLoggedIn(response.success);
+    } catch {
       setIsLoggedIn(false);
     }
   };
@@ -43,23 +40,13 @@ export default function Header() {
 
   const handleLogout = async () => {
     try {
-      const response = await fetch(`${apiUrl}/auth/logout`, {
-        method: "POST",
-        credentials: "include",
-      });
+      const response = await logout();
 
-      if (response.ok) {
+      if (response.success) {
         setIsLoggedIn(false);
         router.push("/home");
       } else {
-        let errorMessage = "Falha ao realizar logout";
-        try {
-          const errorData = await response.json();
-          errorMessage = errorData?.message || errorMessage;
-        } catch {
-          errorMessage = (await response.text()) || errorMessage;
-        }
-        throw new Error(errorMessage);
+        throw new Error(response.errorMessage || "Falha ao realizar logout");
       }
     } catch (error) {
       console.error("Logout error:", error);
@@ -98,7 +85,7 @@ export default function Header() {
             onClick={handleLogout}
             variant="outline"
             scheme="primary"
-            id="signin-link"
+            id="logout-button"
           >
             <IoLogInOutline size={20} />
             Logout
@@ -108,7 +95,7 @@ export default function Header() {
             as="Link"
             variant="outline"
             scheme="primary"
-            id="signin-link"
+            id="login-button"
             href="/login"
           >
             <IoLogInOutline size={20} />
@@ -116,7 +103,12 @@ export default function Header() {
           </Button>
         )}
         {!isLoggedIn && (
-          <Button as="Link" id="signup-link" scheme="primary" href="/home">
+          <Button 
+            as="Link" 
+            id="signup-button" 
+            scheme="primary" 
+            href="/home"
+          >
             <IoPerson size={20} />
             Criar Conta
           </Button>

@@ -3,22 +3,18 @@ import { useRouter } from 'next/router';
 import Button from '@/components/shared/Button';
 import Input from '@/components/shared/Input';
 import { IoMailOutline, IoLockClosedOutline } from 'react-icons/io5';
-
-interface LoginRequest {
-  email: string;
-  password: string;
-}
+import { login } from '@/libs/api';
+import UserLoginView from '@/libs/users/UserLoginView';
+import Head from 'next/head';
 
 export default function LoginPage() {
   const router = useRouter();
-  const [credentials, setCredentials] = useState<LoginRequest>({
+  const [credentials, setCredentials] = useState<UserLoginView>({
     email: '',
     password: '',
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>('');
-
-  const apiUrl = 'http://localhost:8081';
 
   const handleLogin = async (e: FormEvent) => {
     e.preventDefault();
@@ -26,26 +22,12 @@ export default function LoginPage() {
     setError('');
 
     try {
-      const response = await fetch(`${apiUrl}/auth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify(credentials),
-      });
+      const response = await login(credentials);
 
-      if (response.ok) {
+      if (response.success) {
         router.push('/home');
       } else {
-        let errorMessage = 'Credenciais inválidas';
-        try {
-          const errorData = await response.json();
-          errorMessage = errorData?.message || errorMessage;
-        } catch {
-          errorMessage = await response.text() || errorMessage;
-        }
-        throw new Error(errorMessage);
+        throw new Error(response.errorMessage || 'Credenciais inválidas');
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Falha ao realizar login');
@@ -65,7 +47,7 @@ export default function LoginPage() {
         <form onSubmit={handleLogin} className="space-y-6">
           <div className="space-y-4">
             <Input
-              id="email"
+              id="login-email"
               type="text"
               required
               placeholder="Email"
@@ -82,7 +64,7 @@ export default function LoginPage() {
             />
 
             <Input
-              id="password"
+              id="login-password"
               type="password"
               required
               placeholder="Senha"
@@ -106,6 +88,7 @@ export default function LoginPage() {
             as="Link"
             variant="text"
             scheme="primary"
+            id="forgot-password-link"
             href="/auth/forgot-password"
             className="text-sm text-blue-600 hover:text-blue-700"
           >
@@ -115,6 +98,7 @@ export default function LoginPage() {
           <Button
             type="submit"
             scheme="primary"
+            id="login-submit-button"
             className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-md"
             disabled={isLoading}
           >
@@ -129,6 +113,7 @@ export default function LoginPage() {
               as="Link"
               variant="text"
               scheme="primary"
+              id="create-account-link"
               href="/auth/register"
               className="text-blue-600 hover:text-blue-700"
             >
