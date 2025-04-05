@@ -4,11 +4,11 @@ import Button from '@/components/shared/Button';
 import Input from '@/components/shared/Input';
 import { IoMailOutline, IoLockClosedOutline } from 'react-icons/io5';
 import { login } from '@/libs/api';
-import UserLoginView from '@/libs/users/UserLoginView';
+import UserLoginDTO from '@/libs/users/UserLoginDTO';
 
 export default function LoginPage() {
   const router = useRouter();
-  const [credentials, setCredentials] = useState<UserLoginView>({
+  const [credentials, setCredentials] = useState<UserLoginDTO>({
     email: '',
     password: '',
   });
@@ -36,7 +36,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
+    <div className="inset-0 flex items-center justify-center">
       <div className="w-full max-w-md p-8 rounded-2xl shadow-lg">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold">Votify</h1>
@@ -98,7 +98,7 @@ export default function LoginPage() {
             type="submit"
             scheme="primary"
             id="login-submit-button"
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-md"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-md cursor-pointer"
             disabled={isLoading}
           >
             {isLoading ? 'Entrando...' : 'Entrar'}

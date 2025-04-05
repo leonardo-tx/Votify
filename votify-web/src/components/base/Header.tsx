@@ -86,6 +86,7 @@ export default function Header() {
             variant="outline"
             scheme="primary"
             id="logout-button"
+            className="cursor-pointer"
           >
             <IoLogInOutline size={20} />
             Logout
