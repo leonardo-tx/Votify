@@ -18,7 +18,6 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>('');
 
-  // Use an environment variable for the API URL with a fallback for local development
   const apiUrl = 'http://localhost:8081';
 
   const handleLogin = async (e: FormEvent) => {
@@ -32,20 +31,22 @@ export default function LoginPage() {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify(credentials),
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        // Use the error message returned by the backend if available
-        const errorMessage = data?.message || 'Credenciais inválidas';
+      if (response.ok) {
+        router.push('/home');
+      } else {
+        let errorMessage = 'Credenciais inválidas';
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData?.message || errorMessage;
+        } catch {
+          errorMessage = await response.text() || errorMessage;
+        }
         throw new Error(errorMessage);
       }
-
-      // Save the access token and redirect to dashboard
-      localStorage.setItem('accessToken', data.accessToken);
-      router.push('/home');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Falha ao realizar login');
     } finally {
@@ -98,9 +99,7 @@ export default function LoginPage() {
           </div>
 
           {error && (
-            <div className="text-red-500 text-sm text-center">
-              {error}
-            </div>
+            <div className="text-red-500 text-sm text-center">{error}</div>
           )}
 
           <Button

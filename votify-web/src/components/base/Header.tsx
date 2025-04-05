@@ -19,10 +19,18 @@ const navItems: NavItem[] = [
 export default function Header() {
   const router = useRouter();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const apiUrl = "http://localhost:8081";
 
-  const checkAuth = () => {
-    const token = localStorage.getItem("accessToken");
-    setIsLoggedIn(!!token);
+  const checkAuth = async () => {
+    try {
+      const response = await fetch(`${apiUrl}/users/me`, {
+        method: "GET",
+        credentials: "include",
+      });
+      setIsLoggedIn(response.ok);
+    } catch (error) {
+      setIsLoggedIn(false);
+    }
   };
 
   useEffect(() => {
@@ -33,10 +41,29 @@ export default function Header() {
     };
   }, [router.events]);
 
-  const handleLogout = () => {
-    localStorage.removeItem("accessToken");
-    setIsLoggedIn(false);
-    router.push("/home");
+  const handleLogout = async () => {
+    try {
+      const response = await fetch(`${apiUrl}/auth/logout`, {
+        method: "POST",
+        credentials: "include",
+      });
+
+      if (response.ok) {
+        setIsLoggedIn(false);
+        router.push("/home");
+      } else {
+        let errorMessage = "Falha ao realizar logout";
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData?.message || errorMessage;
+        } catch {
+          errorMessage = (await response.text()) || errorMessage;
+        }
+        throw new Error(errorMessage);
+      }
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
   };
 
   return (
