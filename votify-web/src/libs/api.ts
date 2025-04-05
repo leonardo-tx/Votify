@@ -1,7 +1,7 @@
 import axios from "axios";
 import ApiResponse from "./ApiResponse";
 import UserQueryView from "./users/UserQueryView";
-import UserLoginView from "./users/UserLoginView";
+import UserLoginDTO from "./users/UserLoginDTO";
 
 export const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
@@ -38,10 +38,10 @@ export const logout = async (): Promise<ApiResponse<null>> => {
 };
 
 export const login = async (
-  credentials: UserLoginView
-): Promise<ApiResponse<UserLoginView | null>> => {
+  credentials: UserLoginDTO
+): Promise<ApiResponse<UserLoginDTO | null>> => {
   try {
-    const { data } = await api.post<ApiResponse<UserLoginView>>('/auth/login', credentials);
+    const { data } = await api.post<ApiResponse<UserLoginDTO>>('/auth/login', credentials);
     return data;
   } catch (error: any) {
     return error.response;
