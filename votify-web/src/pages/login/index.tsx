@@ -10,7 +10,7 @@ export default function LoginPage() {
   const router = useRouter();
   const [credentials, setCredentials] = useState<UserLoginDTO>({
     email: '',
-    password: '',
+    password: ''
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>('');
@@ -20,16 +20,15 @@ export default function LoginPage() {
     setIsLoading(true);
     setError('');
 
+    const response = await login(credentials);
     try {
-      const response = await login(credentials);
-
       if (response.success) {
         router.push('/home');
       } else {
-        throw new Error(response.errorMessage || 'Credenciais inválidas');
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Falha ao realizar login');
+        setError(response.data?.errorMessage);
+      } 
+    } catch (error: any) {
+      setError(error.message);
     } finally {
       setIsLoading(false);
     }

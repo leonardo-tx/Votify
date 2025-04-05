@@ -91,7 +91,7 @@ public class LoginTest extends BaseTest {
         sleep(2000);
         WebElement errorMessage = webDriver.findElement(By.className("text-red-500"));
         assertTrue(errorMessage.isDisplayed(), "Error message should be displayed");
-        assertEquals("Credenciais inválidas", errorMessage.getText(), "Should show invalid credentials message");
+        assertEquals("The account does not exist or the password is incorrect.", errorMessage.getText(), "Should show invalid credentials message");
     }
 
     @Test
@@ -100,7 +100,7 @@ public class LoginTest extends BaseTest {
         sleep(2000);
         WebElement errorMessage = webDriver.findElement(By.className("text-red-500"));
         assertTrue(errorMessage.isDisplayed(), "Error message should be displayed");
-        assertEquals("Credenciais inválidas", errorMessage.getText(), "Should show invalid credentials message");
+        assertEquals("The account does not exist or the password is incorrect.", errorMessage.getText(), "Should show invalid credentials message");
     }
 
     @Test
