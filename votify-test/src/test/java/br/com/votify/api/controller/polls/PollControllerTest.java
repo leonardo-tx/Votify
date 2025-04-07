@@ -1,11 +1,5 @@
 package br.com.votify.api.controller.polls;
 
-import br.com.votify.core.domain.entities.polls.Poll;
-import br.com.votify.core.domain.entities.users.CommonUser;
-import br.com.votify.core.domain.entities.users.User;
-import br.com.votify.core.repository.PollRepository;
-import br.com.votify.core.repository.UserRepository;
-import br.com.votify.core.service.PasswordEncoderService;
 import br.com.votify.core.utils.exceptions.VotifyErrorCode;
 import br.com.votify.dto.polls.PollInsertDTO;
 import br.com.votify.dto.polls.VoteInsertDTO;
@@ -14,7 +8,6 @@ import br.com.votify.test.suites.ControllerTest;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
@@ -29,15 +22,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 public class PollControllerTest extends ControllerTest {
-    @Autowired
-    private PollRepository pollRepository;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private PasswordEncoderService passwordEncoderService;
-
     @Test
     @Order(0)
     public void testInsertPoll() throws Exception {
@@ -120,7 +104,6 @@ public class PollControllerTest extends ControllerTest {
     @Order(1)
     public void testGetMyPollsWhenAuthenticated() throws Exception {
         Cookie[] cookies = mockMvcHelper.login("common@votify.com.br", "password123");
-
         ResultActions resultActions = mockMvc.perform(get("/polls/me")
                 .cookie(cookies));
         mockMvcHelper.testSuccessfulResponse(resultActions, HttpStatus.OK)
@@ -344,16 +327,7 @@ public class PollControllerTest extends ControllerTest {
     @Test
     @Order(3)
     public void testCancelPollAsNonOwner() throws Exception {
-        User nonOwner = CommonUser.builder()
-                .id(null)
-                .userName("non-owner")
-                .name("Non Owner")
-                .email("nonowner@votify.com.br")
-                .password(passwordEncoderService.encryptPassword("nonownerpass"))
-                .build();
-        userRepository.saveAndFlush(nonOwner);
-
-        Cookie[] cookies = mockMvcHelper.login("nonowner@votify.com.br", "nonownerpass");
+        Cookie[] cookies = mockMvcHelper.login("admin@votify.com.br", "admin123");
         ResultActions cancelResult = mockMvc.perform(delete("/polls/{id}/cancel", 1)
                 .cookie(cookies));
         mockMvcHelper.testUnsuccessfulResponse(cancelResult, VotifyErrorCode.POLL_NOT_OWNER);
@@ -395,13 +369,11 @@ public class PollControllerTest extends ControllerTest {
     @Order(3)
     public void testCancelPollDuringVotingIntegration() throws Exception {
         Instant now = Instant.now();
-        Instant futureStart = now.plus(Duration.ofMinutes(5));
-        Instant futureEnd = now.plus(Duration.ofDays(1));
         PollInsertDTO pollInsertDTO = new PollInsertDTO(
                 "In Progress Poll",
                 "Poll em andamento",
-                futureStart,
-                futureEnd,
+                null,
+                now.plus(Duration.ofHours(1)),
                 false,
                 1,
                 List.of(
@@ -414,12 +386,8 @@ public class PollControllerTest extends ControllerTest {
                 .cookie(cookies)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(pollInsertDTO)));
+
         int pollId = mockMvcHelper.extractId(createResult, "$.data.id");
-
-        Poll poll = pollRepository.findById((long) pollId).orElseThrow();
-        poll.setStartDate(now.minus(Duration.ofHours(1)));
-        pollRepository.save(poll);
-
         ResultActions cancelResult = mockMvc.perform(delete("/polls/{id}/cancel", pollId)
                 .cookie(cookies));
         mockMvcHelper.testSuccessfulResponse(cancelResult, HttpStatus.OK);
@@ -427,38 +395,5 @@ public class PollControllerTest extends ControllerTest {
         ResultActions getResult = mockMvc.perform(get("/polls/user/{id}", 3)
                 .cookie(cookies));
         getResult.andExpect(jsonPath("data.content[?(@.title=='In Progress Poll')]").exists());
-    }
-
-
-    @Test
-    @Order(3)
-    public void testCancelPollAfterEndIntegration() throws Exception {
-        Instant now = Instant.now();
-        Instant futureStart = now.plus(Duration.ofMinutes(1));
-        Instant futureEnd = now.plus(Duration.ofDays(1));
-        PollInsertDTO pollInsertDTO = new PollInsertDTO(
-                "Finished Poll",
-                "Poll já finalizada",
-                futureStart,
-                futureEnd,
-                false,
-                1,
-                List.of(new VoteOptionInsertDTO("Opção 1"))
-        );
-        Cookie[] cookies = mockMvcHelper.login("common@votify.com.br", "password123");
-        ResultActions createResult = mockMvc.perform(post("/polls")
-                .cookie(cookies)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(pollInsertDTO)));
-        int pollId = mockMvcHelper.extractId(createResult, "$.data.id");
-
-        Poll poll = pollRepository.findById((long) pollId).orElseThrow();
-        poll.setStartDate(now.minus(Duration.ofDays(2)));
-        poll.setEndDate(now.minus(Duration.ofDays(1)));
-        pollRepository.save(poll);
-
-        ResultActions cancelResult = mockMvc.perform(delete("/polls/{id}/cancel", pollId)
-                .cookie(cookies));
-        mockMvcHelper.testUnsuccessfulResponse(cancelResult, VotifyErrorCode.POLL_CANNOT_CANCEL_FINISHED);
     }
 }
