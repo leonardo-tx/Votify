@@ -83,6 +83,18 @@ public class PollService {
         return pollRepository.findAllByResponsibleId(userId, pageable);
     }
 
+    public Page<Poll> findAllActivePolls(int page, int size) throws VotifyException {
+        if (page < 0) {
+            throw new VotifyException(VotifyErrorCode.POLL_PAGE_INVALID_PAGE);
+        }
+        if (size < 1 || size > Poll.PAGE_SIZE_LIMIT) {
+            throw new VotifyException(VotifyErrorCode.POLL_PAGE_LENGTH_INVALID, 1, Poll.PAGE_SIZE_LIMIT);
+        }
+        Pageable pageable = PageRequest.of(page, size);
+        return pollRepository.findAllByActives(pageable);
+    }
+
+
     /**
      *
      * @param id  ID da poll a buscar

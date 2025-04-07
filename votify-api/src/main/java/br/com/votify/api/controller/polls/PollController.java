@@ -101,4 +101,13 @@ public class PollController {
         PollQueryDto dto = PollQueryDto.parse(poll, vote);
         return ApiResponse.success(dto, HttpStatus.OK).createResponseEntity();
     }
+
+    @GetMapping("/active")
+    public ResponseEntity<Page<Poll>> getActivePolls(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) throws VotifyException {
+        Page<Poll> activePolls = pollService.findAllActivePolls(page, size);
+        return ResponseEntity.ok(activePolls);
+    }
 }

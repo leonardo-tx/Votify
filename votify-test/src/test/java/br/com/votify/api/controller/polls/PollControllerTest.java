@@ -24,6 +24,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -81,6 +82,8 @@ public class PollControllerTest {
                 .andExpect(jsonPath("data.voteOptions", hasSize(5)))
                 .andExpect(jsonPath("data.voteOptions[*].count", everyItem(is(0))));
     }
+
+
 
     @Test
     @Order(1)
@@ -140,6 +143,22 @@ public class PollControllerTest {
                 .andExpect(jsonPath("data.last", is(true)))
                 .andExpect(jsonPath("data.content", hasSize(0)));
     }
+
+    // Testes Andre
+    @Test
+    @Order(1)
+    public void testGetPollByIdNotAuthenticated() throws Exception {
+        ResultActions resultActions = mockMvc.perform(get("/polls/{id}", 1));
+
+        MockMvcHelper.testSuccessfulResponse(resultActions, HttpStatus.OK)
+                .andExpect(jsonPath("data.id", is(1)))
+                .andExpect(jsonPath("data.title", is("Test Poll")))
+                .andExpect(jsonPath("data.description", is("Test Description")))
+                .andExpect(jsonPath("data.voteOptions", hasSize(5)))
+                .andExpect(jsonPath("data.voteOptions[0].name", is("Opção 1")))
+                .andExpect(jsonPath("data.myChoices", is(0)));
+    }
+
 
     @Test
     @Order(1)
@@ -211,4 +230,33 @@ public class PollControllerTest {
                 .content(objectMapper.writeValueAsString(voteInsertDTO)));
         MockMvcHelper.testUnsuccessfulResponse(resultActions, VotifyErrorCode.POLL_VOTED_ALREADY);
     }
+
+    @Test
+    @Order(3)
+    public void testGetPollWithUserVote() throws Exception {
+        // Login do usuário
+        Cookie[] cookies = MockMvcHelper.login(
+                mockMvc, objectMapper, "common@votify.com.br", "password123"
+        );
+
+        // Apenas busca a enquete e valida que o usuário já votou
+        ResultActions result = mockMvc.perform(get("/polls/{id}", 1)
+                .cookie(cookies));
+
+        MockMvcHelper.testSuccessfulResponse(result, HttpStatus.OK)
+                .andExpect(jsonPath("data.myChoices", greaterThan(0)));
+    }
+
+    @Test
+    @Order(99)
+    public void testGetPollNotFound() throws Exception {
+        long nonExistentPollId = 9999L;
+
+        ResultActions resultActions = mockMvc.perform(get("/polls/{id}", nonExistentPollId));
+
+        MockMvcHelper.testUnsuccessfulResponse(resultActions, VotifyErrorCode.POLL_NOT_FOUND);
+    }
+
 }
+
+
