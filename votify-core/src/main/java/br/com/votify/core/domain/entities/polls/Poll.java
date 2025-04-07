@@ -54,9 +54,6 @@ public class Poll {
     @Column(name = "choice_limit_per_user", nullable = false)
     private Integer choiceLimitPerUser;
 
-    @Column(name = "canceled", nullable = false)
-    private boolean canceled = false;
-
     @Column(name = "archived", nullable = false)
     private boolean archived = false;
 

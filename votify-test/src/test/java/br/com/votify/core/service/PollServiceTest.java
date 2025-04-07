@@ -48,7 +48,6 @@ public class PollServiceTest {
     @BeforeEach
     public void setupBeforeEach() {
         testUser = new CommonUser(1L, "testuser", "Test User", "test@example.com", "password123");
-        // Poll sem datas definidas (será tratada em createPoll)
         Poll testPoll = Poll.builder()
                 .id(1L)
                 .title("Test Poll")
@@ -65,7 +64,6 @@ public class PollServiceTest {
                 .build();
         testPolls.add(testPoll);
 
-        // Outros polls para testes de votação e listagem...
         Poll testPoll2 = Poll.builder()
                 .id(2L)
                 .title("Test Poll 2")
@@ -161,7 +159,6 @@ public class PollServiceTest {
 
         Vote createdVote = assertDoesNotThrow(() -> pollService.vote(vote, poll, testUser));
         assertEquals(new VoteIdentifier(poll.getId(), testUser.getId()), createdVote.getId());
-        // Verifica se o count da opção votada (neste exemplo, opção com índice 2) foi incrementado
         assertEquals(1, poll.getVoteOptions().get(2).getCount());
     }
 

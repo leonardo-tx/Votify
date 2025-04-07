@@ -33,7 +33,7 @@ public final class PollInsertDTO implements DTOInput<Poll> {
                 .endDate(endDate)
                 .userRegistration(userRegistration)
                 .choiceLimitPerUser(choiceLimitPerUser)
-                .archived(false) // novo campo, definido como false inicialmente
+                .archived(false)
                 .voteOptions(new ArrayList<>())
                 .votes(null)
                 .responsible(null)
