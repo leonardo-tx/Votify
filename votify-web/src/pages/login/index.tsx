@@ -1,41 +1,41 @@
-import { useState, FormEvent } from 'react';
-import { useRouter } from 'next/router';
-import Button from '@/components/shared/Button';
-import Input from '@/components/shared/Input';
-import { IoMailOutline, IoLockClosedOutline } from 'react-icons/io5';
-import { login } from '@/libs/api';
-import UserLoginDTO from '@/libs/users/UserLoginDTO';
+import { useState, FormEvent } from "react";
+import { useRouter } from "next/router";
+import Button from "@/components/shared/Button";
+import Input from "@/components/shared/Input";
+import { IoMailOutline, IoLockClosedOutline } from "react-icons/io5";
+import { getCurrentUser, login } from "@/libs/api";
+import UserLoginDTO from "@/libs/users/UserLoginDTO";
+import VotifyErrorCode from "@/libs/VotifyErrorCode";
+import { useSetAtom } from "jotai";
+import { currentUserAtom } from "@/libs/users/atoms/currentUserAtom";
 
 export default function LoginPage() {
   const router = useRouter();
+  const setCurrentUser = useSetAtom(currentUserAtom);
   const [credentials, setCredentials] = useState<UserLoginDTO>({
-    email: '',
-    password: ''
+    email: "",
+    password: "",
   });
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string>('');
+  const [error, setError] = useState<string>("");
 
   const handleLogin = async (e: FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setError('');
+    setError("");
 
     const response = await login(credentials);
-    try {
-      if (response.success) {
-        router.push('/home');
-      } else {
-        setError(response.errorMessage);
-      } 
-    } catch (error: any) {
-      setError(error.message);
-    } finally {
-      setIsLoading(false);
+    if (response.success) {
+      setCurrentUser((await getCurrentUser()).data);
+      router.push("/home");
+    } else {
+      setError(getErrorMessage(response.errorCode));
     }
+    setIsLoading(false);
   };
 
   return (
-    <div className="inset-0 flex items-center justify-center">
+    <div className="h-full flex items-center justify-center">
       <div className="w-full max-w-md p-8 rounded-2xl shadow-lg">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold">Votify</h1>
@@ -54,10 +54,10 @@ export default function LoginPage() {
               startElement={<IoMailOutline size={20} />}
               value={credentials.email}
               onChange={(e) =>
-                setCredentials({
-                  ...credentials,
+                setCredentials((oldCredentials) => ({
+                  ...oldCredentials,
                   email: e.target.value.trim(),
-                })
+                }))
               }
             />
 
@@ -70,18 +70,18 @@ export default function LoginPage() {
               startElement={<IoLockClosedOutline size={20} />}
               value={credentials.password}
               onChange={(e) =>
-                setCredentials({
-                  ...credentials,
+                setCredentials((oldCredentials) => ({
+                  ...oldCredentials,
                   password: e.target.value,
-                })
+                }))
               }
             />
           </div>
-
           {error && (
-            <div className="text-red-500 text-sm text-center">{error}</div>
+            <div id="login-alert" className="text-red-500 text-sm text-center">
+              {error}
+            </div>
           )}
-
           <Button
             as="Link"
             variant="text"
@@ -100,13 +100,13 @@ export default function LoginPage() {
             className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-md cursor-pointer"
             disabled={isLoading}
           >
-            {isLoading ? 'Entrando...' : 'Entrar'}
+            {isLoading ? "Entrando..." : "Entrar"}
           </Button>
         </form>
 
         <div className="mt-6 text-center">
           <p className="text-zinc-600">
-            Não tem uma conta?{' '}
+            Não tem uma conta?{" "}
             <Button
               as="Link"
               variant="text"
@@ -122,4 +122,14 @@ export default function LoginPage() {
       </div>
     </div>
   );
+}
+
+function getErrorMessage(errorCode: VotifyErrorCode): string {
+  switch (errorCode) {
+    case VotifyErrorCode.LOGIN_UNAUTHORIZED:
+      return "A conta não existe ou a senha está incorreta.";
+    case VotifyErrorCode.LOGIN_ALREADY_LOGGED:
+      return "Você já está logado.";
+  }
+  return "Não foi possível fazer o login.";
 }

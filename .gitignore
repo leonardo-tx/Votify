@@ -5,6 +5,7 @@ target/
 *.jqwik-database
 
 # IntelliJ IDEA files - excluir arquivos pessoais, mas manter configurações de execução
+yarn.lock
 .idea/*
 !.idea/runConfigurations/
 !.idea/encodings.xml

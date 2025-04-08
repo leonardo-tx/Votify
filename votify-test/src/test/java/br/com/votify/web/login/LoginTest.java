@@ -1,10 +1,15 @@
 package br.com.votify.web.login;
 
+import br.com.votify.test.SeleniumHelper;
 import br.com.votify.web.BaseTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.ui.ExpectedCondition;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -15,11 +20,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class LoginTest extends BaseTest {
     private LoginPage page;
-    private static final String TEST_EMAIL = "testuser@example.com";
-    private static final String TEST_PASSWORD = "Test123456";
-    private static final String TEST_USERNAME = "testuser";
-    private static final String TEST_NAME = "Test User";
-    private static final String API_BASE_URL = "http://localhost:8081/";
+    private static final String TEST_EMAIL = "admin@votify.com.br";
+    private static final String TEST_PASSWORD = "admin123";
 
     protected LoginTest() {
         super("/login");
@@ -36,27 +38,13 @@ public class LoginTest extends BaseTest {
         page.submitButton.click();
     }
 
-    private void registerUser() {
-        RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-
-        String requestBody = String.format(
-            "{\"userName\":\"%s\",\"name\":\"%s\",\"email\":\"%s\",\"password\":\"%s\"}",
-            TEST_USERNAME, TEST_NAME, TEST_EMAIL, TEST_PASSWORD
-        );
-
-        HttpEntity<String> request = new HttpEntity<>(requestBody, headers);
-        restTemplate.postForObject(API_BASE_URL + "/auth/register", request, String.class);
-    }
-
     @Test
     public void checkLoginFormElements() {
-        assertTrue(page.emailInput.isDisplayed(), "Email input should be visible");
-        assertTrue(page.passwordInput.isDisplayed(), "Password input should be visible");
-        assertTrue(page.submitButton.isDisplayed(), "Submit button should be visible");
-        assertTrue(page.forgotPasswordLink.isDisplayed(), "Forgot password link should be visible");
-        assertTrue(page.createAccountLink.isDisplayed(), "Create account link should be visible");
+        assertTrue(SeleniumHelper.isInViewport(page.emailInput, webDriver), "Email input should be visible");
+        assertTrue(SeleniumHelper.isInViewport(page.passwordInput, webDriver), "Password input should be visible");
+        assertTrue(SeleniumHelper.isInViewport(page.submitButton, webDriver), "Submit button should be visible");
+        assertTrue(SeleniumHelper.isInViewport(page.forgotPasswordLink, webDriver), "Forgot password link should be visible");
+        assertTrue(SeleniumHelper.isInViewport(page.createAccountLink, webDriver), "Create account link should be visible");
     }
 
     @Test
@@ -77,30 +65,62 @@ public class LoginTest extends BaseTest {
     }
 
     @Test
-    public void testSuccessfulLogin() throws InterruptedException {
-        registerUser();
+    public void testSuccessfulLogin() {
         login(TEST_EMAIL, TEST_PASSWORD);
-        sleep(2000);
+
+        wait.until(ExpectedConditions.urlContains("/home"));
+
         String currentUrl = webDriver.getCurrentUrl();
         assertTrue(currentUrl.endsWith("/home"), "Should redirect to home page after successful login");
     }
 
     @Test
-    public void testLoginWithInvalidEmail() throws InterruptedException {
-        login("invalid@email.com", "12345678");
-        sleep(2000);
-        WebElement errorMessage = webDriver.findElement(By.className("text-red-500"));
-        assertTrue(errorMessage.isDisplayed(), "Error message should be displayed");
-        assertEquals("The account does not exist or the password is incorrect.", errorMessage.getText(), "Should show invalid credentials message");
+    public void testLoginAlreadyLoggedIn() {
+        login(TEST_EMAIL, TEST_PASSWORD);
+        wait.until(ExpectedConditions.urlContains("/home"));
+
+        webDriver.get(BASE_URL + "/login");
+        wait.until(ExpectedConditions.urlContains("/login"));
+
+        login(TEST_EMAIL, TEST_PASSWORD);
+        WebElement errorMessage = wait.until(d -> d.findElement(By.id("login-alert")));
+        assertTrue(SeleniumHelper.isInViewport(errorMessage, webDriver), "Error message should be displayed");
+        assertEquals("Você já está logado.", errorMessage.getText(), "Should show already logged in message");
     }
 
     @Test
-    public void testLoginWithInvalidPassword() throws InterruptedException {
+    public void testSuccessfulLoginAccessibility() {
+        new Actions(webDriver)
+                .sendKeys(page.emailInput, TEST_EMAIL)
+                .sendKeys(Keys.TAB)
+                .sendKeys(TEST_PASSWORD)
+                .sendKeys(Keys.TAB)
+                .sendKeys(Keys.TAB)
+                .sendKeys(Keys.ENTER)
+                .perform();
+
+        wait.until(ExpectedConditions.urlContains("/home"));
+
+        String currentUrl = webDriver.getCurrentUrl();
+        assertTrue(currentUrl.endsWith("/home"), "Should redirect to home page after successful login");
+    }
+
+    @Test
+    public void testLoginWithInvalidEmail() {
+        login("invalid@email.com", "12345678");
+
+        WebElement errorMessage = wait.until(d -> d.findElement(By.id("login-alert")));
+        assertTrue(SeleniumHelper.isInViewport(errorMessage, webDriver), "Error message should be displayed");
+        assertEquals("A conta não existe ou a senha está incorreta.", errorMessage.getText(), "Should show invalid credentials message");
+    }
+
+    @Test
+    public void testLoginWithInvalidPassword() {
         login("123@gmail.com", "wrongpassword");
-        sleep(2000);
-        WebElement errorMessage = webDriver.findElement(By.className("text-red-500"));
-        assertTrue(errorMessage.isDisplayed(), "Error message should be displayed");
-        assertEquals("The account does not exist or the password is incorrect.", errorMessage.getText(), "Should show invalid credentials message");
+
+        WebElement errorMessage = wait.until(d -> d.findElement(By.id("login-alert")));
+        assertTrue(SeleniumHelper.isInViewport(errorMessage, webDriver), "Error message should be displayed");
+        assertEquals("A conta não existe ou a senha está incorreta.", errorMessage.getText(), "Should show invalid credentials message");
     }
 
     @Test
