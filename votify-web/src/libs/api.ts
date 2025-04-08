@@ -44,6 +44,6 @@ export const login = async (
     const { data } = await api.post<ApiResponse<UserLoginDTO>>('/auth/login', credentials);
     return data;
   } catch (error: any) {
-    return error.response;
+    return error.response.data;
   }
 };

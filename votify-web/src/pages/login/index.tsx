@@ -25,7 +25,7 @@ export default function LoginPage() {
       if (response.success) {
         router.push('/home');
       } else {
-        setError(response.data?.errorMessage);
+        setError(response.errorMessage);
       } 
     } catch (error: any) {
       setError(error.message);
