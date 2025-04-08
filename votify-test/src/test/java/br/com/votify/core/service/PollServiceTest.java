@@ -214,11 +214,11 @@ public class PollServiceTest {
     public void findAllByUserId() throws VotifyException {
         Pageable pageable = PageRequest.of(0, 10);
         Page<Poll> pollPage = new PageImpl<>(testPolls, pageable, testPolls.size());
-        
+
         when(pollRepository.findAllByResponsibleId(eq(1L), any(Pageable.class))).thenReturn(pollPage);
-        
+
         Page<Poll> result = pollService.findAllByUserId(1L, 0, 10);
-        
+
         assertNotNull(result);
         assertEquals(4, result.getContent().size());
     }
@@ -242,4 +242,22 @@ public class PollServiceTest {
         );
         assertEquals(VotifyErrorCode.POLL_NOT_FOUND, exception.getErrorCode());
     }
+
+    @Test
+    public void findAllActivePolls() throws VotifyException {
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Poll> activePollsPage = new PageImpl<>(List.of(testPolls.get(0), testPolls.get(2)), pageable, 2);
+
+        when(pollRepository.findAllByActives(eq(pageable))).thenReturn(activePollsPage);
+
+        Page<Poll> result = pollService.findAllActivePolls(0, 10);
+
+        assertNotNull(result);
+        assertEquals(2, result.getContent().size());
+        assertTrue(result.getContent().contains(testPolls.get(0)));  // Active Poll 1
+        assertTrue(result.getContent().contains(testPolls.get(2)));  // Active Poll 3
+        assertFalse(result.getContent().contains(testPolls.get(1)));  // Inactive Poll 2
+        assertFalse(result.getContent().contains(testPolls.get(3)));  // Inactive Poll 4
+    }
+
 }

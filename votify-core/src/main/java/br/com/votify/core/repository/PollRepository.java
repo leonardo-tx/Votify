@@ -18,4 +18,15 @@ public interface PollRepository extends JpaRepository<Poll, Long> {
         ORDER BY p.startDate DESC
         """)
     Page<Poll> findAllByResponsibleId(@Param("userId") Long userId, Pageable pageable);
+
+    @Query("""
+    SELECT p
+    FROM Poll p
+    WHERE p.startDate <= CURRENT_DATE 
+    AND p.endDate > CURRENT_DATE
+    ORDER BY p.endDate ASC
+""")
+    Page<Poll> findAllByActives(Pageable pageable);
+
 }
+
