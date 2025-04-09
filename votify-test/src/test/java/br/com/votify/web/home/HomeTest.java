@@ -2,7 +2,7 @@ package br.com.votify.web.home;
 
 import br.com.votify.web.BaseTest;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestTemplate;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
@@ -25,8 +25,8 @@ public class HomeTest extends BaseTest {
     void setupBeforeEach() {
         page = new HomePage(webDriver);
     }
-    
-    @Test
+
+    @TestTemplate
     public void testSearchForA() {
         new Actions(webDriver)
                 .sendKeys(page.navSearchPoll, "a")
@@ -48,8 +48,8 @@ public class HomeTest extends BaseTest {
                 "The URL must go to the search page and at the page 0."
         );
     }
-    
-    @Test
+
+    @TestTemplate
     public void testSearchForEmptyStringRedirectToHome() {
         new Actions(webDriver)
                 .sendKeys(page.navSearchPoll, " ")
@@ -65,7 +65,7 @@ public class HomeTest extends BaseTest {
         );
     }
 
-    @Test
+    @TestTemplate
     public void testHomeActivePolls() {
         int totalPollCount = 0;
         int currentPage = 1;

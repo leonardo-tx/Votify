@@ -3,19 +3,13 @@ package br.com.votify.web.login;
 import br.com.votify.test.SeleniumHelper;
 import br.com.votify.web.BaseTest;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestTemplate;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
-import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.web.client.RestTemplate;
 
-import static java.lang.Thread.sleep;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class LoginTest extends BaseTest {
@@ -38,7 +32,7 @@ public class LoginTest extends BaseTest {
         page.submitButton.click();
     }
 
-    @Test
+    @TestTemplate
     public void checkLoginFormElements() {
         assertTrue(SeleniumHelper.isInViewport(page.emailInput, webDriver), "Email input should be visible");
         assertTrue(SeleniumHelper.isInViewport(page.passwordInput, webDriver), "Password input should be visible");
@@ -47,34 +41,35 @@ public class LoginTest extends BaseTest {
         assertTrue(SeleniumHelper.isInViewport(page.createAccountLink, webDriver), "Create account link should be visible");
     }
 
-    @Test
+    @TestTemplate
     public void checkLoginFormPlaceholders() {
         assertEquals("Email", page.emailInput.getAttribute("placeholder"), "Email input placeholder should be 'Email'");
         assertEquals("Senha", page.passwordInput.getAttribute("placeholder"), "Password input placeholder should be 'Senha'");
     }
 
-    @Test
+    @TestTemplate
     public void checkLoginFormRequiredFields() {
-        assertTrue(page.emailInput.getAttribute("required") != null, "Email input should be required");
-        assertTrue(page.passwordInput.getAttribute("required") != null, "Password input should be required");
+        assertNotNull(page.emailInput.getAttribute("required"), "Email input should be required");
+        assertNotNull(page.passwordInput.getAttribute("required"), "Password input should be required");
     }
 
-    @Test
+    @TestTemplate
     public void checkLoginFormButtonText() {
         assertEquals("Entrar", page.submitButton.getText(), "Submit button text should be 'Entrar'");
     }
 
-    @Test
+    @TestTemplate
     public void testSuccessfulLogin() {
         login(TEST_EMAIL, TEST_PASSWORD);
 
         wait.until(ExpectedConditions.urlContains("/home"));
 
         String currentUrl = webDriver.getCurrentUrl();
+        assertNotNull(currentUrl);
         assertTrue(currentUrl.endsWith("/home"), "Should redirect to home page after successful login");
     }
 
-    @Test
+    @TestTemplate
     public void testLoginAlreadyLoggedIn() {
         login(TEST_EMAIL, TEST_PASSWORD);
         wait.until(ExpectedConditions.urlContains("/home"));
@@ -88,7 +83,7 @@ public class LoginTest extends BaseTest {
         assertEquals("Você já está logado.", errorMessage.getText(), "Should show already logged in message");
     }
 
-    @Test
+    @TestTemplate
     public void testSuccessfulLoginAccessibility() {
         new Actions(webDriver)
                 .sendKeys(page.emailInput, TEST_EMAIL)
@@ -100,12 +95,13 @@ public class LoginTest extends BaseTest {
                 .perform();
 
         wait.until(ExpectedConditions.urlContains("/home"));
-
         String currentUrl = webDriver.getCurrentUrl();
+
+        assertNotNull(currentUrl);
         assertTrue(currentUrl.endsWith("/home"), "Should redirect to home page after successful login");
     }
 
-    @Test
+    @TestTemplate
     public void testLoginWithInvalidEmail() {
         login("invalid@email.com", "12345678");
 
@@ -114,7 +110,7 @@ public class LoginTest extends BaseTest {
         assertEquals("A conta não existe ou a senha está incorreta.", errorMessage.getText(), "Should show invalid credentials message");
     }
 
-    @Test
+    @TestTemplate
     public void testLoginWithInvalidPassword() {
         login("123@gmail.com", "wrongpassword");
 
@@ -123,17 +119,21 @@ public class LoginTest extends BaseTest {
         assertEquals("A conta não existe ou a senha está incorreta.", errorMessage.getText(), "Should show invalid credentials message");
     }
 
-    @Test
+    @TestTemplate
     public void testLoginWithEmptyEmail() {
         login("", "12345678");
         String currentUrl = webDriver.getCurrentUrl();
+
+        assertNotNull(currentUrl);
         assertTrue(currentUrl.endsWith("/login"), "Should stay on login page with empty email");
     }
 
-    @Test
+    @TestTemplate
     public void testLoginWithEmptyPassword() {
         login("123@gmail.com", "");
         String currentUrl = webDriver.getCurrentUrl();
+
+        assertNotNull(currentUrl);
         assertTrue(currentUrl.endsWith("/login"), "Should stay on login page with empty password");
     }
 } 
