@@ -144,7 +144,7 @@ public class PollControllerTest {
                 .andExpect(jsonPath("data.content", hasSize(0)));
     }
 
-    // Testes Andre
+
     @Test
     @Order(1)
     public void testGetPollByIdNotAuthenticated() throws Exception {
@@ -234,18 +234,41 @@ public class PollControllerTest {
     @Test
     @Order(3)
     public void testGetPollWithUserVote() throws Exception {
-        // Login do usuário
+
         Cookie[] cookies = MockMvcHelper.login(
                 mockMvc, objectMapper, "common@votify.com.br", "password123"
         );
 
-        // Apenas busca a enquete e valida que o usuário já votou
         ResultActions result = mockMvc.perform(get("/polls/{id}", 1)
                 .cookie(cookies));
 
         MockMvcHelper.testSuccessfulResponse(result, HttpStatus.OK)
+                .andExpect(jsonPath("data.id", is(1)))
+                .andExpect(jsonPath("data.title", is("Test Poll")))
+                .andExpect(jsonPath("data.description", is("Test Description")))
+                .andExpect(jsonPath("data.voteOptions", hasSize(5)))
+                .andExpect(jsonPath("data.voteOptions[0].name", is("Opção 1")))
                 .andExpect(jsonPath("data.myChoices", greaterThan(0)));
     }
+
+    @Test
+    @Order(0)
+    public void testGetPollWithoutUserVote() throws Exception {
+        Cookie[] cookies = MockMvcHelper.login(
+                mockMvc, objectMapper, "common@votify.com.br", "password123"
+        );
+
+        ResultActions result = mockMvc.perform(get("/polls/{id}", 1).cookie(cookies));
+
+        MockMvcHelper.testSuccessfulResponse(result, HttpStatus.OK)
+                .andExpect(jsonPath("data.id", is(1)))
+                .andExpect(jsonPath("data.title", is("Test Poll")))
+                .andExpect(jsonPath("data.description", is("Test Description")))
+                .andExpect(jsonPath("data.voteOptions", hasSize(5)))
+                .andExpect(jsonPath("data.voteOptions[0].name", is("Opção 1")))
+                .andExpect(jsonPath("data.myChoices", is(0)));
+    }
+
 
     @Test
     @Order(99)
