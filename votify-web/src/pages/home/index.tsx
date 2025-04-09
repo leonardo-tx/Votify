@@ -227,13 +227,11 @@ export const getServerSideProps: GetServerSideProps<Props> = async () => {
       continue;
     }
 
-    try {
-      const user = (await getUserById(poll.responsibleId)).data;
+    const user = (await getUserById(poll.responsibleId)).data;
+    pollsWithUserData.push({ poll, user: user });
 
-      pollsWithUserData.push({ poll, user: user ?? null });
-      users.set(user!.id, user!);
-    } catch {
-      pollsWithUserData.push({ poll, user: null });
+    if (user !== null) {
+      users.set(user.id, user);
     }
   }
 
