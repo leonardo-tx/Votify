@@ -29,9 +29,6 @@ jobs:
           java-version: '17'
           distribution: 'adopt'
 
-      - name: Setup Chrome
-        uses: browser-actions/setup-chrome@v1
-
       - name: Install web dependencies
         run: npm install
         working-directory: ./votify-web

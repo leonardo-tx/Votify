@@ -2,7 +2,7 @@ package br.com.votify.web.home;
 
 import br.com.votify.web.BaseTest;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestTemplate;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
@@ -22,7 +22,7 @@ public class HomeTest extends BaseTest {
         page = new HomePage(webDriver);
     }
 
-    @Test
+    @TestTemplate
     public void checkPollListSize() {
         List<WebElement> pollCards = page.pollList.findElements(By.xpath("./*"));
         assertEquals(24, pollCards.size());
