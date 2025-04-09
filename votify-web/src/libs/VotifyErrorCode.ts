@@ -1,4 +1,5 @@
 enum VotifyErrorCode {
+  CLIENT_CONNECTION_FAILED = "client.connection.failed",
   USER_NAME_EMPTY = "user.name.empty",
   USER_NAME_INVALID_LENGTH = "user.name.invalid.length",
   USER_NAME_INVALID_CHARACTER = "user.name.invalid.character",

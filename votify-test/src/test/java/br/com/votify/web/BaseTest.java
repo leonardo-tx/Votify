@@ -10,9 +10,11 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.UUID;
 
@@ -27,6 +29,7 @@ public abstract class BaseTest {
 
     protected final String url;
     protected WebDriver webDriver;
+    protected WebDriverWait wait;
 
     protected BaseTest(String path) {
         url = BASE_URL + path;
@@ -48,6 +51,8 @@ public abstract class BaseTest {
         webDriver = new ChromeDriver(options);
         webDriver.manage().window().maximize();
         webDriver.get(url);
+
+        wait = new WebDriverWait(webDriver, Duration.ofSeconds(5));
     }
 
     @AfterEach
@@ -79,8 +84,8 @@ public abstract class BaseTest {
         WebElement header = elements.get(0);
 
         assertEquals(1, header.findElements(By.id("logo-home-anchor")).size());
-        assertEquals(1, header.findElements(By.id("signin-link")).size());
-        assertEquals(1, header.findElements(By.id("signup-link")).size());
+        assertEquals(1, header.findElements(By.id("login-button")).size());
+        assertEquals(1, header.findElements(By.id("signup-button")).size());
 
         List<WebElement> navigators = header.findElements(By.tagName("nav"));
         assertEquals(1, navigators.size());
