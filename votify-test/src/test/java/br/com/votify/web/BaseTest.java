@@ -3,12 +3,11 @@ package br.com.votify.web;
 import br.com.votify.api.VotifyApiApplication;
 import br.com.votify.test.SeleniumHelper;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -16,16 +15,15 @@ import org.springframework.test.annotation.DirtiesContext;
 
 import java.time.Duration;
 import java.util.List;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest(classes = VotifyApiApplication.class, webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@ExtendWith(BrowsersProviderExtension.class)
 public abstract class BaseTest {
     public static final String BASE_URL = "http://localhost:3000";
-    private static final ChromeOptions options = new ChromeOptions();
 
     protected final String url;
     protected WebDriver webDriver;
@@ -35,20 +33,9 @@ public abstract class BaseTest {
         url = BASE_URL + path;
     }
 
-    @BeforeAll
-    static void setupBeforeAll() {
-        String ci = System.getenv("CI");
-        if (ci == null || !ci.equals("true")) return;
-
-        options.addArguments("--no-sandbox");
-        options.addArguments("--disable-dev-shm-usage");
-        options.addArguments("--headless");
-
-    }
-
     @BeforeEach
-    void setupBeforeEach() {
-        webDriver = new ChromeDriver(options);
+    void setupBeforeEach(WebDriver webDriver) {
+        this.webDriver = webDriver;
         webDriver.manage().window().maximize();
         webDriver.get(url);
 
@@ -61,7 +48,7 @@ public abstract class BaseTest {
         webDriver = null;
     }
 
-    @Test
+    @TestTemplate
     @Order(-1)
     public void checkVisibilityOfHeader() {
         WebElement header = webDriver.findElement(By.tagName("header"));
@@ -75,7 +62,7 @@ public abstract class BaseTest {
         }
     }
 
-    @Test
+    @TestTemplate
     @Order(-1)
     public void checkHeader() {
         List<WebElement> elements = webDriver.findElements(By.tagName("header"));
@@ -96,7 +83,7 @@ public abstract class BaseTest {
         assertEquals(1, nav.findElements(By.id("nav-search-poll")).size());
     }
 
-    @Test
+    @TestTemplate
     @Order(-1)
     public void checkFooter() {
         List<WebElement> elements = webDriver.findElements(By.tagName("footer"));
