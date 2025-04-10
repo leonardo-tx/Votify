@@ -54,6 +54,9 @@ public enum VotifyErrorCode {
     VOTE_OPTION_NAME_INVALID_LENGTH("vote.option.name.invalid.length", HttpStatus.BAD_REQUEST),
     PASSWORD_RESET_CODE_INVALID("password.reset.code.invalid", HttpStatus.BAD_REQUEST),
     PASSWORD_RESET_REQUEST_EXISTS("password.reset.request.exists", HttpStatus.BAD_REQUEST),
+    POLL_CANCEL_UNAUTHORIZED("poll.cancel.unauthorized", HttpStatus.FORBIDDEN),
+    POLL_NOT_OWNER("poll.not.owner", HttpStatus.FORBIDDEN),
+    POLL_CANNOT_CANCEL_FINISHED("poll.cannot.cancel.finished", HttpStatus.BAD_REQUEST),
     PASSWORD_RESET_EMAIL_NOT_FOUND("password.reset.email.not.found", HttpStatus.BAD_REQUEST);
 
     private final String messageKey;

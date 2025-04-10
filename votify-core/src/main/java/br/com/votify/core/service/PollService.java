@@ -83,4 +83,23 @@ public class PollService {
         }
         return optionalPoll.get();
     }
+
+    @Transactional
+    public void cancelPoll(Long pollId, User user) throws VotifyException {
+        Poll poll = getByIdOrThrow(pollId);
+        if (!poll.getResponsible().getId().equals(user.getId())) {
+            throw new VotifyException(VotifyErrorCode.POLL_NOT_OWNER);
+        }
+
+        LocalDateTime now = LocalDateTime.now(ZoneId.of("UTC"));
+
+        if (now.isBefore(poll.getStartDate())) {
+            pollRepository.delete(poll);
+        } else if (now.isAfter(poll.getEndDate())) {
+            throw new VotifyException(VotifyErrorCode.POLL_CANNOT_CANCEL_FINISHED);
+        } else {
+            poll.setArchived(true);
+            pollRepository.save(poll);
+        }
+    }
 }
