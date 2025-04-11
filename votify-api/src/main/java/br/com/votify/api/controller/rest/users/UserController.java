@@ -1,4 +1,4 @@
-package br.com.votify.api.controller.users;
+package br.com.votify.api.controller.rest.users;
 
 import br.com.votify.api.configuration.SecurityConfig;
 import br.com.votify.core.decorators.NeedsUserContext;
