@@ -10,7 +10,7 @@ import { PollDetailedView } from "./polls/PollDetailedView";
 import VoteInsertDTO from "./polls/VoteInsertDTO";
 
 export const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
+  baseURL: "http://" + process.env.NEXT_PUBLIC_API_BASE_URL + "/api",
   withCredentials: true,
 });
 
