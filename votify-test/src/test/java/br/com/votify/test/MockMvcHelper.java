@@ -26,7 +26,7 @@ public class MockMvcHelper {
             String password
     ) throws Exception {
         UserLoginDTO userLoginDTO = new UserLoginDTO(email, password);
-        MvcResult mvcResult = mockMvc.perform(post("/auth/login")
+        MvcResult mvcResult = mockMvc.perform(post("/api/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(userLoginDTO))
         ).andReturn();

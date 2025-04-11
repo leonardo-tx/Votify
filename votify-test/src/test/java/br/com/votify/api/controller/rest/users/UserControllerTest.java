@@ -1,4 +1,4 @@
-package br.com.votify.api.controller.users;
+package br.com.votify.api.controller.rest.users;
 
 import br.com.votify.core.utils.exceptions.VotifyErrorCode;
 import br.com.votify.dto.users.UserUpdateEmailRequestDTO;
@@ -35,7 +35,7 @@ public class UserControllerTest {
     @Test
     @Order(0)
     public void getUserByIdAsGuest() throws Exception {
-        ResultActions resultActions = mockMvc.perform(get("/users/{id}", 2));
+        ResultActions resultActions = mockMvc.perform(get("/api/users/{id}", 2));
         MockMvcHelper.testSuccessfulResponse(resultActions, HttpStatus.OK)
                 .andExpect(jsonPath("data.id", is(2)))
                 .andExpect(jsonPath("data.userName", is("moderator")))
@@ -50,7 +50,7 @@ public class UserControllerTest {
         Cookie[] cookies = MockMvcHelper.login(
                 mockMvc, objectMapper, "common@votify.com.br", "password123"
         );
-        ResultActions resultActions = mockMvc.perform(get("/users/{id}", 1)
+        ResultActions resultActions = mockMvc.perform(get("/api/users/{id}", 1)
                 .cookie(cookies)
         );
         MockMvcHelper.testSuccessfulResponse(resultActions, HttpStatus.OK)
@@ -67,7 +67,7 @@ public class UserControllerTest {
         Cookie[] cookies = MockMvcHelper.login(
                 mockMvc, objectMapper, "moderator@votify.com.br", "moderator321"
         );
-        ResultActions resultActions = mockMvc.perform(get("/users/{id}", 1)
+        ResultActions resultActions = mockMvc.perform(get("/api/users/{id}", 1)
                 .cookie(cookies)
         );
         MockMvcHelper.testSuccessfulResponse(resultActions, HttpStatus.OK)
@@ -84,7 +84,7 @@ public class UserControllerTest {
         Cookie[] cookies = MockMvcHelper.login(
                 mockMvc, objectMapper, "admin@votify.com.br", "admin123"
         );
-        ResultActions resultActions = mockMvc.perform(get("/users/{id}", 3)
+        ResultActions resultActions = mockMvc.perform(get("/api/users/{id}", 3)
                 .cookie(cookies)
         );
         MockMvcHelper.testSuccessfulResponse(resultActions, HttpStatus.OK)
@@ -101,7 +101,7 @@ public class UserControllerTest {
         Cookie[] cookies = MockMvcHelper.login(
                 mockMvc, objectMapper, "common@votify.com.br", "password123"
         );
-        ResultActions resultActions = mockMvc.perform(get("/users/me").cookie(cookies));
+        ResultActions resultActions = mockMvc.perform(get("/api/users/me").cookie(cookies));
         MockMvcHelper.testSuccessfulResponse(resultActions, HttpStatus.OK)
                 .andExpect(jsonPath("data.id", is(3)))
                 .andExpect(jsonPath("data.userName", is("common")))
@@ -113,14 +113,14 @@ public class UserControllerTest {
     @Test
     @Order(0)
     public void getSelfNotLogged() throws Exception {
-        ResultActions resultActions = mockMvc.perform(get("/users/me"));
+        ResultActions resultActions = mockMvc.perform(get("/api/users/me"));
         MockMvcHelper.testUnsuccessfulResponse(resultActions, VotifyErrorCode.COMMON_UNAUTHORIZED);
     }
 
     @Test
     @Order(2)
     public void deleteSelfNotLogged() throws Exception {
-        ResultActions resultActions = mockMvc.perform(delete("/users/me"));
+        ResultActions resultActions = mockMvc.perform(delete("/api/users/me"));
         MockMvcHelper.testUnsuccessfulResponse(resultActions, VotifyErrorCode.COMMON_UNAUTHORIZED);
     }
 
@@ -130,7 +130,7 @@ public class UserControllerTest {
         Cookie[] cookies = MockMvcHelper.login(
                 mockMvc, objectMapper, "common@votify.com.br", "password123"
         );
-        ResultActions resultActions = mockMvc.perform(delete("/users/me").cookie(cookies));
+        ResultActions resultActions = mockMvc.perform(delete("/api/users/me").cookie(cookies));
         MockMvcHelper.testSuccessfulResponse(resultActions, HttpStatus.OK)
                 .andExpect(jsonPath("data", is(nullValue())));
     }

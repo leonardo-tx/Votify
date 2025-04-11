@@ -1,4 +1,4 @@
-package br.com.votify.api.controller.polls;
+package br.com.votify.api.controller.rest.polls;
 
 import br.com.votify.core.utils.exceptions.VotifyErrorCode;
 import br.com.votify.dto.polls.PollInsertDTO;
@@ -64,7 +64,7 @@ public class PollControllerTest {
         Cookie[] cookies = MockMvcHelper.login(
                 mockMvc, objectMapper, "common@votify.com.br", "password123"
         );
-        ResultActions resultActions = mockMvc.perform(post("/polls")
+        ResultActions resultActions = mockMvc.perform(post("/api/polls")
                 .cookie(cookies)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(pollInsertDTO)));
@@ -85,7 +85,7 @@ public class PollControllerTest {
     @Test
     @Order(1)
     public void testGetUserPolls() throws Exception {
-        ResultActions resultActions = mockMvc.perform(get("/polls/user/{id}", 3));
+        ResultActions resultActions = mockMvc.perform(get("/api/polls/user/{id}", 3));
         MockMvcHelper.testSuccessfulResponse(resultActions, HttpStatus.OK)
                 .andExpect(jsonPath("data.pageNumber", is(0)))
                 .andExpect(jsonPath("data.pageSize", is(10)))
@@ -109,7 +109,7 @@ public class PollControllerTest {
                 mockMvc, objectMapper, "common@votify.com.br", "password123"
         );
 
-        ResultActions resultActions = mockMvc.perform(get("/polls/me")
+        ResultActions resultActions = mockMvc.perform(get("/api/polls/me")
                 .cookie(cookies));
         MockMvcHelper.testSuccessfulResponse(resultActions, HttpStatus.OK)
                 .andExpect(jsonPath("data.pageNumber", is(0)))
@@ -130,7 +130,7 @@ public class PollControllerTest {
     @Test
     @Order(1)
     public void testGetMyPollsWhenNotAuthenticated() throws Exception {
-        ResultActions resultActions = mockMvc.perform(get("/polls/me"));
+        ResultActions resultActions = mockMvc.perform(get("/api/polls/me"));
         MockMvcHelper.testSuccessfulResponse(resultActions, HttpStatus.OK)
                 .andExpect(jsonPath("data.pageNumber", is(0)))
                 .andExpect(jsonPath("data.pageSize", is(10)))
@@ -149,7 +149,7 @@ public class PollControllerTest {
         );
 
         VoteInsertDTO voteInsertDTO = new VoteInsertDTO(16);
-        ResultActions resultActions = mockMvc.perform(post("/polls/{id}/vote", 1)
+        ResultActions resultActions = mockMvc.perform(post("/api/polls/{id}/vote", 1)
                 .cookie(cookies)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(voteInsertDTO)));
@@ -165,7 +165,7 @@ public class PollControllerTest {
         );
 
         VoteInsertDTO voteInsertDTO = new VoteInsertDTO(31);
-        ResultActions resultActions = mockMvc.perform(post("/polls/{id}/vote", 1)
+        ResultActions resultActions = mockMvc.perform(post("/api/polls/{id}/vote", 1)
                 .cookie(cookies)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(voteInsertDTO)));
@@ -180,7 +180,7 @@ public class PollControllerTest {
         );
 
         VoteInsertDTO voteInsertDTO = new VoteInsertDTO(0);
-        ResultActions resultActions = mockMvc.perform(post("/polls/{id}/vote", 1)
+        ResultActions resultActions = mockMvc.perform(post("/api/polls/{id}/vote", 1)
                 .cookie(cookies)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(voteInsertDTO)));
@@ -191,7 +191,7 @@ public class PollControllerTest {
     @Order(1)
     public void testVoteWhenNotAuthenticated() throws Exception {
         VoteInsertDTO voteInsertDTO = new VoteInsertDTO(1);
-        ResultActions resultActions = mockMvc.perform(post("/polls/{id}/vote", 1)
+        ResultActions resultActions = mockMvc.perform(post("/api/polls/{id}/vote", 1)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(voteInsertDTO)));
         MockMvcHelper.testUnsuccessfulResponse(resultActions, VotifyErrorCode.COMMON_UNAUTHORIZED);
@@ -205,7 +205,7 @@ public class PollControllerTest {
         );
 
         VoteInsertDTO voteInsertDTO = new VoteInsertDTO(4);
-        ResultActions resultActions = mockMvc.perform(post("/polls/{id}/vote", 1)
+        ResultActions resultActions = mockMvc.perform(post("/api/polls/{id}/vote", 1)
                 .cookie(cookies)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(voteInsertDTO)));

@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -24,6 +25,7 @@ import java.util.Optional;
 public class PollService {
     private final PollRepository pollRepository;
     private final VoteRepository voteRepository;
+    private final SimpMessagingTemplate simpMessagingTemplate;
 
     public Poll createPoll(Poll poll, User responsible) throws VotifyException {
         LocalDateTime now = LocalDateTime.now(ZoneId.of("UTC"));
@@ -62,7 +64,13 @@ public class PollService {
                 voteOption.incrementCount();
             }
         }
-        return voteRepository.save(vote);
+        pollRepository.save(poll);
+        Vote createdVote = voteRepository.save(vote);
+        simpMessagingTemplate.convertAndSend(
+                "/receiver/polls/" + poll.getId(),
+                Optional.empty()
+        );
+        return createdVote;
     }
     
     public Page<Poll> findAllByUserId(Long userId, int page, int size) throws VotifyException {
