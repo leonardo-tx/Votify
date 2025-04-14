@@ -17,6 +17,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -26,6 +27,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -36,6 +38,9 @@ public class PollServiceTest {
 
     @Mock
     private VoteRepository voteRepository;
+
+    @Mock
+    private SimpMessagingTemplate simpMessagingTemplate;
 
     @InjectMocks
     private PollService pollService;
@@ -149,12 +154,15 @@ public class PollServiceTest {
 
         VoteIdentifier voteId = new VoteIdentifier(poll.getId(), testUser.getId());
 
+        when(pollRepository.save(poll)).thenReturn(poll);
         when(voteRepository.save(vote)).thenReturn(vote);
         when(voteRepository.existsById(voteId)).thenReturn(false);
 
         Vote createdVote = assertDoesNotThrow(() -> pollService.vote(vote, poll, testUser));
         assertEquals(new VoteIdentifier(poll.getId(), testUser.getId()), createdVote.getId());
         assertEquals(1, poll.getVoteOptions().get(2).getCount());
+
+        verify(simpMessagingTemplate).convertAndSend("/receiver/polls/1", Optional.empty());
     }
 
     @Test
