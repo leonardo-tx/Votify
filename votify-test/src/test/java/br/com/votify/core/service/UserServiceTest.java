@@ -301,4 +301,64 @@ public class UserServiceTest {
         verify(passwordEncoderService, never()).encryptPassword(anyString());
         verify(userRepository, never()).save(any(User.class));
     }
+
+    @Test
+    void updateUserEmail_Success() throws VotifyException {
+        String newEmail = "jhonny.new@nightcity.2077";
+        when(contextService.getUserOrThrow()).thenReturn(user);
+        when(userRepository.existsByEmail(newEmail)).thenReturn(false);
+        when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArguments()[0]);
+
+        User updatedUser = userService.updateUserEmail(newEmail);
+
+        assertNotNull(updatedUser);
+        assertEquals(newEmail, updatedUser.getEmail());
+        verify(userRepository).save(user);
+    }
+
+    @Test
+    void updateUserEmail_Fail_EmailExists() throws VotifyException {
+        String existingEmail = "rogue@afterlife.2077";
+        when(contextService.getUserOrThrow()).thenReturn(user);
+        when(userRepository.existsByEmail(existingEmail)).thenReturn(true);
+
+        VotifyException exception = assertThrows(VotifyException.class, () -> {
+            userService.updateUserEmail(existingEmail);
+        });
+
+        assertEquals(VotifyErrorCode.EMAIL_ALREADY_EXISTS, exception.getErrorCode());
+        assertEquals(user.getEmail(), user.getEmail());
+        verify(userRepository, never()).save(any(User.class));
+    }
+
+    @Test
+    void updateUserEmail_Fail_EmailNullOrBlank() throws VotifyException {
+        when(contextService.getUserOrThrow()).thenReturn(user);
+
+        VotifyException exceptionNull = assertThrows(VotifyException.class, () -> {
+            userService.updateUserEmail(null);
+        });
+        assertEquals(VotifyErrorCode.EMAIL_INVALID, exceptionNull.getErrorCode());
+
+        VotifyException exceptionBlank = assertThrows(VotifyException.class, () -> {
+            userService.updateUserEmail("   ");
+        });
+        assertEquals(VotifyErrorCode.EMAIL_INVALID, exceptionBlank.getErrorCode());
+
+        assertEquals(user.getEmail(), user.getEmail());
+        verify(userRepository, never()).save(any(User.class));
+    }
+
+    @Test
+    void updateUserEmail_SameEmail_NoChange() throws VotifyException {
+        String sameEmail = user.getEmail();
+        when(contextService.getUserOrThrow()).thenReturn(user);
+
+        User resultUser = userService.updateUserEmail(sameEmail);
+
+        assertNotNull(resultUser);
+        assertEquals(sameEmail, resultUser.getEmail());
+        verify(userRepository, never()).existsByEmail(anyString());
+        verify(userRepository, never()).save(any(User.class));
+    }
 }
