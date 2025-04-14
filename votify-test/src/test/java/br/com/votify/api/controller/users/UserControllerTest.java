@@ -1,6 +1,9 @@
 package br.com.votify.api.controller.users;
 
 import br.com.votify.core.utils.exceptions.VotifyErrorCode;
+import br.com.votify.dto.users.UserUpdateEmailRequestDTO;
+import br.com.votify.dto.users.UserUpdateInfoRequestDTO;
+import br.com.votify.dto.users.UserUpdatePasswordRequestDTO;
 import br.com.votify.test.MockMvcHelper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.Cookie;
@@ -130,5 +133,136 @@ public class UserControllerTest {
         ResultActions resultActions = mockMvc.perform(delete("/users/me").cookie(cookies));
         MockMvcHelper.testSuccessfulResponse(resultActions, HttpStatus.OK)
                 .andExpect(jsonPath("data", is(nullValue())));
+    }
+
+
+    @Test
+    @Order(1)
+    public void updatePassword_Success() throws Exception {
+        Cookie[] cookies = MockMvcHelper.login(
+                mockMvc, objectMapper, "moderator@votify.com.br", "moderator321"
+        );
+        UserUpdatePasswordRequestDTO requestDTO = new UserUpdatePasswordRequestDTO("moderator321", "newSecurePass123");
+
+        ResultActions resultActions = mockMvc.perform(put("/users/me/password")
+                .cookie(cookies)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(requestDTO)));
+
+        MockMvcHelper.testSuccessfulResponse(resultActions, HttpStatus.OK)
+                .andExpect(jsonPath("data", is(nullValue())));
+
+        MockMvcHelper.loginExpectingError(
+                mockMvc, objectMapper, "moderator@votify.com.br", "moderator321", VotifyErrorCode.LOGIN_UNAUTHORIZED
+        );
+
+        MockMvcHelper.login(mockMvc, objectMapper, "moderator@votify.com.br", "newSecurePass123");
+    }
+
+    @Test
+    @Order(1)
+    public void updatePassword_Fail_InvalidOldPassword() throws Exception {
+        Cookie[] cookies = MockMvcHelper.login(
+                mockMvc, objectMapper, "common@votify.com.br", "password123"
+        );
+        UserUpdatePasswordRequestDTO requestDTO = new UserUpdatePasswordRequestDTO("wrongOldPassword", "newPass");
+
+        ResultActions resultActions = mockMvc.perform(put("/users/me/password")
+                .cookie(cookies)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(requestDTO)));
+
+        MockMvcHelper.testUnsuccessfulResponse(resultActions, VotifyErrorCode.INVALID_OLD_PASSWORD);
+    }
+
+    @Test
+    @Order(1)
+    public void updatePassword_Fail_NotLogged() throws Exception {
+        UserUpdatePasswordRequestDTO requestDTO = new UserUpdatePasswordRequestDTO("anyPassword", "newPass");
+
+        ResultActions resultActions = mockMvc.perform(put("/users/me/password")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(requestDTO)));
+
+        MockMvcHelper.testUnsuccessfulResponse(resultActions, VotifyErrorCode.COMMON_UNAUTHORIZED);
+    }
+
+    @Test
+    @Order(1)
+    public void updateEmail_Success() throws Exception {
+        Cookie[] cookies = MockMvcHelper.login(
+                mockMvc, objectMapper, "admin@votify.com.br", "admin123"
+        );
+        String newEmail = "admin-new@votify.com.br";
+        UserUpdateEmailRequestDTO requestDTO = new UserUpdateEmailRequestDTO(newEmail);
+
+        ResultActions resultActions = mockMvc.perform(put("/users/me/email")
+                .cookie(cookies)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(requestDTO)));
+
+        MockMvcHelper.testSuccessfulResponse(resultActions, HttpStatus.OK)
+                .andExpect(jsonPath("data.email", is(newEmail)));
+
+        ResultActions checkResult = mockMvc.perform(get("/users/me").cookie(cookies));
+        MockMvcHelper.testSuccessfulResponse(checkResult, HttpStatus.OK)
+                .andExpect(jsonPath("data.email", is(newEmail)));
+
+        UserUpdateEmailRequestDTO restoreDTO = new UserUpdateEmailRequestDTO("admin@votify.com.br");
+        mockMvc.perform(put("/users/me/email")
+                .cookie(cookies)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(restoreDTO)));
+    }
+
+    @Test
+    @Order(1)
+    public void updateEmail_Fail_EmailExists() throws Exception {
+        Cookie[] cookies = MockMvcHelper.login(
+                mockMvc, objectMapper, "common@votify.com.br", "password123"
+        );
+        String existingEmail = "moderator@votify.com.br";
+        UserUpdateEmailRequestDTO requestDTO = new UserUpdateEmailRequestDTO(existingEmail);
+
+        ResultActions resultActions = mockMvc.perform(put("/users/me/email")
+                .cookie(cookies)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(requestDTO)));
+
+        MockMvcHelper.testUnsuccessfulResponse(resultActions, VotifyErrorCode.EMAIL_ALREADY_EXISTS);
+    }
+
+    @Test
+    @Order(1)
+    public void updateEmail_Fail_InvalidEmail() throws Exception {
+        Cookie[] cookies = MockMvcHelper.login(
+                mockMvc, objectMapper, "common@votify.com.br", "password123"
+        );
+
+        UserUpdateEmailRequestDTO requestDTOBlank = new UserUpdateEmailRequestDTO("   ");
+        ResultActions resultActionsBlank = mockMvc.perform(put("/users/me/email")
+                .cookie(cookies)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(requestDTOBlank)));
+        MockMvcHelper.testUnsuccessfulResponse(resultActionsBlank, VotifyErrorCode.EMAIL_INVALID);
+
+        UserUpdateEmailRequestDTO requestDTONull = new UserUpdateEmailRequestDTO(null);
+        ResultActions resultActionsNull = mockMvc.perform(put("/users/me/email")
+                .cookie(cookies)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(requestDTONull)));
+        MockMvcHelper.testUnsuccessfulResponse(resultActionsNull, VotifyErrorCode.EMAIL_INVALID);
+    }
+
+    @Test
+    @Order(1)
+    public void updateEmail_Fail_NotLogged() throws Exception {
+        UserUpdateEmailRequestDTO requestDTO = new UserUpdateEmailRequestDTO("new@email.com");
+
+        ResultActions resultActions = mockMvc.perform(put("/users/me/email")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(requestDTO)));
+
+        MockMvcHelper.testUnsuccessfulResponse(resultActions, VotifyErrorCode.COMMON_UNAUTHORIZED);
     }
 }
