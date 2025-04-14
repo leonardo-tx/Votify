@@ -90,7 +90,7 @@ public class PollControllerTest {
                 mockMvc, objectMapper, "common@votify.com.br", "password123"
         );
 
-        ResultActions result = mockMvc.perform(get("/polls/{id}", 1).cookie(cookies));
+        ResultActions result = mockMvc.perform(get("/api/polls/{id}", 1).cookie(cookies));
 
         MockMvcHelper.testSuccessfulResponse(result, HttpStatus.OK)
                 .andExpect(jsonPath("data.id", is(1)))
@@ -106,7 +106,7 @@ public class PollControllerTest {
     public void testGetPollNotFound() throws Exception {
         long nonExistentPollId = 9999L;
 
-        ResultActions resultActions = mockMvc.perform(get("/polls/{id}", nonExistentPollId));
+        ResultActions resultActions = mockMvc.perform(get("/api/polls/{id}", nonExistentPollId));
 
         MockMvcHelper.testUnsuccessfulResponse(resultActions, VotifyErrorCode.POLL_NOT_FOUND);
     }
@@ -173,7 +173,7 @@ public class PollControllerTest {
     @Test
     @Order(1)
     public void testGetPollByIdNotAuthenticated() throws Exception {
-        ResultActions resultActions = mockMvc.perform(get("/polls/{id}", 1));
+        ResultActions resultActions = mockMvc.perform(get("/api/polls/{id}", 1));
 
         MockMvcHelper.testSuccessfulResponse(resultActions, HttpStatus.OK)
                 .andExpect(jsonPath("data.id", is(1)))
@@ -188,7 +188,7 @@ public class PollControllerTest {
     @Order(1)
     public void testSearchPollsWithResults() throws Exception {
         ResultActions resultActions = mockMvc.perform(
-                get("/polls/search")
+                get("/api/polls/search")
                         .param("title", "Test")
                         .param("page", "0")
                         .param("size", "10")
@@ -210,7 +210,7 @@ public class PollControllerTest {
     @Order(1)
     public void testSearchPollsWithoutResults() throws Exception {
         ResultActions resultActions = mockMvc.perform(
-                get("/polls/search")
+                get("/api/polls/search")
                         .param("title", "Algo")
         );
 
@@ -226,7 +226,7 @@ public class PollControllerTest {
     @Order(1)
     public void testSearchPollsEmptyQuery() throws Exception {
         ResultActions resultActions = mockMvc.perform(
-                get("/polls/search")
+                get("/api/polls/search")
                         .param("title", "")
         );
         MockMvcHelper.testUnsuccessfulResponse(resultActions, VotifyErrorCode.POLL_TITLE_SEARCH_EMPTY);
@@ -236,7 +236,7 @@ public class PollControllerTest {
     @Order(1)
     public void testSearchPollsTestQuery() throws Exception {
         ResultActions resultActions = mockMvc.perform(
-                get("/polls/search")
+                get("/api/polls/search")
                         .param("title", "Test")
         );
 
@@ -331,7 +331,7 @@ public class PollControllerTest {
                 mockMvc, objectMapper, "common@votify.com.br", "password123"
         );
 
-        ResultActions result = mockMvc.perform(get("/polls/{id}", 1)
+        ResultActions result = mockMvc.perform(get("/api/polls/{id}", 1)
                 .cookie(cookies));
 
         MockMvcHelper.testSuccessfulResponse(result, HttpStatus.OK)

@@ -127,7 +127,7 @@ public class UserControllerTest {
         );
         UserUpdatePasswordRequestDTO requestDTO = new UserUpdatePasswordRequestDTO("moderator321", "newSecurePass123");
 
-        ResultActions resultActions = mockMvc.perform(put("/users/me/password")
+        ResultActions resultActions = mockMvc.perform(put("/api/users/me/password")
                 .cookie(cookies)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(requestDTO)));
@@ -153,7 +153,7 @@ public class UserControllerTest {
         );
         UserUpdatePasswordRequestDTO requestDTO = new UserUpdatePasswordRequestDTO("wrongOldPassword", "newPass");
 
-        ResultActions resultActions = mockMvc.perform(put("/users/me/password")
+        ResultActions resultActions = mockMvc.perform(put("/api/users/me/password")
                 .cookie(cookies)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(requestDTO)));
@@ -166,7 +166,7 @@ public class UserControllerTest {
     public void updatePassword_Fail_NotLogged() throws Exception {
         UserUpdatePasswordRequestDTO requestDTO = new UserUpdatePasswordRequestDTO("anyPassword", "newPass");
 
-        ResultActions resultActions = mockMvc.perform(put("/users/me/password")
+        ResultActions resultActions = mockMvc.perform(put("/api/users/me/password")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(requestDTO)));
 
@@ -183,7 +183,7 @@ public class UserControllerTest {
         String newEmail = "admin-new@votify.com.br";
         UserUpdateEmailRequestDTO requestDTO = new UserUpdateEmailRequestDTO(newEmail);
 
-        ResultActions resultActions = mockMvc.perform(put("/users/me/email")
+        ResultActions resultActions = mockMvc.perform(put("/api/users/me/email")
                 .cookie(cookies)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(requestDTO)));
@@ -191,7 +191,7 @@ public class UserControllerTest {
         MockMvcHelper.testSuccessfulResponse(resultActions, HttpStatus.OK)
                 .andExpect(jsonPath("data", isA(String.class)));
 
-        ResultActions checkResult = mockMvc.perform(get("/users/me").cookie(cookies));
+        ResultActions checkResult = mockMvc.perform(get("/api/users/me").cookie(cookies));
         MockMvcHelper.testSuccessfulResponse(checkResult, HttpStatus.OK)
                 .andExpect(jsonPath("data.email", is(oldEmail)));
     }
@@ -205,7 +205,7 @@ public class UserControllerTest {
         String existingEmail = "moderator@votify.com.br";
         UserUpdateEmailRequestDTO requestDTO = new UserUpdateEmailRequestDTO(existingEmail);
 
-        ResultActions resultActions = mockMvc.perform(put("/users/me/email")
+        ResultActions resultActions = mockMvc.perform(put("/api/users/me/email")
                 .cookie(cookies)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(requestDTO)));
@@ -221,7 +221,7 @@ public class UserControllerTest {
         );
 
         UserUpdateEmailRequestDTO requestDTOBlank = new UserUpdateEmailRequestDTO("   ");
-        ResultActions resultActionsBlank = mockMvc.perform(put("/users/me/email")
+        ResultActions resultActionsBlank = mockMvc.perform(put("/api/users/me/email")
                 .cookie(cookies)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(requestDTOBlank)));
@@ -233,7 +233,7 @@ public class UserControllerTest {
         );
 
         UserUpdateEmailRequestDTO requestDTONull = new UserUpdateEmailRequestDTO(null);
-        ResultActions resultActionsNull = mockMvc.perform(put("/users/me/email")
+        ResultActions resultActionsNull = mockMvc.perform(put("/api/users/me/email")
                 .cookie(cookies)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(requestDTONull)));
@@ -245,7 +245,7 @@ public class UserControllerTest {
     public void updateEmail_Fail_NotLogged() throws Exception {
         UserUpdateEmailRequestDTO requestDTO = new UserUpdateEmailRequestDTO("new@email.com");
 
-        ResultActions resultActions = mockMvc.perform(put("/users/me/email")
+        ResultActions resultActions = mockMvc.perform(put("/api/users/me/email")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(requestDTO)));
 
@@ -261,7 +261,7 @@ public class UserControllerTest {
         String newEmail = "admin-newwww@votify.com.br";
         UserUpdateEmailRequestDTO requestDTO = new UserUpdateEmailRequestDTO(newEmail);
 
-        ResultActions resultActions = mockMvc.perform(put("/users/me/email")
+        ResultActions resultActions = mockMvc.perform(put("/api/users/me/email")
                 .cookie(cookies)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(requestDTO)));
@@ -276,7 +276,7 @@ public class UserControllerTest {
                 mockMvc, objectMapper, "moderator@votify.com.br", "newSecurePass123"
         );
         UserUpdateInfoRequestDTO userUpdateInfoRequestDTO = new UserUpdateInfoRequestDTO("Mod", null);
-        ResultActions resultActions = mockMvc.perform(put("/users/me/info").cookie(cookies)
+        ResultActions resultActions = mockMvc.perform(put("/api/users/me/info").cookie(cookies)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(userUpdateInfoRequestDTO)));
         MockMvcHelper.testSuccessfulResponse(resultActions, HttpStatus.OK)
@@ -294,7 +294,7 @@ public class UserControllerTest {
                 mockMvc, objectMapper, "moderator@votify.com.br", "newSecurePass123"
         );
         UserUpdateInfoRequestDTO userUpdateInfoRequestDTO = new UserUpdateInfoRequestDTO("", "cool-username");
-        ResultActions resultActions = mockMvc.perform(put("/users/me/info").cookie(cookies)
+        ResultActions resultActions = mockMvc.perform(put("/api/users/me/info").cookie(cookies)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(userUpdateInfoRequestDTO)));
         MockMvcHelper.testSuccessfulResponse(resultActions, HttpStatus.OK)
@@ -308,7 +308,7 @@ public class UserControllerTest {
     @Test
     @Order(3)
     public void deleteSelfNotLogged() throws Exception {
-        ResultActions resultActions = mockMvc.perform(delete("/users/me"));
+        ResultActions resultActions = mockMvc.perform(delete("/api/users/me"));
         MockMvcHelper.testUnsuccessfulResponse(resultActions, VotifyErrorCode.COMMON_UNAUTHORIZED);
     }
 
@@ -318,7 +318,7 @@ public class UserControllerTest {
         Cookie[] cookies = MockMvcHelper.login(
                 mockMvc, objectMapper, "common@votify.com.br", "password123"
         );
-        ResultActions resultActions = mockMvc.perform(delete("/users/me")
+        ResultActions resultActions = mockMvc.perform(delete("/api/users/me")
                 .cookie(cookies));
         MockMvcHelper.testSuccessfulResponse(resultActions, HttpStatus.OK)
                 .andExpect(jsonPath("data", is(nullValue())));
