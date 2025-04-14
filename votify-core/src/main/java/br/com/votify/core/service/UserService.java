@@ -1,6 +1,7 @@
 package br.com.votify.core.service;
 
 import br.com.votify.core.domain.entities.tokens.AuthTokens;
+import br.com.votify.core.domain.entities.tokens.EmailConfirmation;
 import br.com.votify.core.domain.entities.tokens.RefreshToken;
 import br.com.votify.core.domain.entities.users.CommonUser;
 import br.com.votify.core.domain.entities.users.User;
@@ -22,8 +23,10 @@ public class UserService {
     private final ContextService context;
     private final PasswordEncoderService passwordEncoderService;
     private final UserRepository userRepository;
+    private final EmailConfirmationService emailConfirmationService;
     private final TokenService tokenService;
 
+    @Transactional
     public User register(CommonUser user) throws VotifyException {
         UserValidator.validateFields(user);
         if (userRepository.existsByEmail(user.getEmail())) {
@@ -36,16 +39,24 @@ public class UserService {
         user.setPassword(encryptedPassword);
         user.setId(null);
 
-        return userRepository.save(user);
+        User createdUser = userRepository.save(user);
+        EmailConfirmation emailConfirmation = emailConfirmationService.addUser(createdUser);
+
+        createdUser.setEmailConfirmation(emailConfirmation);
+        return createdUser;
     }
 
     public AuthTokens login(String email, String password) throws VotifyException {
         if (context.isAuthenticated()) {
             throw new VotifyException(VotifyErrorCode.LOGIN_ALREADY_LOGGED);
         }
+
         User user = userRepository.findByEmail(email).orElse(null);
         if (user == null || !passwordEncoderService.checkPassword(user, password)) {
             throw new VotifyException(VotifyErrorCode.LOGIN_UNAUTHORIZED);
+        }
+        if (emailConfirmationService.existsByEmail(email)) {
+            throw new VotifyException(VotifyErrorCode.PENDING_EMAIL_CONFIRMATION);
         }
         RefreshToken refreshToken = tokenService.createRefreshToken(user);
         String accessToken = tokenService.createAccessToken(refreshToken);

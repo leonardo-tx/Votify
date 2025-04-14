@@ -1,5 +1,6 @@
 package br.com.votify.core.domain.entities.users;
 
+import br.com.votify.core.domain.entities.tokens.EmailConfirmation;
 import br.com.votify.core.domain.entities.tokens.RefreshToken;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -12,7 +13,7 @@ import java.util.List;
 @Entity
 @Getter
 @Setter
-@Table(name = "TB_USER", indexes = { @Index(columnList = "userName", unique = true) })
+@Table(name = "TB_USER", indexes = { @Index(columnList = "userName", unique = true), @Index(columnList = "email", unique = true) })
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "USER_TYPE", discriminatorType = DiscriminatorType.STRING)
 public abstract class User implements Cloneable {
@@ -55,6 +56,10 @@ public abstract class User implements Cloneable {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private List<RefreshToken> refreshTokens;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private EmailConfirmation emailConfirmation;
 
     public int getPermissions() {
         return PermissionFlags.NONE;

@@ -2,8 +2,9 @@ package br.com.votify.api.controller.users;
 
 import br.com.votify.api.configuration.SecurityConfig;
 import br.com.votify.core.domain.entities.users.User;
-import br.com.votify.core.utils.exceptions.VotifyException;
+import br.com.votify.core.service.EmailConfirmationService;
 import br.com.votify.core.service.UserService;
+import br.com.votify.core.utils.exceptions.VotifyException;
 import br.com.votify.dto.ApiResponse;
 import br.com.votify.dto.users.UserDetailedViewDTO;
 import br.com.votify.dto.users.UserQueryDTO;
@@ -24,6 +25,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
+    private final EmailConfirmationService emailConfirmationService;
     private final SecurityConfig securityConfig;
 
     @GetMapping("/{id}")
