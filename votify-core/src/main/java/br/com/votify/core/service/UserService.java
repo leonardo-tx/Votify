@@ -115,4 +115,26 @@ public class UserService {
 
         userRepository.save(user);
     }
+
+    @Transactional
+    public User updateUserEmail(String email) throws VotifyException {
+        User user = context.getUserOrThrow();
+
+        if (email == null || email.isBlank()) {
+            throw new VotifyException(VotifyErrorCode.EMAIL_INVALID);
+        }
+
+        UserValidator.validateEmail(email);
+
+        if (!user.getEmail().equals(email)) {
+            if (userRepository.existsByEmail(email)) {
+                throw new VotifyException(VotifyErrorCode.EMAIL_ALREADY_EXISTS);
+            }
+            user.setEmail(email);
+        } else {
+            return user;
+        }
+
+        return userRepository.save(user);
+    }
 }

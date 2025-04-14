@@ -9,6 +9,7 @@ import br.com.votify.dto.users.UserDetailedViewDTO;
 import br.com.votify.dto.users.UserQueryDTO;
 import br.com.votify.dto.users.UserUpdateInfoRequestDTO;
 import br.com.votify.dto.users.UserUpdatePasswordRequestDTO;
+import br.com.votify.dto.users.UserUpdateEmailRequestDTO;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -75,6 +76,15 @@ public class UserController {
             requestDTO.getEmail()
         );
 
+        UserDetailedViewDTO userDetailedViewDTO = UserDetailedViewDTO.parse(updatedUser);
+        return ApiResponse.success(userDetailedViewDTO, HttpStatus.OK).createResponseEntity();
+    }
+
+    @PutMapping("/me/email")
+    public ResponseEntity<ApiResponse<UserDetailedViewDTO>> updateEmail(
+        @RequestBody UserUpdateEmailRequestDTO requestDTO
+    ) throws VotifyException {
+        User updatedUser = userService.updateUserEmail(requestDTO.getEmail());
         UserDetailedViewDTO userDetailedViewDTO = UserDetailedViewDTO.parse(updatedUser);
         return ApiResponse.success(userDetailedViewDTO, HttpStatus.OK).createResponseEntity();
     }
