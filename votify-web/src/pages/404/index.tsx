@@ -1,4 +1,5 @@
 import Button from "@/components/shared/Button";
+import WebSocketMessage from "./WebSocketMessage";
 
 export default function NotFound() {
   return (
@@ -7,6 +8,7 @@ export default function NotFound() {
       <Button as="Link" href="/home" scheme="primary">
         Voltar para Home
       </Button>
+      <WebSocketMessage />
     </div>
   );
 }

@@ -1,4 +1,4 @@
-package br.com.votify.api.controller.users;
+package br.com.votify.api.controller.rest.users;
 
 import br.com.votify.api.configuration.SecurityConfig;
 import br.com.votify.core.utils.exceptions.VotifyErrorCode;
@@ -51,7 +51,7 @@ public class AuthControllerTest {
                 "123@gmail.com",
                 "12345678"
         );
-        ResultActions resultActions = mockMvc.perform(post("/auth/register")
+        ResultActions resultActions = mockMvc.perform(post("/api/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(userRegisterDTO)));
         MockMvcHelper.testSuccessfulResponse(resultActions, HttpStatus.CREATED)
@@ -66,7 +66,7 @@ public class AuthControllerTest {
     @Order(1)
     public void login() throws Exception {
         UserLoginDTO userLoginDTO = new UserLoginDTO("123@gmail.com", "12345678");
-        ResultActions resultActions = mockMvc.perform(post("/auth/login")
+        ResultActions resultActions = mockMvc.perform(post("/api/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(userLoginDTO)));
         MockMvcHelper.testSuccessfulResponse(resultActions, HttpStatus.OK)
@@ -82,7 +82,7 @@ public class AuthControllerTest {
                 mockMvc, objectMapper, "123@gmail.com", "12345678"
         );
 
-        ResultActions resultActions = mockMvc.perform(post("/auth/logout")
+        ResultActions resultActions = mockMvc.perform(post("/api/auth/logout")
                 .cookie(cookies));
         MockMvcHelper.testSuccessfulResponse(resultActions, HttpStatus.OK)
                 .andExpect(jsonPath("data", is(nullValue())))
@@ -99,7 +99,7 @@ public class AuthControllerTest {
                 mockMvc, objectMapper, "123@gmail.com", "12345678"
         );
 
-        ResultActions resultActions = mockMvc.perform(post("/auth/refresh-tokens")
+        ResultActions resultActions = mockMvc.perform(post("/api/auth/refresh-tokens")
                 .cookie(cookies));
         MockMvcHelper.testSuccessfulResponse(resultActions, HttpStatus.OK)
                 .andExpect(jsonPath("data", is(nullValue())))
@@ -111,7 +111,7 @@ public class AuthControllerTest {
     @Order(1)
     public void forgotPassword() throws Exception {
         PasswordResetRequestDTO passwordResetRequestDTO = new PasswordResetRequestDTO("123@gmail.com");
-        ResultActions resultActions = mockMvc.perform(post("/auth/forgot-password")
+        ResultActions resultActions = mockMvc.perform(post("/api/auth/forgot-password")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(passwordResetRequestDTO)));
 
@@ -130,7 +130,7 @@ public class AuthControllerTest {
     @Order(2)
     public void forgotPasswordDuplicated() throws Exception {
         PasswordResetRequestDTO passwordResetRequestDTO = new PasswordResetRequestDTO("123@gmail.com");
-        ResultActions resultActions = mockMvc.perform(post("/auth/forgot-password")
+        ResultActions resultActions = mockMvc.perform(post("/api/auth/forgot-password")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(passwordResetRequestDTO)));
 
@@ -145,7 +145,7 @@ public class AuthControllerTest {
                 "87654321"
         );
 
-        ResultActions resultActions = mockMvc.perform(post("/auth/reset-password")
+        ResultActions resultActions = mockMvc.perform(post("/api/auth/reset-password")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(passwordResetConfirmDTO)));
         MockMvcHelper.testSuccessfulResponse(resultActions, HttpStatus.OK)
@@ -156,7 +156,7 @@ public class AuthControllerTest {
     @Order(4)
     public void loginAfterPasswordReset() throws Exception {
         UserLoginDTO userLoginDTO = new UserLoginDTO("123@gmail.com", "87654321");
-        ResultActions resultActions = mockMvc.perform(post("/auth/login")
+        ResultActions resultActions = mockMvc.perform(post("/api/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(userLoginDTO)));
         MockMvcHelper.testSuccessfulResponse(resultActions, HttpStatus.OK)

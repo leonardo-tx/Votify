@@ -1,4 +1,4 @@
-package br.com.votify.api.controller.polls;
+package br.com.votify.api.controller.rest.polls;
 
 import br.com.votify.core.domain.entities.polls.Vote;
 import br.com.votify.dto.ApiResponse;
