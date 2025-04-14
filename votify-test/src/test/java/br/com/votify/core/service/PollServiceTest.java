@@ -3,6 +3,7 @@ package br.com.votify.core.service;
 import br.com.votify.core.domain.entities.polls.*;
 import br.com.votify.core.domain.entities.users.CommonUser;
 import br.com.votify.core.domain.entities.users.User;
+import br.com.votify.core.domain.events.PollUpdateEvent;
 import br.com.votify.core.repository.PollRepository;
 import br.com.votify.core.repository.VoteRepository;
 import br.com.votify.core.utils.exceptions.VotifyErrorCode;
@@ -13,6 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -38,6 +40,9 @@ public class PollServiceTest {
 
     @Mock
     private VoteRepository voteRepository;
+
+    @Mock
+    private ApplicationEventPublisher applicationEventPublisher;
 
     @InjectMocks
     private PollService pollService;
@@ -160,12 +165,15 @@ public class PollServiceTest {
 
         VoteIdentifier voteId = new VoteIdentifier(poll.getId(), testUser.getId());
 
-        when(voteRepository.existsById(voteId)).thenReturn(false);
+        when(pollRepository.save(poll)).thenReturn(poll);
         when(voteRepository.save(vote)).thenReturn(vote);
+        when(voteRepository.existsById(voteId)).thenReturn(false);
 
         Vote createdVote = assertDoesNotThrow(() -> pollService.vote(vote, poll, testUser));
         assertEquals(new VoteIdentifier(poll.getId(), testUser.getId()), createdVote.getId());
         assertEquals(1, poll.getVoteOptions().get(2).getCount());
+
+        verify(applicationEventPublisher).publishEvent(any(PollUpdateEvent.class));
     }
 
     @Test

@@ -56,7 +56,7 @@ public class AuthControllerTest extends ControllerTest {
     @Order(1)
     public void login_WhenEmailNotConfirmed_ShouldReturnError() throws Exception {
         UserLoginDTO userLoginDTO = new UserLoginDTO("123@gmail.com", "12345678");
-        ResultActions resultActions = mockMvc.perform(post("/auth/login")
+        ResultActions resultActions = mockMvc.perform(post("/api/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(userLoginDTO)));
         mockMvcHelper.testUnsuccessfulResponse(resultActions, VotifyErrorCode.PENDING_EMAIL_CONFIRMATION);
@@ -69,7 +69,7 @@ public class AuthControllerTest extends ControllerTest {
                 "123@gmail.com",
                 emailConfirmationCode
         );
-        ResultActions resultActions = mockMvc.perform(post("/auth/confirm-email")
+        ResultActions resultActions = mockMvc.perform(post("/api/auth/confirm-email")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(emailConfirmationRequestDto)));
         mockMvcHelper.testSuccessfulResponse(resultActions, HttpStatus.OK)
@@ -181,7 +181,7 @@ public class AuthControllerTest extends ControllerTest {
         Cookie[] cookies = mockMvcHelper.login("123@gmail.com", "87654321");
         UserUpdateEmailRequestDTO userUpdateEmailRequestDTO = new UserUpdateEmailRequestDTO("321@gmail.com");
 
-        ResultActions resultActions = mockMvc.perform(put("/users/me/email")
+        ResultActions resultActions = mockMvc.perform(put("/api/users/me/email")
                 .cookie(cookies)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(userUpdateEmailRequestDTO)));
@@ -202,7 +202,7 @@ public class AuthControllerTest extends ControllerTest {
                 null,
                 emailConfirmationCode
         );
-        ResultActions resultActions = mockMvc.perform(post("/auth/confirm-email")
+        ResultActions resultActions = mockMvc.perform(post("/api/auth/confirm-email")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(emailConfirmationRequestDto)));
        mockMvcHelper.testUnsuccessfulResponse(resultActions, VotifyErrorCode.COMMON_UNAUTHORIZED);
@@ -216,7 +216,7 @@ public class AuthControllerTest extends ControllerTest {
                 null,
                 emailConfirmationCode
         );
-        ResultActions resultActions = mockMvc.perform(post("/auth/confirm-email")
+        ResultActions resultActions = mockMvc.perform(post("/api/auth/confirm-email")
                 .cookie(cookies)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(emailConfirmationRequestDto)));

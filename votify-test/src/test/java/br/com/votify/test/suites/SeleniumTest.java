@@ -31,7 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @AutoConfigureMockMvc
 @ExtendWith({ BrowsersProviderExtension.class, ScreenshotExtension.class })
-@Order(2)
+@Order(3)
 public abstract class SeleniumTest {
     @Value("${frontend.base.url}")
     public String baseUrl;

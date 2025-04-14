@@ -66,14 +66,14 @@ public class PollControllerTest extends ControllerTest {
     public void testGetPollWithoutUserVote() throws Exception {
         Cookie[] cookies = mockMvcHelper.login("common@votify.com.br", "password123");
 
-        ResultActions result = mockMvc.perform(get("/api/polls/{id}", 14).cookie(cookies));
-
+        ResultActions result = mockMvc.perform(get("/api/polls/{id}", 14)
+                .cookie(cookies));
         mockMvcHelper.testSuccessfulResponse(result, HttpStatus.OK)
                 .andExpect(jsonPath("data.id", is(14)))
                 .andExpect(jsonPath("data.title", is("Test Poll")))
                 .andExpect(jsonPath("data.description", is("Test Description")))
                 .andExpect(jsonPath("data.voteOptions", hasSize(5)))
-                .andExpect(jsonPath("data.myChoices", is(0)));
+                .andExpect(jsonPath("data.votedOption", is(0)));
     }
 
     @Test
@@ -171,7 +171,7 @@ public class PollControllerTest extends ControllerTest {
                 .andExpect(jsonPath("data.description", is("Test Description")))
                 .andExpect(jsonPath("data.voteOptions", hasSize(5)))
                 .andExpect(jsonPath("data.voteOptions[0].name", is("Opção 1")))
-                .andExpect(jsonPath("data.myChoices", is(0)));
+                .andExpect(jsonPath("data.votedOption", is(0)));
     }
 
     @Test
@@ -303,22 +303,21 @@ public class PollControllerTest extends ControllerTest {
     public void testGetPollWithUserVote() throws Exception {
         Cookie[] cookies = mockMvcHelper.login("common@votify.com.br", "password123");
 
-        ResultActions result = mockMvc.perform(get("/polls/{id}", 14)
+        ResultActions result = mockMvc.perform(get("/api/polls/{id}", 14)
                 .cookie(cookies));
-
         mockMvcHelper.testSuccessfulResponse(result, HttpStatus.OK)
                 .andExpect(jsonPath("data.id", is(14)))
                 .andExpect(jsonPath("data.title", is("Test Poll")))
                 .andExpect(jsonPath("data.description", is("Test Description")))
                 .andExpect(jsonPath("data.voteOptions", hasSize(5)))
-                .andExpect(jsonPath("data.myChoices", is(16)));
+                .andExpect(jsonPath("data.votedOption", is(16)));
     }
 
     @Test
     @Order(4)
     public void testCancelPollAsOwner() throws Exception {
         Cookie[] cookies = mockMvcHelper.login("common@votify.com.br", "password123");
-        ResultActions cancelResult = mockMvc.perform(delete("/polls/{id}/cancel", 14)
+        ResultActions cancelResult = mockMvc.perform(delete("/api/polls/{id}/cancel", 14)
                 .cookie(cookies));
         mockMvcHelper.testSuccessfulResponse(cancelResult, HttpStatus.OK);
     }
@@ -327,7 +326,7 @@ public class PollControllerTest extends ControllerTest {
     @Order(4)
     public void testCancelPollAsNonOwner() throws Exception {
         Cookie[] cookies = mockMvcHelper.login("admin@votify.com.br", "admin123");
-        ResultActions cancelResult = mockMvc.perform(delete("/polls/{id}/cancel", 3)
+        ResultActions cancelResult = mockMvc.perform(delete("/api/polls/{id}/cancel", 3)
                 .cookie(cookies));
         mockMvcHelper.testUnsuccessfulResponse(cancelResult, VotifyErrorCode.POLL_NOT_OWNER);
     }
@@ -351,15 +350,15 @@ public class PollControllerTest extends ControllerTest {
                 voteOptions
         );
         Cookie[] cookies = mockMvcHelper.login("common@votify.com.br", "password123");
-        ResultActions createResult = mockMvc.perform(post("/polls")
+        ResultActions createResult = mockMvc.perform(post("/api/polls")
                 .cookie(cookies)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(pollInsertDTO)));
         int pollId = mockMvcHelper.extractId(createResult, "$.data.id");
-        ResultActions cancelResult = mockMvc.perform(delete("/polls/{id}/cancel", pollId)
+        ResultActions cancelResult = mockMvc.perform(delete("/api/polls/{id}/cancel", pollId)
                 .cookie(cookies));
         mockMvcHelper.testSuccessfulResponse(cancelResult, HttpStatus.OK);
-        ResultActions getResult = mockMvc.perform(get("/polls/user/{id}", 15)
+        ResultActions getResult = mockMvc.perform(get("/api/polls/user/{id}", 15)
                 .cookie(cookies));
         getResult.andExpect(jsonPath("data.content[?(@.title=='Future Poll')]").doesNotExist());
     }
@@ -381,17 +380,17 @@ public class PollControllerTest extends ControllerTest {
                 )
         );
         Cookie[] cookies = mockMvcHelper.login("common@votify.com.br", "password123");
-        ResultActions createResult = mockMvc.perform(post("/polls")
+        ResultActions createResult = mockMvc.perform(post("/api/polls")
                 .cookie(cookies)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(pollInsertDTO)));
 
         int pollId = mockMvcHelper.extractId(createResult, "$.data.id");
-        ResultActions cancelResult = mockMvc.perform(delete("/polls/{id}/cancel", pollId)
+        ResultActions cancelResult = mockMvc.perform(delete("/api/polls/{id}/cancel", pollId)
                 .cookie(cookies));
         mockMvcHelper.testSuccessfulResponse(cancelResult, HttpStatus.OK);
 
-        ResultActions getResult = mockMvc.perform(get("/polls/user/{id}", 15)
+        ResultActions getResult = mockMvc.perform(get("/api/polls/user/{id}", 15)
                 .cookie(cookies));
         mockMvcHelper.testSuccessfulResponse(getResult, HttpStatus.OK);
     }
