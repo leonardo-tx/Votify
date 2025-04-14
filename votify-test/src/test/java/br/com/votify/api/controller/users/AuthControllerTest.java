@@ -9,20 +9,18 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -82,7 +80,7 @@ public class AuthControllerTest {
     @Test
     @Order(2)
     public void confirmEmail() throws Exception {
-        EmailConfirmationRequestDto emailConfirmationRequestDto = new EmailConfirmationRequestDto(
+        EmailConfirmationRequestDTO emailConfirmationRequestDto = new EmailConfirmationRequestDTO(
                 "123@gmail.com",
                 emailConfirmationCode
         );
@@ -194,5 +192,58 @@ public class AuthControllerTest {
                 .andExpect(jsonPath("data", is(nullValue())))
                 .andExpect(MockMvcResultMatchers.cookie().exists("refresh_token"))
                 .andExpect(MockMvcResultMatchers.cookie().exists("access_token"));
+    }
+
+    @Test
+    @Order(8)
+    public void loginAfterChangingEmail() throws Exception {
+        Cookie[] cookies = MockMvcHelper.login(
+                mockMvc, objectMapper, "123@gmail.com", "87654321"
+        );
+        UserUpdateEmailRequestDTO userUpdateEmailRequestDTO = new UserUpdateEmailRequestDTO("321@gmail.com");
+
+        ResultActions resultActions = mockMvc.perform(put("/users/me/email")
+                .cookie(cookies)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(userUpdateEmailRequestDTO)));
+        MockMvcHelper.testSuccessfulResponse(resultActions, HttpStatus.OK);
+
+        ApiResponse<String> apiResponse = objectMapper.readValue(
+                resultActions.andReturn().getResponse().getContentAsByteArray(),
+                new TypeReference<>() {}
+        );
+        emailConfirmationCode = apiResponse.getData();
+        MockMvcHelper.login(mockMvc, objectMapper, "123@gmail.com", "87654321");
+    }
+
+    @Test
+    @Order(10)
+    public void confirmChangedEmailNotAuthenticated() throws Exception {
+        EmailConfirmationRequestDTO emailConfirmationRequestDto = new EmailConfirmationRequestDTO(
+                null,
+                emailConfirmationCode
+        );
+        ResultActions resultActions = mockMvc.perform(post("/auth/confirm-email")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(emailConfirmationRequestDto)));
+        MockMvcHelper.testUnsuccessfulResponse(resultActions, VotifyErrorCode.COMMON_UNAUTHORIZED);
+    }
+
+    @Test
+    @Order(11)
+    public void confirmChangedEmail() throws Exception {
+        Cookie[] cookies = MockMvcHelper.login(
+                mockMvc, objectMapper, "123@gmail.com", "87654321"
+        );
+        EmailConfirmationRequestDTO emailConfirmationRequestDto = new EmailConfirmationRequestDTO(
+                null,
+                emailConfirmationCode
+        );
+        ResultActions resultActions = mockMvc.perform(post("/auth/confirm-email")
+                .cookie(cookies)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(emailConfirmationRequestDto)));
+        MockMvcHelper.testSuccessfulResponse(resultActions, HttpStatus.OK);
+        MockMvcHelper.login(mockMvc, objectMapper, "321@gmail.com", "87654321");
     }
 }

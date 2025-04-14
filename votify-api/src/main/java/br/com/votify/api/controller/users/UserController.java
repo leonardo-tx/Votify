@@ -74,8 +74,7 @@ public class UserController {
     ) throws VotifyException {
         User updatedUser = userService.updateUserInfo(
             requestDTO.getName(),
-            requestDTO.getUserName(),
-            requestDTO.getEmail()
+            requestDTO.getUserName()
         );
 
         UserDetailedViewDTO userDetailedViewDTO = UserDetailedViewDTO.parse(updatedUser);
@@ -83,12 +82,13 @@ public class UserController {
     }
 
     @PutMapping("/me/email")
-    public ResponseEntity<ApiResponse<UserDetailedViewDTO>> updateEmail(
+    public ResponseEntity<ApiResponse<String>> updateEmail(
         @RequestBody UserUpdateEmailRequestDTO requestDTO
     ) throws VotifyException {
         User updatedUser = userService.updateUserEmail(requestDTO.getEmail());
-        UserDetailedViewDTO userDetailedViewDTO = UserDetailedViewDTO.parse(updatedUser);
-        return ApiResponse.success(userDetailedViewDTO, HttpStatus.OK).createResponseEntity();
+        String code = updatedUser.getEmailConfirmation().getEmailConfirmationCode();
+
+        return ApiResponse.success(code, HttpStatus.OK).createResponseEntity();
     }
 
     @PutMapping("/me/password")

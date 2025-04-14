@@ -4,11 +4,13 @@ import br.com.votify.core.domain.entities.tokens.EmailConfirmation;
 import br.com.votify.core.domain.entities.tokens.EmailConfirmationExpirationProperties;
 import br.com.votify.core.domain.entities.users.User;
 import br.com.votify.core.repository.EmailConfirmationRepository;
+import br.com.votify.core.repository.UserRepository;
 import br.com.votify.core.utils.EmailCodeGeneratorUtils;
 import br.com.votify.core.utils.exceptions.VotifyErrorCode;
 import br.com.votify.core.utils.exceptions.VotifyException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -17,33 +19,53 @@ import java.util.Objects;
 @Service
 @RequiredArgsConstructor
 public class EmailConfirmationService {
+    private final UserRepository userRepository;
+    private final ContextService contextService;
     private final EmailConfirmationRepository emailConfirmationRepository;
     private final EmailConfirmationExpirationProperties emailConfirmationExpirationProperties;
 
-    public void confirmEmail(String code, String email) throws VotifyException {
-        EmailConfirmation entity = emailConfirmationRepository.findByUserEmail(email)
+    @Transactional
+    public void confirmEmail(String code, String currentEmail) throws VotifyException {
+        if (currentEmail == null) {
+            User user = contextService.getUserOrThrow();
+            currentEmail = user.getEmail();
+        }
+        EmailConfirmation emailConfirmation = emailConfirmationRepository.findByUserEmail(currentEmail)
                 .orElseThrow(() -> new VotifyException(VotifyErrorCode.EMAIL_ALREADY_CONFIRMED));
 
-        if (!Objects.equals(entity.getEmailConfirmationCode(), code)) {
+        if (!Objects.equals(emailConfirmation.getEmailConfirmationCode(), code)) {
             throw new VotifyException(VotifyErrorCode.EMAIL_CONFIRMATION_CODE_INVALID);
         }
 
-        emailConfirmationRepository.delete(entity);
+        emailConfirmationRepository.delete(emailConfirmation);
+        if (emailConfirmation.getNewEmail() == null) return;
+
+        User user = emailConfirmation.getUser();
+        user.setEmailConfirmation(null);
+        user.setEmail(emailConfirmation.getNewEmail());
+
+        userRepository.save(user);
     }
 
     public boolean existsByEmail(String email) {
         return emailConfirmationRepository.existsByUserEmail(email);
     }
 
-    public EmailConfirmation addUser(User createdUser) {
+    public EmailConfirmation addUser(User createdUser, String newEmail) throws VotifyException {
+        if (createdUser.getEmailConfirmation() != null) {
+            throw new VotifyException(VotifyErrorCode.PENDING_EMAIL_CONFIRMATION);
+        }
+
         String codeGenerated = EmailCodeGeneratorUtils.generateEmailConfirmationCode();
-        EmailConfirmation entity = new EmailConfirmation(
+        LocalDateTime now = LocalDateTime.now();
+        EmailConfirmation emailConfirmation = new EmailConfirmation(
                 null,
                 createdUser,
+                newEmail,
                 codeGenerated,
-                LocalDateTime.now().plusDays(emailConfirmationExpirationProperties.getExpirationMinutes())
+                now.plusMinutes(emailConfirmationExpirationProperties.getExpirationMinutes())
         );
-        return emailConfirmationRepository.save(entity);
+        return emailConfirmationRepository.save(emailConfirmation);
     }
 
     public List<EmailConfirmation> findExpiredAccounts() {

@@ -40,7 +40,7 @@ public class UserService {
         user.setId(null);
 
         User createdUser = userRepository.save(user);
-        EmailConfirmation emailConfirmation = emailConfirmationService.addUser(createdUser);
+        EmailConfirmation emailConfirmation = emailConfirmationService.addUser(createdUser, null);
 
         createdUser.setEmailConfirmation(emailConfirmation);
         return createdUser;
@@ -55,7 +55,7 @@ public class UserService {
         if (user == null || !passwordEncoderService.checkPassword(user, password)) {
             throw new VotifyException(VotifyErrorCode.LOGIN_UNAUTHORIZED);
         }
-        if (emailConfirmationService.existsByEmail(email)) {
+        if (user.getEmailConfirmation() != null && user.getEmailConfirmation().getNewEmail() == null) {
             throw new VotifyException(VotifyErrorCode.PENDING_EMAIL_CONFIRMATION);
         }
         RefreshToken refreshToken = tokenService.createRefreshToken(user);
@@ -84,14 +84,13 @@ public class UserService {
     }
 
     @Transactional
-    public User updateUserInfo(String name, String userName, String email) throws VotifyException {
+    public User updateUserInfo(String name, String userName) throws VotifyException {
         User user = context.getUserOrThrow();
 
         if (name != null && !name.isBlank()) {
             UserValidator.validateName(name);
             user.setName(name);
         }
-
         if (userName != null && !userName.isBlank()) {
             UserValidator.validateUserName(userName);
             if (!user.getUserName().equals(userName) && userRepository.existsByUserName(userName)) {
@@ -99,20 +98,9 @@ public class UserService {
             }
             user.setUserName(userName);
         }
-
-        if (email != null && !email.isBlank()) {
-            UserValidator.validateEmail(email);
-            if (!user.getEmail().equals(email) && userRepository.existsByEmail(email)) {
-                throw new VotifyException(VotifyErrorCode.EMAIL_ALREADY_EXISTS);
-            }
-
-            user.setEmail(email);
-        }
-
         return userRepository.save(user);
     }
 
-    @Transactional
     public void updateUserPassword(String oldPassword, String newPassword) throws VotifyException {
         User user = context.getUserOrThrow();
 
@@ -127,25 +115,20 @@ public class UserService {
         userRepository.save(user);
     }
 
-    @Transactional
     public User updateUserEmail(String email) throws VotifyException {
         User user = context.getUserOrThrow();
-
-        if (email == null || email.isBlank()) {
-            throw new VotifyException(VotifyErrorCode.EMAIL_INVALID);
-        }
-
-        UserValidator.validateEmail(email);
-
-        if (!user.getEmail().equals(email)) {
-            if (userRepository.existsByEmail(email)) {
-                throw new VotifyException(VotifyErrorCode.EMAIL_ALREADY_EXISTS);
-            }
-            user.setEmail(email);
-        } else {
+        if (user.getEmail().equals(email)) {
             return user;
         }
 
-        return userRepository.save(user);
+        UserValidator.validateEmail(email);
+        if (userRepository.existsByEmail(email)) {
+            throw new VotifyException(VotifyErrorCode.EMAIL_ALREADY_EXISTS);
+        }
+
+        EmailConfirmation emailConfirmation = emailConfirmationService.addUser(user, email);
+        user.setEmailConfirmation(emailConfirmation);
+
+        return user;
     }
 }

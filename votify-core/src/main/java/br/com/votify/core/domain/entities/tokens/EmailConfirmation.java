@@ -24,6 +24,9 @@ public class EmailConfirmation {
     @JoinColumn(name = "user_id", foreignKey = @ForeignKey(name = "fk_user_email_confirmation"), nullable = false, unique = true)
     private User user;
 
+    @Column(name = "new_email", nullable = true)
+    private String newEmail;
+
     @Column(name = "email_confirmation_code", nullable = false)
     private String emailConfirmationCode;
 

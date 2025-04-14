@@ -40,8 +40,6 @@ public class UserServiceTest {
 
     private CommonUser user;
 
-    private static EmailConfirmation emailConfirmation = new EmailConfirmation();
-
     @BeforeEach
     public void setupBeforeEach() {
         this.user = new CommonUser(
@@ -54,11 +52,11 @@ public class UserServiceTest {
     }
 
     @Test
-    public void createValidUser() {
+    public void createValidUser() throws VotifyException {
         when(userRepository.existsByEmail(user.getEmail())).thenReturn(false);
         when(userRepository.existsByUserName(user.getUserName())).thenReturn(false);
         when(passwordEncoderService.encryptPassword(user.getPassword())).thenReturn(user.getPassword());
-        when(emailConfirmationService.addUser(user)).thenReturn(new EmailConfirmation());
+        when(emailConfirmationService.addUser(user, null)).thenReturn(new EmailConfirmation());
         when(userRepository.save(user)).thenReturn(user);
 
         User userFromService = assertDoesNotThrow(() -> userService.register(user));
@@ -118,7 +116,6 @@ public class UserServiceTest {
         when(passwordEncoderService.checkPassword(user, user.getPassword())).thenReturn(true);
         when(tokenService.createRefreshToken(user)).thenReturn(refreshToken);
         when(tokenService.createAccessToken(refreshToken)).thenReturn("access_token");
-        when(emailConfirmationService.existsByEmail(user.getEmail())).thenReturn(false);
 
         AuthTokens authTokens = assertDoesNotThrow(
                 () -> userService.login(user.getEmail(), user.getPassword())
@@ -160,8 +157,8 @@ public class UserServiceTest {
         when(contextService.isAuthenticated()).thenReturn(false);
         when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
         when(passwordEncoderService.checkPassword(user, user.getPassword())).thenReturn(true);
-        when(emailConfirmationService.existsByEmail(user.getEmail())).thenReturn(true);
 
+        user.setEmailConfirmation(new EmailConfirmation());
         VotifyException exception = assertThrows(
                 VotifyException.class,
                 () -> userService.login(user.getEmail(), user.getPassword())
@@ -223,19 +220,16 @@ public class UserServiceTest {
     void updateUserInfo_Success_AllFields() throws VotifyException {
         String newName = "Johnny Silverhand Updated";
         String newUserName = "silverhand-updated";
-        String newEmail = "jhonny.updated@nightcity.2077";
 
         when(contextService.getUserOrThrow()).thenReturn(user);
         when(userRepository.existsByUserName(newUserName)).thenReturn(false);
-        when(userRepository.existsByEmail(newEmail)).thenReturn(false);
         when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArguments()[0]);
 
-        User updatedUser = userService.updateUserInfo(newName, newUserName, newEmail);
+        User updatedUser = userService.updateUserInfo(newName, newUserName);
 
         assertNotNull(updatedUser);
         assertEquals(newName, updatedUser.getName());
         assertEquals(newUserName, updatedUser.getUserName());
-        assertEquals(newEmail, updatedUser.getEmail());
 
         verify(userRepository).save(user);
     }
@@ -247,11 +241,45 @@ public class UserServiceTest {
         when(contextService.getUserOrThrow()).thenReturn(user);
         when(userRepository.save(any(User.class))).thenReturn(user);
 
-        User updatedUser = userService.updateUserInfo(newName, null, "   ");
+        User updatedUser = userService.updateUserInfo(newName, null);
 
         assertNotNull(updatedUser);
         assertEquals(newName, updatedUser.getName());
         assertEquals(user.getUserName(), updatedUser.getUserName());
+        assertEquals(user.getEmail(), updatedUser.getEmail());
+
+        verify(userRepository).save(user);
+    }
+
+    @Test
+    void updateUserInfoSuccessWithBlankUserName() throws VotifyException {
+        String newName = "Johnny Only Name Updated";
+
+        when(contextService.getUserOrThrow()).thenReturn(user);
+        when(userRepository.save(any(User.class))).thenReturn(user);
+
+        User updatedUser = userService.updateUserInfo(newName, "");
+
+        assertNotNull(updatedUser);
+        assertEquals(newName, updatedUser.getName());
+        assertEquals(user.getUserName(), updatedUser.getUserName());
+        assertEquals(user.getEmail(), updatedUser.getEmail());
+
+        verify(userRepository).save(user);
+    }
+
+    @Test
+    void updateUserInfoSuccessWithBlankName() throws VotifyException {
+        String newUserName = "diamondhand";
+
+        when(contextService.getUserOrThrow()).thenReturn(user);
+        when(userRepository.save(any(User.class))).thenReturn(user);
+
+        User updatedUser = userService.updateUserInfo("  ", newUserName);
+
+        assertNotNull(updatedUser);
+        assertEquals(user.getName(), updatedUser.getName());
+        assertEquals(newUserName, updatedUser.getUserName());
         assertEquals(user.getEmail(), updatedUser.getEmail());
 
         verify(userRepository).save(user);
@@ -264,26 +292,12 @@ public class UserServiceTest {
         when(contextService.getUserOrThrow()).thenReturn(user);
         when(userRepository.existsByUserName(newUserName)).thenReturn(true);
 
-        VotifyException exception = assertThrows(VotifyException.class, () -> {
-            userService.updateUserInfo(null, newUserName, null);
-        });
+        VotifyException exception = assertThrows(
+                VotifyException.class,
+                () -> userService.updateUserInfo(null, newUserName)
+        );
 
         assertEquals(VotifyErrorCode.USER_NAME_ALREADY_EXISTS, exception.getErrorCode());
-        verify(userRepository, never()).save(any(User.class));
-    }
-
-    @Test
-    void updateUserInfo_Fail_EmailExists() throws VotifyException {
-        String newEmail = "existing@email.com";
-
-        when(contextService.getUserOrThrow()).thenReturn(user);
-        when(userRepository.existsByEmail(newEmail)).thenReturn(true);
-
-        VotifyException exception = assertThrows(VotifyException.class, () -> {
-            userService.updateUserInfo(null, null, newEmail);
-        });
-
-        assertEquals(VotifyErrorCode.EMAIL_ALREADY_EXISTS, exception.getErrorCode());
         verify(userRepository, never()).save(any(User.class));
     }
 
@@ -298,9 +312,7 @@ public class UserServiceTest {
         when(passwordEncoderService.encryptPassword(newPassword)).thenReturn(encryptedNewPassword);
         when(userRepository.save(any(User.class))).thenReturn(user);
 
-        assertDoesNotThrow(() -> {
-            userService.updateUserPassword(oldPassword, newPassword);
-        });
+        assertDoesNotThrow(() -> userService.updateUserPassword(oldPassword, newPassword));
 
         assertEquals(encryptedNewPassword, user.getPassword());
         verify(passwordEncoderService).encryptPassword(newPassword);
@@ -315,9 +327,10 @@ public class UserServiceTest {
         when(contextService.getUserOrThrow()).thenReturn(user);
         when(passwordEncoderService.checkPassword(user, wrongOldPassword)).thenReturn(false);
 
-        VotifyException exception = assertThrows(VotifyException.class, () -> {
-            userService.updateUserPassword(wrongOldPassword, newPassword);
-        });
+        VotifyException exception = assertThrows(
+                VotifyException.class,
+                () -> userService.updateUserPassword(wrongOldPassword, newPassword)
+        );
 
         assertEquals(VotifyErrorCode.INVALID_OLD_PASSWORD, exception.getErrorCode());
         verify(passwordEncoderService, never()).encryptPassword(anyString());
@@ -329,13 +342,12 @@ public class UserServiceTest {
         String newEmail = "jhonny.new@nightcity.2077";
         when(contextService.getUserOrThrow()).thenReturn(user);
         when(userRepository.existsByEmail(newEmail)).thenReturn(false);
-        when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArguments()[0]);
+        when(emailConfirmationService.addUser(user, newEmail)).thenReturn(new EmailConfirmation());
 
         User updatedUser = userService.updateUserEmail(newEmail);
 
         assertNotNull(updatedUser);
-        assertEquals(newEmail, updatedUser.getEmail());
-        verify(userRepository).save(user);
+        assertNotEquals(newEmail, updatedUser.getEmail());
     }
 
     @Test
@@ -344,12 +356,13 @@ public class UserServiceTest {
         when(contextService.getUserOrThrow()).thenReturn(user);
         when(userRepository.existsByEmail(existingEmail)).thenReturn(true);
 
-        VotifyException exception = assertThrows(VotifyException.class, () -> {
-            userService.updateUserEmail(existingEmail);
-        });
+        VotifyException exception = assertThrows(
+                VotifyException.class,
+                () -> userService.updateUserEmail(existingEmail)
+        );
 
         assertEquals(VotifyErrorCode.EMAIL_ALREADY_EXISTS, exception.getErrorCode());
-        assertEquals(user.getEmail(), user.getEmail());
+        assertNotEquals("rogue@afterlife.2077", user.getEmail());
         verify(userRepository, never()).save(any(User.class));
     }
 
@@ -357,17 +370,19 @@ public class UserServiceTest {
     void updateUserEmail_Fail_EmailNullOrBlank() throws VotifyException {
         when(contextService.getUserOrThrow()).thenReturn(user);
 
-        VotifyException exceptionNull = assertThrows(VotifyException.class, () -> {
-            userService.updateUserEmail(null);
-        });
-        assertEquals(VotifyErrorCode.EMAIL_INVALID, exceptionNull.getErrorCode());
+        VotifyException exceptionNull = assertThrows(
+                VotifyException.class,
+                () -> userService.updateUserEmail(null)
+        );
+        assertEquals(VotifyErrorCode.EMAIL_EMPTY, exceptionNull.getErrorCode());
 
-        VotifyException exceptionBlank = assertThrows(VotifyException.class, () -> {
-            userService.updateUserEmail("   ");
-        });
-        assertEquals(VotifyErrorCode.EMAIL_INVALID, exceptionBlank.getErrorCode());
+        VotifyException exceptionBlank = assertThrows(
+                VotifyException.class,
+                () -> userService.updateUserEmail("   ")
+        );
+        assertEquals(VotifyErrorCode.EMAIL_INVALID_LENGTH, exceptionBlank.getErrorCode());
 
-        assertEquals(user.getEmail(), user.getEmail());
+        assertNotEquals("   ", user.getEmail());
         verify(userRepository, never()).save(any(User.class));
     }
 

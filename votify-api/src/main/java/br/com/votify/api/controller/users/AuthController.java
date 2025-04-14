@@ -118,7 +118,7 @@ public class AuthController {
     }
 
     @PostMapping("/confirm-email")
-    public ResponseEntity<ApiResponse<Object>> confirmEmail(@RequestBody EmailConfirmationRequestDto emailConfirmationRequestDto) throws VotifyException {
+    public ResponseEntity<ApiResponse<Object>> confirmEmail(@RequestBody EmailConfirmationRequestDTO emailConfirmationRequestDto) throws VotifyException {
         emailConfirmationService.confirmEmail(
                 emailConfirmationRequestDto.getCode(),
                 emailConfirmationRequestDto.getEmail()
