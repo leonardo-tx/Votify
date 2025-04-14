@@ -67,14 +67,14 @@ public class PollControllerTest extends ControllerTest {
     public void testGetPollWithoutUserVote() throws Exception {
         Cookie[] cookies = mockMvcHelper.login("common@votify.com.br", "password123");
 
-        ResultActions result = mockMvc.perform(get("/api/polls/{id}", 14).cookie(cookies));
-
+        ResultActions result = mockMvc.perform(get("/api/polls/{id}", 14)
+                .cookie(cookies));
         mockMvcHelper.testSuccessfulResponse(result, HttpStatus.OK)
                 .andExpect(jsonPath("data.id", is(14)))
                 .andExpect(jsonPath("data.title", is("Test Poll")))
                 .andExpect(jsonPath("data.description", is("Test Description")))
                 .andExpect(jsonPath("data.voteOptions", hasSize(5)))
-                .andExpect(jsonPath("data.myChoices", is(0)));
+                .andExpect(jsonPath("data.votedOption", is(0)));
     }
 
     @Test
@@ -173,7 +173,7 @@ public class PollControllerTest extends ControllerTest {
                 .andExpect(jsonPath("data.description", is("Test Description")))
                 .andExpect(jsonPath("data.voteOptions", hasSize(5)))
                 .andExpect(jsonPath("data.voteOptions[0].name", is("Opção 1")))
-                .andExpect(jsonPath("data.myChoices", is(0)));
+                .andExpect(jsonPath("data.votedOption", is(0)));
     }
 
     @Test
@@ -305,14 +305,13 @@ public class PollControllerTest extends ControllerTest {
     public void testGetPollWithUserVote() throws Exception {
         Cookie[] cookies = mockMvcHelper.login("common@votify.com.br", "password123");
 
-        ResultActions result = mockMvc.perform(get("/polls/{id}", 14)
+        ResultActions result = mockMvc.perform(get("/api/polls/{id}", 14)
                 .cookie(cookies));
-
         mockMvcHelper.testSuccessfulResponse(result, HttpStatus.OK)
                 .andExpect(jsonPath("data.id", is(14)))
                 .andExpect(jsonPath("data.title", is("Test Poll")))
                 .andExpect(jsonPath("data.description", is("Test Description")))
                 .andExpect(jsonPath("data.voteOptions", hasSize(5)))
-                .andExpect(jsonPath("data.myChoices", is(16)));
+                .andExpect(jsonPath("data.votedOption", is(16)));
     }
 }

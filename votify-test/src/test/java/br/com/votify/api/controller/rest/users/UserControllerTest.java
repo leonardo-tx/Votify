@@ -157,7 +157,8 @@ public class UserControllerTest extends ControllerTest {
         mockMvcHelper.testSuccessfulResponse(resultActions, HttpStatus.OK)
                 .andExpect(jsonPath("data", isA(String.class)));
 
-        ResultActions checkResult = mockMvc.perform(get("/users/me").cookie(cookies));
+        ResultActions checkResult = mockMvc.perform(get("/api/users/me")
+                .cookie(cookies));
         mockMvcHelper.testSuccessfulResponse(checkResult, HttpStatus.OK)
                 .andExpect(jsonPath("data.email", is(oldEmail)));
     }
