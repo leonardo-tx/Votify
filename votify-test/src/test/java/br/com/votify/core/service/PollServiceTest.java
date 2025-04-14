@@ -6,6 +6,7 @@ import br.com.votify.core.domain.entities.users.User;
 import br.com.votify.core.repository.PollRepository;
 import br.com.votify.core.repository.VoteRepository;
 import br.com.votify.core.utils.exceptions.VotifyErrorCode;
+import br.com.votify.core.utils.exceptions.VotifyErrorCode;
 import br.com.votify.core.utils.exceptions.VotifyException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -214,11 +215,11 @@ public class PollServiceTest {
     public void findAllByUserId() throws VotifyException {
         Pageable pageable = PageRequest.of(0, 10);
         Page<Poll> pollPage = new PageImpl<>(testPolls, pageable, testPolls.size());
-        
+
         when(pollRepository.findAllByResponsibleId(eq(1L), any(Pageable.class))).thenReturn(pollPage);
-        
+
         Page<Poll> result = pollService.findAllByUserId(1L, 0, 10);
-        
+
         assertNotNull(result);
         assertEquals(4, result.getContent().size());
     }
