@@ -59,4 +59,19 @@ public class MockMvcHelper {
                 .andExpect(jsonPath("errorMessage", is(votifyException.getMessage())));
         return resultActions;
     }
+
+    public static void loginExpectingError(
+            MockMvc mockMvc,
+            ObjectMapper objectMapper,
+            String email,
+            String password,
+            VotifyErrorCode expectedErrorCode
+    ) throws Exception {
+        UserLoginDTO userLoginDTO = new UserLoginDTO(email, password);
+        ResultActions resultActions = mockMvc.perform(post("/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(userLoginDTO))
+        );
+        testUnsuccessfulResponse(resultActions, expectedErrorCode);
+    }
 }
