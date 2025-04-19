@@ -83,4 +83,15 @@ public class PollService {
         }
         return optionalPoll.get();
     }
+
+    public Page<Poll> findByTitle(String title, int page, int size) throws VotifyException {
+        if (page < 0) {
+            throw new VotifyException(VotifyErrorCode.POLL_PAGE_INVALID_PAGE);
+        }
+        if (size < 1 || size > Poll.PAGE_SIZE_LIMIT) {
+            throw new VotifyException(VotifyErrorCode.POLL_PAGE_LENGTH_INVALID, 1, Poll.PAGE_SIZE_LIMIT);
+        }
+        Pageable pageable = PageRequest.of(page, size);
+        return pollRepository.findByTitleContainingIgnoreCase(title, pageable);
+    }
 }

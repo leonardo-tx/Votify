@@ -88,4 +88,19 @@ public class PollController {
         PageResponse<PollListViewDTO> pageResponse = PageResponse.from(pollPage, pollDtos);
         return ApiResponse.success(pageResponse, HttpStatus.OK).createResponseEntity();
     }
+
+    @GetMapping("/search")
+    public ResponseEntity<ApiResponse<PageResponse<PollListViewDTO>>> findByTitle(
+            @RequestParam(name = "title") String title,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size
+    ) throws VotifyException {
+        Page<Poll> pollPage = pollService.findByTitle(title, page, size);
+        List<PollListViewDTO> pollDtos = pollPage.getContent().stream()
+                .map(PollListViewDTO::parse)
+                .collect(Collectors.toList());
+
+        PageResponse<PollListViewDTO> pageResponse = PageResponse.from(pollPage, pollDtos);
+        return ApiResponse.success(pageResponse, HttpStatus.OK).createResponseEntity();
+    }
 }
