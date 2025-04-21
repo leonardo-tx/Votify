@@ -1,11 +1,13 @@
 import PollSimpleView from "@/libs/polls/PollSimpleView";
-import { getUserById, searchPollsByTitle, getCurrentUser } from "@/libs/api";
+import { getUserById, searchPollsByTitle } from "@/libs/api";
 import { GetServerSideProps } from "next";
 import UserQueryView from "@/libs/users/UserQueryView";
 import PollList from "./components/PollList";
 import { useEffect, useState } from "react";
 import { useAtom } from "jotai";
 import { searchTermAtom } from "@/libs/polls/atoms/searchTermAtom";
+import VotifyErrorCode from "@/libs/VotifyErrorCode";
+import Button from "@/components/shared/Button";
 
 interface Props {
   initialPolls: { poll: PollSimpleView; user: UserQueryView | null }[];
@@ -15,47 +17,46 @@ export default function Home({ initialPolls }: Props) {
   const [polls, setPolls] = useState(initialPolls);
   const [searchTerm] = useAtom(searchTermAtom);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   
-
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const pageSize = 10;
 
   useEffect(() => {
-    const checkAuth = async () => {
-      await getCurrentUser();
-    };
-    
-    checkAuth();
-  }, []);
 
-  useEffect(() => {
     setCurrentPage(0);
     handleSearch(0);
   }, [searchTerm]);
 
   const handleSearch = async (page: number) => {
-    try {
-      setLoading(true);
-      const query = searchTerm?.trim() || "";
-      const response = await searchPollsByTitle(query, page, pageSize);
-      
-      if (response && response.data) {
-        const pollsWithUsers = await Promise.all(
-          response.data.content.map(async (poll: PollSimpleView) => {
-            const user = (await getUserById(poll.responsibleId)).data;
-            return { poll, user };
-          })
-        );
-        setPolls(pollsWithUsers);
-        setCurrentPage(response.data.pageNumber);
-        setTotalPages(response.data.totalPages);
+    setLoading(true);
+    setError(null);
+    const query = searchTerm?.trim() || "";
+    
+    const response = await searchPollsByTitle(query, page, pageSize);
+    
+    if (response && response.data) {
+      const pollsWithUsers = await Promise.all(
+        response.data.content.map(async (poll: PollSimpleView) => {
+          const user = (await getUserById(poll.responsibleId)).data;
+          return { poll, user };
+        })
+      );
+      setPolls(pollsWithUsers);
+      setCurrentPage(response.data.pageNumber);
+      setTotalPages(response.data.totalPages);
+    } else if (!response.success) {
+      if (response.errorCode === VotifyErrorCode.POLL_TITLE_SEARCH_EMPTY) {
+        setError("Por favor, informe um título não vazio ou nulo para pesquisa.");
+        setPolls([]);
+      } else {
+        setError(`Erro na busca: ${response.errorMessage}`);
+        setPolls([]);
       }
-    } catch (error) {
-      console.error("Error searching polls:", error);
-    } finally {
-      setLoading(false);
     }
+
+    setLoading(false);
   };
 
   const handlePageChange = (page: number) => {
@@ -68,25 +69,29 @@ export default function Home({ initialPolls }: Props) {
     
     return (
       <div className="flex justify-center mt-4 space-x-2">
-        <button 
+        <Button
           onClick={() => onPageChange(Math.max(0, currentPage - 1))}
           disabled={currentPage === 0}
-          className={`px-3 py-1 rounded ${currentPage === 0 ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-blue-500 text-white hover:bg-blue-600 cursor-pointer'}`}
+          className={currentPage === 0 ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
+          variant="outline"
+          scheme="primary"
         >
           Anterior
-        </button>
+        </Button>
         
         <span className="px-3 py-1">
           Página {currentPage + 1} de {totalPages}
         </span>
         
-        <button 
+        <Button
           onClick={() => onPageChange(Math.min(totalPages - 1, currentPage + 1))}
           disabled={currentPage >= totalPages - 1}
-          className={`px-3 py-1 rounded ${currentPage >= totalPages - 1 ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-blue-500 text-white hover:bg-blue-600 cursor-pointer'}`}
+          className={currentPage >= totalPages - 1 ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
+          variant="outline"
+          scheme="primary"
         >
           Próximo
-        </button>
+        </Button>
       </div>
     );
   };
@@ -99,6 +104,10 @@ export default function Home({ initialPolls }: Props) {
         </h2>
         {loading ? (
           <p>Carregando...</p>
+        ) : error ? (
+          <div className="p-4 bg-red-100 text-red-800 rounded-md">
+            {error}
+          </div>
         ) : (
           <>
             <PollList polls={polls} />
@@ -116,7 +125,7 @@ export default function Home({ initialPolls }: Props) {
 
 export const getServerSideProps: GetServerSideProps<Props> = async () => {
   try {
-    const response = await searchPollsByTitle("", 0, 10);
+    const response = await searchPollsByTitle("a", 0, 10);
     let pollsWithUserData: { poll: PollSimpleView; user: UserQueryView | null }[] = [];
     
     if (response && response.data && response.data.content) {
