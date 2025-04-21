@@ -55,6 +55,7 @@ public enum VotifyErrorCode {
     PASSWORD_RESET_CODE_INVALID("password.reset.code.invalid", HttpStatus.BAD_REQUEST),
     PASSWORD_RESET_REQUEST_EXISTS("password.reset.request.exists", HttpStatus.BAD_REQUEST),
     PASSWORD_RESET_EMAIL_NOT_FOUND("password.reset.email.not.found", HttpStatus.BAD_REQUEST),
+    POLL_TITLE_SEARCH_EMPTY("poll.title.search.empty", HttpStatus.BAD_REQUEST),
     INVALID_OLD_PASSWORD("invalid.old.password", HttpStatus.BAD_REQUEST);
 
     private final String messageKey;
