@@ -12,7 +12,17 @@ export default function GlobalValuesProvider({ children }: Props) {
 
   useEffect(() => {
     const loadCurrentUser = async () => {
-      setCurrentUser((await getCurrentUser()).data);
+      try {
+        const response = await getCurrentUser();
+        if (response.success) {
+          setCurrentUser(response.data);
+        } else {
+          setCurrentUser(null);
+        }
+      } catch (error) {
+        console.log("Erro de autenticação, prosseguindo sem usuário:", error);
+        setCurrentUser(null);
+      }
     };
     loadCurrentUser();
   }, [setCurrentUser]);

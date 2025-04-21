@@ -12,6 +12,8 @@ import {
 import { logout } from "@/libs/api";
 import { useAtom } from "jotai";
 import { currentUserAtom } from "@/libs/users/atoms/currentUserAtom";
+import { searchTermAtom } from "@/libs/polls/atoms/searchTermAtom";
+import { FormEvent, useState } from "react";
 
 interface NavItem {
   text: string;
@@ -26,6 +28,9 @@ const navItems: NavItem[] = [
 export default function Header() {
   const router = useRouter();
   const [currentUser, setCurrentUser] = useAtom(currentUserAtom);
+  const [searchTerm, setSearchTerm] = useAtom(searchTermAtom);
+  const [localSearchTerm, setLocalSearchTerm] = useState(searchTerm);
+  const formId = "search-form";
 
   const handleLogout = async () => {
     try {
@@ -39,6 +44,15 @@ export default function Header() {
       }
     } catch (error) {
       console.error("Logout error:", error);
+    }
+  };
+
+  const handleSearch = (e: FormEvent) => {
+    e.preventDefault();
+    setSearchTerm(localSearchTerm);
+    
+    if (router.pathname !== "/home") {
+      router.push("/home");
     }
   };
 
@@ -66,13 +80,25 @@ export default function Header() {
             {item.text}
           </Button>
         ))}
-        <Input
-          id="nav-search-poll"
-          className="w-full"
-          variant="line"
-          placeholder="Pesquisar enquete"
-          startElement={<IoSearch size={20} />}
-        />
+        <form id={formId} onSubmit={handleSearch} className="flex w-full cursor-pointer">
+          <Input
+            id="nav-search-poll"
+            className="w-full"
+            variant="line"
+            placeholder="Pesquisar enquete"
+            startElement={
+              <div 
+                onClick={() => document.getElementById(formId)?.dispatchEvent(new Event('submit', { bubbles: true }))} 
+                className="cursor-pointer"
+              >
+                <IoSearch size={20} />
+              </div>
+            }
+            value={localSearchTerm}
+            onChange={(e) => setLocalSearchTerm(e.target.value)}
+          />
+          <button type="submit" className="hidden">Search</button>
+        </form>
       </nav>
       <div className="flex gap-6 text-base font-semibold">
         {currentUser !== null ? (
