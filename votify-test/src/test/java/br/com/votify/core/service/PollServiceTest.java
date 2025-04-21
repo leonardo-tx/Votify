@@ -223,6 +223,20 @@ public class PollServiceTest {
         assertEquals(4, result.getContent().size());
     }
 
+    
+    @Test
+    public void findByTitle() throws VotifyException {
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Poll> pollPage = new PageImpl<>(testPolls, pageable, testPolls.size());
+        
+        when(pollRepository.findByTitleContainingIgnoreCase(eq("t"), any(Pageable.class))).thenReturn(pollPage);
+        
+        Page<Poll> result = pollService.findByTitle("t", 0, 10);
+        
+        assertNotNull(result);
+        assertEquals(4, result.getContent().size());
+    }
+
     @Test
     public void getByIdOrThrowValidCase() {
         when(pollRepository.findById(2L)).thenReturn(Optional.of(testPolls.get(1)));
