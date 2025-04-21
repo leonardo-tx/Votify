@@ -24,6 +24,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -143,6 +144,20 @@ public class PollControllerTest {
 
     @Test
     @Order(1)
+    public void testGetPollByIdNotAuthenticated() throws Exception {
+        ResultActions resultActions = mockMvc.perform(get("/polls/{id}", 1));
+
+        MockMvcHelper.testSuccessfulResponse(resultActions, HttpStatus.OK)
+                .andExpect(jsonPath("data.id", is(1)))
+                .andExpect(jsonPath("data.title", is("Test Poll")))
+                .andExpect(jsonPath("data.description", is("Test Description")))
+                .andExpect(jsonPath("data.voteOptions", hasSize(5)))
+                .andExpect(jsonPath("data.voteOptions[0].name", is("Opção 1")))
+                .andExpect(jsonPath("data.myChoices", is(0)));
+    }
+
+    @Test
+    @Order(1)
     public void testVotePoll() throws Exception {
         Cookie[] cookies = MockMvcHelper.login(
                 mockMvc, objectMapper, "common@votify.com.br", "password123"
@@ -257,9 +272,7 @@ public class PollControllerTest {
                 get("/polls/search")
                         .param("title", "")
         );
-
-        MockMvcHelper
-                .testUnsuccessfulResponse(resultActions,  VotifyErrorCode.POLL_TITLE_SEARCH_EMPTY);
+        MockMvcHelper.testUnsuccessfulResponse(resultActions, VotifyErrorCode.POLL_TITLE_SEARCH_EMPTY);
     }
 
     @Test
@@ -280,5 +293,53 @@ public class PollControllerTest {
                 .andExpect(jsonPath("data.content[0].id", is(1)))
                 .andExpect(jsonPath("data.content[0].title", containsString("Test")))
                 .andExpect(jsonPath("data.content[0].description", containsString("Test")));
+    }
+
+    @Test
+    @Order(3)
+    public void testGetPollWithUserVote() throws Exception {
+
+        Cookie[] cookies = MockMvcHelper.login(
+                mockMvc, objectMapper, "common@votify.com.br", "password123"
+        );
+
+        ResultActions result = mockMvc.perform(get("/polls/{id}", 1)
+                .cookie(cookies));
+
+        MockMvcHelper.testSuccessfulResponse(result, HttpStatus.OK)
+                .andExpect(jsonPath("data.id", is(1)))
+                .andExpect(jsonPath("data.title", is("Test Poll")))
+                .andExpect(jsonPath("data.description", is("Test Description")))
+                .andExpect(jsonPath("data.voteOptions", hasSize(5)))
+                .andExpect(jsonPath("data.voteOptions[0].name", is("Opção 1")))
+                .andExpect(jsonPath("data.myChoices", greaterThan(0)));
+    }
+
+    @Test
+    @Order(0)
+    public void testGetPollWithoutUserVote() throws Exception {
+        Cookie[] cookies = MockMvcHelper.login(
+                mockMvc, objectMapper, "common@votify.com.br", "password123"
+        );
+
+        ResultActions result = mockMvc.perform(get("/polls/{id}", 1).cookie(cookies));
+
+        MockMvcHelper.testSuccessfulResponse(result, HttpStatus.OK)
+                .andExpect(jsonPath("data.id", is(1)))
+                .andExpect(jsonPath("data.title", is("Test Poll")))
+                .andExpect(jsonPath("data.description", is("Test Description")))
+                .andExpect(jsonPath("data.voteOptions", hasSize(5)))
+                .andExpect(jsonPath("data.voteOptions[0].name", is("Opção 1")))
+                .andExpect(jsonPath("data.myChoices", is(0)));
+    }
+
+    @Test
+    @Order(99)
+    public void testGetPollNotFound() throws Exception {
+        long nonExistentPollId = 9999L;
+
+        ResultActions resultActions = mockMvc.perform(get("/polls/{id}", nonExistentPollId));
+
+        MockMvcHelper.testUnsuccessfulResponse(resultActions, VotifyErrorCode.POLL_NOT_FOUND);
     }
 }
