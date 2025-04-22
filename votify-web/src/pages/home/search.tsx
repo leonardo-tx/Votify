@@ -6,77 +6,81 @@ import PollList from "./components/PollList";
 import { useEffect, useState } from "react";
 import { useAtom } from "jotai";
 import { searchTermAtom } from "@/libs/polls/atoms/searchTermAtom";
-import VotifyErrorCode from "@/libs/VotifyErrorCode";
 import Button from "@/components/shared/Button";
 import { useRouter } from "next/router";
 
 interface Props {
   initialPolls: { poll: PollSimpleView; user: UserQueryView | null }[];
+  searchTitle: string;
+  initialPage: number; 
+  initialTotalPages: number;
+  errorMessage?: string;
 }
 
-export default function Home({ initialPolls }: Props) {
+export default function SearchResults({ initialPolls, searchTitle, initialPage, initialTotalPages, errorMessage }: Props) {
   const router = useRouter();
+  const [, setSearchTerm] = useAtom(searchTermAtom);
   const [polls, setPolls] = useState(initialPolls);
-  const [searchTerm] = useAtom(searchTermAtom);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  
-  const [currentPage, setCurrentPage] = useState(0);
-  const [totalPages, setTotalPages] = useState(1);
+  const [error, setError] = useState<string | null>(errorMessage || null);
+  const [currentPage, setCurrentPage] = useState(initialPage);
+  const [totalPages, setTotalPages] = useState(initialTotalPages);
   const pageSize = 10;
-
+  
   useEffect(() => {
-    if (searchTerm && searchTerm.trim() !== "" && searchTerm.trim() !== " ") {
-      router.push({
-        pathname: '/home/search',
-        query: { 
-          title: searchTerm.trim(),
-          page: 0 
-        }
-      });
-      return;
-    }
+    setSearchTerm(searchTitle);
+  }, [searchTitle, setSearchTerm]);
+  
+  // Fetch data whenever URL query parameters change
+  useEffect(() => {
+    const titleParam = router.query.title as string;
+    const pageParam = router.query.page;
     
-    setCurrentPage(0);
-    handleSearch(0);
-  }, [searchTerm, router]);
-
-  const handleSearch = async (page: number) => {
+    if (titleParam && titleParam.trim() !== "") {
+      const newPage = typeof pageParam === 'string' ? parseInt(pageParam, 10) : 0;
+      setCurrentPage(newPage);
+      fetchSearchResults(titleParam, newPage);
+    }
+  }, [router.query.title, router.query.page]);
+  
+  const fetchSearchResults = async (title: string, page: number) => {
     setLoading(true);
     setError(null);
-    const query = searchTerm?.trim() || "";
     
-    const searchQuery = query === "" ? "a" : query;
-    const response = await searchPollsByTitle(searchQuery, page, pageSize);
-    
-    if (response && response.data) {
-      const pollsWithUsers = await Promise.all(
-        response.data.content.map(async (poll: PollSimpleView) => {
-          const user = (await getUserById(poll.responsibleId)).data;
-          return { poll, user };
-        })
-      );
-      setPolls(pollsWithUsers);
-      setCurrentPage(response.data.pageNumber);
-      setTotalPages(response.data.totalPages);
-    } else if (!response.success) {
-      if (response.errorCode === VotifyErrorCode.POLL_TITLE_SEARCH_EMPTY) {
-        if (query !== "") {
-          setError("Por favor, informe um título não vazio ou nulo para pesquisa.");
-        }
-        setPolls([]);
-      } else {
+    try {
+      const response = await searchPollsByTitle(title, page, pageSize);
+      
+      if (response && response.data) {
+        const pollsWithUsers = await Promise.all(
+          response.data.content.map(async (poll: PollSimpleView) => {
+            const user = (await getUserById(poll.responsibleId)).data;
+            return { poll, user };
+          })
+        );
+        setPolls(pollsWithUsers);
+        setCurrentPage(response.data.pageNumber);
+        setTotalPages(response.data.totalPages);
+      } else if (!response.success) {
         setError(`Erro na busca: ${response.errorMessage}`);
         setPolls([]);
       }
+    } catch (error) {
+      console.error("Error searching polls:", error);
+      setError("Ocorreu um erro ao buscar enquetes. Por favor, tente novamente.");
+      setPolls([]);
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-    handleSearch(page);
+    router.push({
+      pathname: '/home/search',
+      query: { 
+        title: searchTitle,
+        page: page 
+      }
+    }, undefined, { shallow: false });
   };
 
   const Pagination = ({ currentPage, totalPages, onPageChange }: { currentPage: number, totalPages: number, onPageChange: (page: number) => void }) => {
@@ -115,7 +119,7 @@ export default function Home({ initialPolls }: Props) {
     <div className="flex flex-col gap-4">
       <div>
         <h2 className="text-xl font-bold mb-2">
-          {searchTerm ? `Resultados da busca por "${searchTerm}"` : "Todas as enquetes"}
+          {`Resultados da busca por "${searchTitle}"`}
         </h2>
         {loading ? (
           <p>Carregando...</p>
@@ -123,6 +127,8 @@ export default function Home({ initialPolls }: Props) {
           <div className="p-4 bg-red-100 text-red-800 rounded-md">
             {error}
           </div>
+        ) : polls.length === 0 ? (
+          <p>{`Nenhuma enquete encontrada para "${searchTitle}"`}</p>
         ) : (
           <>
             <PollList polls={polls} />
@@ -138,12 +144,39 @@ export default function Home({ initialPolls }: Props) {
   );
 }
 
-export const getServerSideProps: GetServerSideProps<Props> = async () => {
+export const getServerSideProps: GetServerSideProps<Props> = async (context) => {
+  const { title, page } = context.query;
+  const searchTitle = typeof title === 'string' ? title : '';
+  const pageNumber = typeof page === 'string' ? parseInt(page, 10) : 0;
+  
+  // Check if search term is empty and redirect to home if it is
+  if (!searchTitle || searchTitle.trim() === "" || searchTitle.trim() === " ") {
+    return {
+      redirect: {
+        destination: '/home',
+        permanent: false,
+      },
+    };
+  }
+
   try {
-    const response = await searchPollsByTitle("a", 0, 10);
+    const response = await searchPollsByTitle(searchTitle, pageNumber, 10);
+    
+    if (!response.success) {
+      return {
+        props: {
+          initialPolls: [],
+          searchTitle: searchTitle,
+          initialPage: pageNumber,
+          initialTotalPages: 1,
+          errorMessage: response.errorMessage || "Erro na busca",
+        },
+      };
+    }
+    
     let pollsWithUserData: { poll: PollSimpleView; user: UserQueryView | null }[] = [];
     
-    if (response && response.data && response.data.content) {
+    if (response.data && response.data.content) {
       const users: Map<number, UserQueryView> = new Map();
       
       pollsWithUserData = await Promise.all(
@@ -165,14 +198,21 @@ export const getServerSideProps: GetServerSideProps<Props> = async () => {
     return {
       props: {
         initialPolls: pollsWithUserData,
+        searchTitle: searchTitle,
+        initialPage: response.data?.pageNumber || pageNumber,
+        initialTotalPages: response.data?.totalPages || 1,
       },
     };
   } catch (error) {
-    console.error("Error fetching initial polls:", error);
+    console.error("Error fetching search results:", error);
     return {
       props: {
         initialPolls: [],
+        searchTitle: searchTitle,
+        initialPage: pageNumber,
+        initialTotalPages: 1,
+        errorMessage: "Ocorreu um erro ao buscar enquetes. Por favor, tente novamente.",
       },
     };
   }
-};
+}; 

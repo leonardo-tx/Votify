@@ -49,11 +49,23 @@ export default function Header() {
 
   const handleSearch = (e: FormEvent) => {
     e.preventDefault();
+    
+    if (!localSearchTerm || localSearchTerm.trim() === "") {
+      if (router.pathname !== "/home") {
+        router.push("/home");
+      }
+      return;
+    }
+    
     setSearchTerm(localSearchTerm);
     
-    if (router.pathname !== "/home") {
-      router.push("/home");
-    }
+    router.push({
+      pathname: '/home/search',
+      query: { 
+        title: localSearchTerm.trim(),
+        page: 0 
+      }
+    }, undefined, { shallow: false });
   };
 
   return (
