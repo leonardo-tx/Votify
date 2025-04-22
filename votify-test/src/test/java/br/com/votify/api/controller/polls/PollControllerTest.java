@@ -259,6 +259,18 @@ public class PollControllerTest {
         );
 
         MockMvcHelper
+                .testUnsuccessfulResponse(resultActions,  VotifyErrorCode.POLL_TITLE_SEARCH_EMPTY);
+    }
+
+    @Test
+    @Order(1)
+    public void testSearchPollsTestQuery() throws Exception {
+        ResultActions resultActions = mockMvc.perform(
+                get("/polls/search")
+                        .param("title", "Test")
+        );
+
+        MockMvcHelper
                 .testSuccessfulResponse(resultActions, HttpStatus.OK)
                 .andExpect(jsonPath("data.pageNumber", is(0)))
                 .andExpect(jsonPath("data.pageSize", is(10)))
