@@ -92,7 +92,7 @@ public class PollService {
             throw new VotifyException(VotifyErrorCode.POLL_PAGE_LENGTH_INVALID, 1, Poll.PAGE_SIZE_LIMIT);
         }
         
-        if (title == null || title.trim().isEmpty() || title.trim().equals(" ") || title.isBlank()) {
+        if (title == null || title.isBlank()) {
             throw new VotifyException(VotifyErrorCode.POLL_TITLE_SEARCH_EMPTY);
         }
         
