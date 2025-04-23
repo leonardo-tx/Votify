@@ -158,60 +158,47 @@ export const getServerSideProps: GetServerSideProps<Props> = async (context) => 
     };
   }
 
-  try {
-    const response = await searchPollsByTitle(searchTitle, pageNumber, 10);
-    
-    if (!response.success) {
-      return {
-        props: {
-          initialPolls: [],
-          searchTitle: searchTitle,
-          initialPage: pageNumber,
-          initialTotalPages: 1,
-          errorMessage: response.errorMessage || "Erro na busca",
-        },
-      };
-    }
-    
-    let pollsWithUserData: { poll: PollSimpleView; user: UserQueryView | null }[] = [];
-    
-    if (response.data && response.data.content) {
-      const users: Map<number, UserQueryView> = new Map();
-      
-      pollsWithUserData = await Promise.all(
-        response.data.content.map(async (poll: PollSimpleView) => {
-          const userFromMap = users.get(poll.responsibleId);
-          if (userFromMap !== undefined) {
-            return { poll, user: userFromMap };
-          }
-
-          const user = (await getUserById(poll.responsibleId)).data;
-          if (user !== null) {
-            users.set(user.id, user);
-          }
-          return { poll, user };
-        })
-      );
-    }
-
-    return {
-      props: {
-        initialPolls: pollsWithUserData,
-        searchTitle: searchTitle,
-        initialPage: response.data?.pageNumber || pageNumber,
-        initialTotalPages: response.data?.totalPages || 1,
-      },
-    };
-  } catch (error) {
-    console.error("Error fetching search results:", error);
+  const response = await searchPollsByTitle(searchTitle, pageNumber, 10);
+  
+  if (!response.success) {
     return {
       props: {
         initialPolls: [],
         searchTitle: searchTitle,
         initialPage: pageNumber,
         initialTotalPages: 1,
-        errorMessage: "Ocorreu um erro ao buscar enquetes. Por favor, tente novamente.",
+        errorMessage: response.errorMessage || "Erro na busca",
       },
     };
   }
+  
+  let pollsWithUserData: { poll: PollSimpleView; user: UserQueryView | null }[] = [];
+  
+  if (response.data && response.data.content) {
+    const users: Map<number, UserQueryView> = new Map();
+    
+    pollsWithUserData = await Promise.all(
+      response.data.content.map(async (poll: PollSimpleView) => {
+        const userFromMap = users.get(poll.responsibleId);
+        if (userFromMap !== undefined) {
+          return { poll, user: userFromMap };
+        }
+
+        const user = (await getUserById(poll.responsibleId)).data;
+        if (user !== null) {
+          users.set(user.id, user);
+        }
+        return { poll, user };
+      })
+    );
+  }
+
+  return {
+    props: {
+      initialPolls: pollsWithUserData,
+      searchTitle: searchTitle,
+      initialPage: response.data?.pageNumber || pageNumber,
+      initialTotalPages: response.data?.totalPages || 1,
+    },
+  };
 }; 
