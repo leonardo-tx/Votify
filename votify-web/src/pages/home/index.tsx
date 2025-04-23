@@ -10,6 +10,201 @@ import VotifyErrorCode from "@/libs/VotifyErrorCode";
 import Button from "@/components/shared/Button";
 import { useRouter } from "next/router";
 
+const mockPolls: PollSimpleView[] = [
+  {
+    id: 1,
+    title: "Lorem Ipsum",
+    description: "",
+    startDate: "2025-02-01T00:00:00",
+    endDate: "2025-04-12T02:20:00",
+    responsibleId: 1,
+  },
+  {
+    id: 2,
+    title: "Esse é o máximo de letras que um título pode ter..",
+    description: "asdhka",
+    startDate: "2025-02-01T00:00:00",
+    endDate: "2025-08-01T00:00:00",
+    responsibleId: 1,
+  },
+  {
+    id: 3,
+    title: "Outro teste",
+    description: "asdhka",
+    startDate: "2025-02-01T00:00:00",
+    endDate: "2025-08-01T00:00:00",
+    responsibleId: 1,
+  },
+  {
+    id: 4,
+    title: "Uma enquete bem específica",
+    description: "hahaha",
+    startDate: "2025-02-01T00:00:00",
+    endDate: "2025-08-01T00:00:00",
+    responsibleId: 1,
+  },
+  {
+    id: 5,
+    title: "?????????",
+    description: "Abra e descubra",
+    startDate: "2025-02-01T00:00:00",
+    endDate: "2025-08-01T00:00:00",
+    responsibleId: 1,
+  },
+  {
+    id: 6,
+    title: "Não sei o que digitar",
+    description: "",
+    startDate: "2025-02-01T00:00:00",
+    endDate: "2025-08-01T00:00:00",
+    responsibleId: 1,
+  },
+  {
+    id: 7,
+    title: "Lorem Ipsum",
+    description: "",
+    startDate: "2025-02-01T00:00:00",
+    endDate: "2025-08-01T00:00:00",
+    responsibleId: 1,
+  },
+  {
+    id: 8,
+    title: "Esse é o máximo de letras que um título pode ter..",
+    description: "asdhka",
+    startDate: "2025-02-01T00:00:00",
+    endDate: "2025-08-01T00:00:00",
+    responsibleId: 1,
+  },
+  {
+    id: 9,
+    title: "Outro teste",
+    description: "asdhka",
+    startDate: "2025-02-01T00:00:00",
+    endDate: "2025-08-01T00:00:00",
+    responsibleId: 1,
+  },
+  {
+    id: 10,
+    title: "Uma enquete bem específica",
+    description: "hahaha",
+    startDate: "2025-02-01T00:00:00",
+    endDate: "2025-08-01T00:00:00",
+    responsibleId: 1,
+  },
+  {
+    id: 11,
+    title: "?????????",
+    description: "Abra e descubra",
+    startDate: "2025-02-01T00:00:00",
+    endDate: "2025-08-01T00:00:00",
+    responsibleId: 1,
+  },
+  {
+    id: 12,
+    title: "Não sei o que digitar",
+    description: "",
+    startDate: "2025-02-01T00:00:00",
+    endDate: "2025-08-01T00:00:00",
+    responsibleId: 1,
+  },
+  {
+    id: 13,
+    title: "Lorem Ipsum",
+    description: "",
+    startDate: "2025-02-01T00:00:00",
+    endDate: "2025-08-01T00:00:00",
+    responsibleId: 1,
+  },
+  {
+    id: 14,
+    title: "Esse é o máximo de letras que um título pode ter..",
+    description: "asdhka",
+    startDate: "2025-02-01T00:00:00",
+    endDate: "2025-08-01T00:00:00",
+    responsibleId: 1,
+  },
+  {
+    id: 15,
+    title: "Outro teste",
+    description: "asdhka",
+    startDate: "2025-02-01T00:00:00",
+    endDate: "2025-08-01T00:00:00",
+    responsibleId: 1,
+  },
+  {
+    id: 16,
+    title: "Uma enquete bem específica",
+    description: "hahaha",
+    startDate: "2025-02-01T00:00:00",
+    endDate: "2025-08-01T00:00:00",
+    responsibleId: 1,
+  },
+  {
+    id: 17,
+    title: "?????????",
+    description: "Abra e descubra",
+    startDate: "2025-02-01T00:00:00",
+    endDate: "2025-08-01T00:00:00",
+    responsibleId: 1,
+  },
+  {
+    id: 18,
+    title: "Não sei o que digitar",
+    description: "",
+    startDate: "2025-02-01T00:00:00",
+    endDate: "2025-08-01T00:00:00",
+    responsibleId: 1,
+  },
+  {
+    id: 19,
+    title: "Lorem Ipsum",
+    description: "",
+    startDate: "2025-02-01T00:00:00",
+    endDate: "2025-08-01T00:00:00",
+    responsibleId: 1,
+  },
+  {
+    id: 20,
+    title: "Esse é o máximo de letras que um título pode ter..",
+    description: "asdhka",
+    startDate: "2025-02-01T00:00:00",
+    endDate: "2025-08-01T00:00:00",
+    responsibleId: 1,
+  },
+  {
+    id: 21,
+    title: "Outro teste",
+    description: "asdhka",
+    startDate: "2025-02-01T00:00:00",
+    endDate: "2025-08-01T00:00:00",
+    responsibleId: 1,
+  },
+  {
+    id: 22,
+    title: "Uma enquete bem específica",
+    description: "hahaha",
+    startDate: "2025-02-01T00:00:00",
+    endDate: "2025-08-01T00:00:00",
+    responsibleId: 1,
+  },
+  {
+    id: 23,
+    title: "?????????",
+    description: "Abra e descubra",
+    startDate: "2025-02-01T00:00:00",
+    endDate: "2025-08-01T00:00:00",
+    responsibleId: 1,
+  },
+  {
+    id: 24,
+    title: "Não sei o que digitar",
+    description: "",
+    startDate: "2025-02-01T00:00:00",
+    endDate: "2025-08-01T00:00:00",
+    responsibleId: 1,
+  },
+];
+
 interface Props {
   initialPolls: { poll: PollSimpleView; user: UserQueryView | null }[];
 }
@@ -46,8 +241,19 @@ export default function Home({ initialPolls }: Props) {
     setError(null);
     const query = searchTerm?.trim() || "";
     
-    const searchQuery = query === "" ? "a" : query;
-    const response = await searchPollsByTitle(searchQuery, page, pageSize);
+    if (query === "" || query === " ") {
+      const startIndex = page * pageSize;
+      const endIndex = startIndex + pageSize;
+      const paginatedMockPolls = mockPolls.slice(startIndex, endIndex);
+      
+      setPolls(paginatedMockPolls.map(poll => ({ poll, user: null })));
+      setCurrentPage(page);
+      setTotalPages(Math.ceil(mockPolls.length / pageSize));
+      setLoading(false);
+      return;
+    }
+    
+    const response = await searchPollsByTitle(query, page, pageSize);
     
     if (response && response.data) {
       const pollsWithUsers = await Promise.all(
@@ -61,10 +267,7 @@ export default function Home({ initialPolls }: Props) {
       setTotalPages(response.data.totalPages);
     } else if (!response.success) {
       if (response.errorCode === VotifyErrorCode.POLL_TITLE_SEARCH_EMPTY) {
-        if (query !== "") {
-          setError("Por favor, informe um título não vazio ou nulo para pesquisa.");
-        }
-        setPolls([]);
+        setPolls(mockPolls.slice(0, pageSize).map(poll => ({ poll, user: null })));
       } else {
         setError(`Erro na busca: ${response.errorMessage}`);
         setPolls([]);
@@ -140,27 +343,14 @@ export default function Home({ initialPolls }: Props) {
 
 export const getServerSideProps: GetServerSideProps<Props> = async () => {
   try {
-    const response = await searchPollsByTitle("a", 0, 10);
-    let pollsWithUserData: { poll: PollSimpleView; user: UserQueryView | null }[] = [];
-    
-    if (response && response.data && response.data.content) {
-      const users: Map<number, UserQueryView> = new Map();
-      
-      pollsWithUserData = await Promise.all(
-        response.data.content.map(async (poll: PollSimpleView) => {
-          const userFromMap = users.get(poll.responsibleId);
-          if (userFromMap !== undefined) {
-            return { poll, user: userFromMap };
-          }
+    const initialPage = 0;
+    const pageSize = 10;
+    const paginatedMockPolls = mockPolls.slice(initialPage * pageSize, (initialPage + 1) * pageSize);
 
-          const user = (await getUserById(poll.responsibleId)).data;
-          if (user !== null) {
-            users.set(user.id, user);
-          }
-          return { poll, user };
-        })
-      );
-    }
+    const pollsWithUserData = paginatedMockPolls.map(poll => ({
+      poll,
+      user: null
+    }));
 
     return {
       props: {

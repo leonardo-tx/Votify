@@ -51,6 +51,8 @@ export default function Header() {
     e.preventDefault();
     
     if (!localSearchTerm || localSearchTerm.trim() === "") {
+      setSearchTerm("");
+      
       if (router.pathname !== "/home") {
         router.push("/home");
       }

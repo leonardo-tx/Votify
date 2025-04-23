@@ -31,7 +31,6 @@ export default function SearchResults({ initialPolls, searchTitle, initialPage, 
     setSearchTerm(searchTitle);
   }, [searchTitle, setSearchTerm]);
   
-  // Fetch data whenever URL query parameters change
   useEffect(() => {
     const titleParam = router.query.title as string;
     const pageParam = router.query.page;
