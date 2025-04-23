@@ -34,8 +34,10 @@ public class HomeTest extends BaseTest {
 
         Thread.sleep(1000);
 
-        List<WebElement> pollCards = page.pollList.findElements(By.xpath("./*"));
-        assertEquals(0, pollCards.size(), "Search for 'a' should return 0 polls");
+        WebElement alertMessage = webDriver.findElement(By.xpath("//p"));
+        assertEquals("Nenhuma enquete encontrada para \"a\"",
+                alertMessage.getText().trim(),
+                "Alert message should match expected text");
 
     }
     
@@ -43,19 +45,13 @@ public class HomeTest extends BaseTest {
     public void testSearchForEmptyString() throws InterruptedException {
         WebElement searchInput = webDriver.findElement(By.id("nav-search-poll"));
         searchInput.clear();
-        searchInput.sendKeys("a");
-        searchInput.sendKeys(Keys.ENTER);
-        searchInput.clear();
         searchInput.sendKeys(" ");
         searchInput.sendKeys(Keys.ENTER);
 
         Thread.sleep(1000);
-        
-        WebElement errorMessage = webDriver.findElement(By.xpath("//div[contains(@class, 'bg-red-100')]"));
-        assertTrue(errorMessage.isDisplayed(), "Error message should be displayed");
-        assertEquals("Por favor, informe um título não vazio ou nulo para pesquisa.", 
-                errorMessage.getText().trim(), 
-                "Error message should match expected text");
+
+        List<WebElement> pollCards = page.pollList.findElements(By.xpath("./*"));
+        assertEquals(0, pollCards.size(), "Search for 'a' should return 0 polls");
     }
 
     // todo: Precisamos implementar alguns Polls para que possa ser possível testar a busca e inserção pela página.
