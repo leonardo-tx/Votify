@@ -49,9 +49,24 @@ public class HomeTest extends BaseTest {
         searchInput.sendKeys(Keys.ENTER);
 
         Thread.sleep(1000);
-
-        List<WebElement> pollCards = page.pollList.findElements(By.xpath("./*"));
-        assertEquals(0, pollCards.size(), "Search for 'a' should return 0 polls");
+        
+        int totalPollCount = 0;
+        boolean hasNextPage = true;
+        
+        while (hasNextPage) {
+            List<WebElement> pollCards = page.pollList.findElements(By.xpath("./*"));
+            totalPollCount += pollCards.size();
+            
+            List<WebElement> nextButtons = webDriver.findElements(By.xpath("//button[contains(text(), 'Próximo')]"));
+            if (!nextButtons.isEmpty() && !nextButtons.get(0).getAttribute("class").contains("opacity-50")) {
+                nextButtons.get(0).click();
+                Thread.sleep(1000);
+            } else {
+                hasNextPage = false;
+            }
+        }
+        
+        assertEquals(24, totalPollCount, "Total poll count across all pages should be 24");
     }
 
     // todo: Precisamos implementar alguns Polls para que possa ser possível testar a busca e inserção pela página.
