@@ -4,6 +4,7 @@ import br.com.votify.api.configuration.SecurityConfig;
 import br.com.votify.core.domain.entities.tokens.AuthTokens;
 import br.com.votify.core.domain.entities.users.CommonUser;
 import br.com.votify.core.domain.entities.users.User;
+import br.com.votify.core.service.EmailConfirmationService;
 import br.com.votify.core.service.PasswordResetService;
 import br.com.votify.core.service.UserService;
 import br.com.votify.core.utils.exceptions.VotifyException;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
     private final UserService userService;
     private final PasswordResetService passwordResetService;
+    private final EmailConfirmationService emailConfirmationService;
     private final SecurityConfig securityConfig;
 
     @PostMapping("/register")
@@ -33,8 +35,10 @@ public class AuthController {
     ) throws VotifyException {
         CommonUser user = userRegisterDTO.convertToEntity();
         User createdUser = userService.register(user);
-        UserDetailedViewDTO userDTO = UserDetailedViewDTO.parse(createdUser);
-
+        UserDetailedViewDTO userDTO = UserDetailedViewDTO.parse(
+                createdUser,
+                createdUser.getEmailConfirmation().getEmailConfirmationCode()
+        );
         return ApiResponse.success(userDTO, HttpStatus.CREATED).createResponseEntity();
     }
 
@@ -110,6 +114,15 @@ public class AuthController {
             @RequestBody PasswordResetConfirmDTO confirmDTO) throws VotifyException {
 
         passwordResetService.resetPassword(confirmDTO.getCode(), confirmDTO.getNewPassword());
+        return ApiResponse.success(null, HttpStatus.OK).createResponseEntity();
+    }
+
+    @PostMapping("/confirm-email")
+    public ResponseEntity<ApiResponse<Object>> confirmEmail(@RequestBody EmailConfirmationRequestDTO emailConfirmationRequestDto) throws VotifyException {
+        emailConfirmationService.confirmEmail(
+                emailConfirmationRequestDto.getCode(),
+                emailConfirmationRequestDto.getEmail()
+        );
         return ApiResponse.success(null, HttpStatus.OK).createResponseEntity();
     }
 }

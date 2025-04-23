@@ -2,6 +2,7 @@ package br.com.votify.api.configuration;
 
 import br.com.votify.core.domain.entities.cookies.CookieProperties;
 import br.com.votify.core.domain.entities.password.PasswordResetProperties;
+import br.com.votify.core.domain.entities.tokens.EmailConfirmationExpirationProperties;
 import br.com.votify.core.domain.entities.tokens.TokenProperties;
 import jakarta.servlet.http.Cookie;
 import lombok.Getter;
@@ -19,6 +20,9 @@ public class SecurityConfig {
 
     @Autowired
     private PasswordResetProperties passwordResetProperties;
+
+    @Autowired
+    private EmailConfirmationExpirationProperties emailConfirmationExpirationProperties;
 
     public void configureAccessTokenCookie(Cookie cookie) {
         configureCookie(cookie);
