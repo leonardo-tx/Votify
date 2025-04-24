@@ -12,7 +12,6 @@ import {
 import { logout } from "@/libs/api";
 import { useAtom } from "jotai";
 import { currentUserAtom } from "@/libs/users/atoms/currentUserAtom";
-import { searchTermAtom } from "@/libs/polls/atoms/searchTermAtom";
 import { FormEvent, useState } from "react";
 
 interface NavItem {
@@ -28,46 +27,44 @@ const navItems: NavItem[] = [
 export default function Header() {
   const router = useRouter();
   const [currentUser, setCurrentUser] = useAtom(currentUserAtom);
-  const [searchTerm, setSearchTerm] = useAtom(searchTermAtom);
-  const [localSearchTerm, setLocalSearchTerm] = useState(searchTerm);
-  const formId = "search-form";
+  const [searchTerm, setSearchTerm] = useState(
+    typeof router.query["title"] === "string" ? router.query["title"] : "",
+  );
 
   const handleLogout = async () => {
-    try {
-      const response = await logout();
+    const response = await logout();
 
-      if (response.success) {
-        setCurrentUser(null);
-        router.push("/home");
-      } else {
-        throw new Error(response.errorMessage || "Falha ao realizar logout");
-      }
-    } catch (error) {
-      console.error("Logout error:", error);
+    if (response.success) {
+      setCurrentUser(null);
+      router.push("/home");
+    } else {
+      throw new Error("Falha ao realizar logout");
     }
   };
 
   const handleSearch = (e: FormEvent) => {
     e.preventDefault();
-    
-    if (!localSearchTerm || localSearchTerm.trim() === "") {
+
+    const trimSearchTerm = searchTerm.trim();
+    if (trimSearchTerm === "") {
       setSearchTerm("");
-      
+
       if (router.pathname !== "/home") {
         router.push("/home");
       }
       return;
     }
-    
-    setSearchTerm(localSearchTerm);
-    
-    router.push({
-      pathname: '/home/search',
-      query: { 
-        title: localSearchTerm.trim(),
-        page: 0 
-      }
-    }, undefined, { shallow: false });
+    router.push(
+      {
+        pathname: "/home/search",
+        query: {
+          title: searchTerm,
+          page: 0,
+        },
+      },
+      undefined,
+      { shallow: false },
+    );
   };
 
   return (
@@ -94,24 +91,29 @@ export default function Header() {
             {item.text}
           </Button>
         ))}
-        <form id={formId} onSubmit={handleSearch} className="flex w-full cursor-pointer">
+        <form
+          id="search-form"
+          onSubmit={handleSearch}
+          className="flex w-full cursor-pointer"
+        >
           <Input
             id="nav-search-poll"
             className="w-full"
             variant="line"
             placeholder="Pesquisar enquete"
-            startElement={
-              <div 
-                onClick={() => document.getElementById(formId)?.dispatchEvent(new Event('submit', { bubbles: true }))} 
+            endElement={
+              <Button
+                id="poll-search-submit"
                 className="cursor-pointer"
+                variant="text"
+                type="submit"
               >
                 <IoSearch size={20} />
-              </div>
+              </Button>
             }
-            value={localSearchTerm}
-            onChange={(e) => setLocalSearchTerm(e.target.value)}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
           />
-          <button type="submit" className="hidden">Search</button>
         </form>
       </nav>
       <div className="flex gap-6 text-base font-semibold">

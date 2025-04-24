@@ -19,6 +19,9 @@ public class BasePage {
     @FindBy(id = "nav-search-poll")
     public WebElement navSearchPoll;
 
+    @FindBy(id = "poll-search-submit")
+    public WebElement buttonPollSearchSubmit;
+
     @FindBy(id = "signin-link")
     public WebElement signinLink;
 

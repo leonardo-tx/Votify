@@ -1,14 +1,10 @@
 import PollSimpleView from "@/libs/polls/PollSimpleView";
-import { getUserById, searchPollsByTitle } from "@/libs/api";
 import { GetServerSideProps } from "next";
 import UserQueryView from "@/libs/users/UserQueryView";
 import PollList from "./components/PollList";
-import { useEffect, useState } from "react";
-import { useAtom } from "jotai";
-import { searchTermAtom } from "@/libs/polls/atoms/searchTermAtom";
-import VotifyErrorCode from "@/libs/VotifyErrorCode";
-import Button from "@/components/shared/Button";
 import { useRouter } from "next/router";
+import Pagination from "./components/Pagination";
+import Head from "next/head";
 
 const mockPolls: PollSimpleView[] = [
   {
@@ -205,164 +201,77 @@ const mockPolls: PollSimpleView[] = [
   },
 ];
 
+const pageSize = 10;
+
 interface Props {
-  initialPolls: { poll: PollSimpleView; user: UserQueryView | null }[];
+  polls: { poll: PollSimpleView; user: UserQueryView | null }[];
+  page: number;
+  totalPages: number;
 }
 
-export default function Home({ initialPolls }: Props) {
+export default function Home({ polls, page, totalPages }: Props) {
   const router = useRouter();
-  const [polls, setPolls] = useState(initialPolls);
-  const [searchTerm] = useAtom(searchTermAtom);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  
-  const [currentPage, setCurrentPage] = useState(0);
-  const [totalPages, setTotalPages] = useState(1);
-  const pageSize = 10;
-
-  useEffect(() => {
-    if (searchTerm && searchTerm.trim() !== "" && searchTerm.trim() !== " ") {
-      router.push({
-        pathname: '/home/search',
-        query: { 
-          title: searchTerm.trim(),
-          page: 0 
-        }
-      });
-      return;
-    }
-    
-    setCurrentPage(0);
-    handleSearch(0);
-  }, [searchTerm, router]);
-
-  const handleSearch = async (page: number) => {
-    setLoading(true);
-    setError(null);
-    const query = searchTerm?.trim() || "";
-    
-    if (query === "" || query === " ") {
-      const startIndex = page * pageSize;
-      const endIndex = startIndex + pageSize;
-      const paginatedMockPolls = mockPolls.slice(startIndex, endIndex);
-      
-      setPolls(paginatedMockPolls.map(poll => ({ poll, user: null })));
-      setCurrentPage(page);
-      setTotalPages(Math.ceil(mockPolls.length / pageSize));
-      setLoading(false);
-      return;
-    }
-    
-    const response = await searchPollsByTitle(query, page, pageSize);
-    
-    if (response && response.data) {
-      const pollsWithUsers = await Promise.all(
-        response.data.content.map(async (poll: PollSimpleView) => {
-          const user = (await getUserById(poll.responsibleId)).data;
-          return { poll, user };
-        })
-      );
-      setPolls(pollsWithUsers);
-      setCurrentPage(response.data.pageNumber);
-      setTotalPages(response.data.totalPages);
-    } else if (!response.success) {
-      if (response.errorCode === VotifyErrorCode.POLL_TITLE_SEARCH_EMPTY) {
-        setPolls(mockPolls.slice(0, pageSize).map(poll => ({ poll, user: null })));
-      } else {
-        setError(`Erro na busca: ${response.errorMessage}`);
-        setPolls([]);
-      }
-    }
-
-    setLoading(false);
-  };
 
   const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-    handleSearch(page);
-  };
-
-  const Pagination = ({ currentPage, totalPages, onPageChange }: { currentPage: number, totalPages: number, onPageChange: (page: number) => void }) => {
-    if (totalPages <= 1) return null;
-    
-    return (
-      <div className="flex justify-center mt-4 space-x-2">
-        <Button
-          onClick={() => onPageChange(Math.max(0, currentPage - 1))}
-          disabled={currentPage === 0}
-          className={currentPage === 0 ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
-          variant="outline"
-          scheme="primary"
-        >
-          Anterior
-        </Button>
-        
-        <span className="px-3 py-1">
-          Página {currentPage + 1} de {totalPages}
-        </span>
-        
-        <Button
-          onClick={() => onPageChange(Math.min(totalPages - 1, currentPage + 1))}
-          disabled={currentPage >= totalPages - 1}
-          className={currentPage >= totalPages - 1 ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
-          variant="outline"
-          scheme="primary"
-        >
-          Próximo
-        </Button>
-      </div>
+    router.push(
+      {
+        pathname: "/home",
+        query: {
+          page: page,
+        },
+      },
+      undefined,
+      { shallow: false },
     );
   };
 
   return (
-    <div className="flex flex-col gap-4">
-      <div>
-        <h2 className="text-xl font-bold mb-2">
-          {searchTerm ? `Resultados da busca por "${searchTerm}"` : "Todas as enquetes"}
-        </h2>
-        {loading ? (
-          <p>Carregando...</p>
-        ) : error ? (
-          <div className="p-4 bg-red-100 text-red-800 rounded-md">
-            {error}
-          </div>
-        ) : (
-          <>
-            <PollList polls={polls} />
-            <Pagination 
-              currentPage={currentPage} 
-              totalPages={totalPages} 
-              onPageChange={handlePageChange} 
-            />
-          </>
-        )}
+    <>
+      <Head>
+        <title>Home - Votify</title>
+      </Head>
+      <div className="flex flex-col gap-4">
+        <h1 className="text-xl font-extrabold">
+          Nenhuma das enquetes aqui são reais, falta implementação no back-end!
+        </h1>
+        <div className="flex flex-col gap-3">
+          <PollList polls={polls} />
+          <Pagination
+            currentPage={page}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+          />
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 
-export const getServerSideProps: GetServerSideProps<Props> = async () => {
-  try {
-    const initialPage = 0;
-    const pageSize = 10;
-    const paginatedMockPolls = mockPolls.slice(initialPage * pageSize, (initialPage + 1) * pageSize);
+export const getServerSideProps: GetServerSideProps<Props> = async (
+  context,
+) => {
+  const { page } = context.query;
 
-    const pollsWithUserData = paginatedMockPolls.map(poll => ({
-      poll,
-      user: null
-    }));
-
-    return {
-      props: {
-        initialPolls: pollsWithUserData,
-      },
-    };
-  } catch (error) {
-    console.error("Error fetching initial polls:", error);
-    return {
-      props: {
-        initialPolls: [],
-      },
-    };
+  let currentPage = 0;
+  if (typeof page === "string") {
+    currentPage = parseInt(page);
   }
+
+  const paginatedMockPolls = mockPolls.slice(
+    currentPage * pageSize,
+    (currentPage + 1) * pageSize,
+  );
+
+  const pollsWithUserData = paginatedMockPolls.map((poll) => ({
+    poll,
+    user: null,
+  }));
+
+  return {
+    props: {
+      polls: pollsWithUserData,
+      page: currentPage,
+      totalPages: Math.ceil(mockPolls.length / pageSize),
+    },
+  };
 };

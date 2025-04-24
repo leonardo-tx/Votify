@@ -6,6 +6,8 @@ import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 
 import java.util.List;
 
@@ -25,49 +27,67 @@ public class HomeTest extends BaseTest {
     }
     
     @Test
-    public void testSearchForA() throws InterruptedException {
+    public void testSearchForA() {
+        new Actions(webDriver)
+                .sendKeys(page.navSearchPoll, "a")
+                .sendKeys(Keys.ENTER)
+                .perform();
 
-        WebElement searchInput = webDriver.findElement(By.id("nav-search-poll"));
-        searchInput.clear();
-        searchInput.sendKeys("a");
-        searchInput.sendKeys(Keys.ENTER);
-
-        Thread.sleep(1000);
+        wait.until(ExpectedConditions.titleIs("Pesquisa - Votify"));
 
         WebElement alertMessage = webDriver.findElement(By.xpath("//p"));
-        assertEquals("Nenhuma enquete encontrada para \"a\"",
+        assertEquals(
+                "Nenhuma enquete encontrada para \"a\"",
                 alertMessage.getText().trim(),
-                "Alert message should match expected text");
+                "Alert message should match expected text."
+        );
 
+        String currentUrl = webDriver.getCurrentUrl();
+        assertTrue(
+                currentUrl.endsWith("/home/search?title=a&page=0"),
+                "The URL must go to the search page and at the page 0."
+        );
     }
     
     @Test
-    public void testSearchForEmptyString() throws InterruptedException {
-        WebElement searchInput = webDriver.findElement(By.id("nav-search-poll"));
-        searchInput.clear();
-        searchInput.sendKeys(" ");
-        searchInput.sendKeys(Keys.ENTER);
+    public void testSearchForEmptyStringRedirectToHome() {
+        new Actions(webDriver)
+                .sendKeys(page.navSearchPoll, " ")
+                .sendKeys(Keys.ENTER)
+                .perform();
 
-        Thread.sleep(1000);
-        
-        int totalPollCount = 0;
-        boolean hasNextPage = true;
-        
-        while (hasNextPage) {
-            List<WebElement> pollCards = page.pollList.findElements(By.xpath("./*"));
-            totalPollCount += pollCards.size();
-            
-            List<WebElement> nextButtons = webDriver.findElements(By.xpath("//button[contains(text(), 'Próximo')]"));
-            if (!nextButtons.isEmpty() && !nextButtons.get(0).getAttribute("class").contains("opacity-50")) {
-                nextButtons.get(0).click();
-                Thread.sleep(1000);
-            } else {
-                hasNextPage = false;
-            }
-        }
-        
-        assertEquals(24, totalPollCount, "Total poll count across all pages should be 24");
+        wait.until(ExpectedConditions.titleIs("Home - Votify"));
+
+        String currentUrl = webDriver.getCurrentUrl();
+        assertTrue(
+                currentUrl.endsWith("/home"),
+                "The URL must go to the home page."
+        );
     }
 
-    // todo: Precisamos implementar alguns Polls para que possa ser possível testar a busca e inserção pela página.
+    @Test
+    public void testHomeActivePolls() {
+        int totalPollCount = 0;
+        int currentPage = 1;
+        boolean endOfPagination = false;
+
+        while (!endOfPagination) {
+            List<WebElement> pollCards = page.pollList.findElements(By.xpath("./*"));
+            totalPollCount += pollCards.size();
+
+            if (!page.buttonNextPage.isEnabled()) {
+                endOfPagination = true;
+                continue;
+            }
+            page.buttonNextPage.click();
+            wait.until(ExpectedConditions.urlContains("/home?page=" + currentPage++));
+        }
+        assertEquals(24, totalPollCount, "Total poll count across all pages should be 24.");
+
+        String currentUrl = webDriver.getCurrentUrl();
+        assertTrue(
+                currentUrl.endsWith("/home?page=2"),
+                "The URL must remain on the home page and at the page 2."
+        );
+    }
 }

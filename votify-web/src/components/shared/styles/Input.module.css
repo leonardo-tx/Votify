@@ -8,8 +8,16 @@
 
 .input-div input {
     padding-block: calc(var(--spacing) * 2);
-    padding-inline: calc(var(--spacing) * 10);
+    padding-inline: calc(var(--spacing) * 2);
     border-radius: 0.25rem;
+}
+
+.input-div-start-element input {
+    padding-left: calc(var(--spacing) * 10);
+}
+
+.input-div-end-element input {
+    padding-right: calc(var(--spacing) * 10);
 }
 
 .common {
@@ -51,6 +59,15 @@
     position: absolute;
     top: 50%;
     left: calc(var(--spacing) * 2);
+    display: flex;
+    align-items: center;
+    transform: translate(0, -50%);
+}
+
+.end-element {
+    position: absolute;
+    top: 50%;
+    right: calc(var(--spacing) * 2);
     display: flex;
     align-items: center;
     transform: translate(0, -50%);

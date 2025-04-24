@@ -12,4 +12,10 @@ public class HomePage extends BasePage {
 
     @FindBy(id = "poll-list")
     public WebElement pollList;
+
+    @FindBy(id = "next-page")
+    public WebElement buttonNextPage;
+
+    @FindBy(id = "previous-page")
+    public WebElement buttonPreviousPage;
 }
