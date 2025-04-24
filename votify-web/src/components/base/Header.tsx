@@ -12,6 +12,7 @@ import {
 import { logout } from "@/libs/api";
 import { useAtom } from "jotai";
 import { currentUserAtom } from "@/libs/users/atoms/currentUserAtom";
+import { FormEvent, useState } from "react";
 
 interface NavItem {
   text: string;
@@ -26,20 +27,44 @@ const navItems: NavItem[] = [
 export default function Header() {
   const router = useRouter();
   const [currentUser, setCurrentUser] = useAtom(currentUserAtom);
+  const [searchTerm, setSearchTerm] = useState(
+    typeof router.query["title"] === "string" ? router.query["title"] : "",
+  );
 
   const handleLogout = async () => {
-    try {
-      const response = await logout();
+    const response = await logout();
 
-      if (response.success) {
-        setCurrentUser(null);
-        router.push("/home");
-      } else {
-        throw new Error(response.errorMessage || "Falha ao realizar logout");
-      }
-    } catch (error) {
-      console.error("Logout error:", error);
+    if (response.success) {
+      setCurrentUser(null);
+      router.push("/home");
+    } else {
+      throw new Error("Falha ao realizar logout");
     }
+  };
+
+  const handleSearch = (e: FormEvent) => {
+    e.preventDefault();
+
+    const trimSearchTerm = searchTerm.trim();
+    if (trimSearchTerm === "") {
+      setSearchTerm("");
+
+      if (router.pathname !== "/home") {
+        router.push("/home");
+      }
+      return;
+    }
+    router.push(
+      {
+        pathname: "/home/search",
+        query: {
+          title: searchTerm,
+          page: 0,
+        },
+      },
+      undefined,
+      { shallow: false },
+    );
   };
 
   return (
@@ -66,13 +91,30 @@ export default function Header() {
             {item.text}
           </Button>
         ))}
-        <Input
-          id="nav-search-poll"
-          className="w-full"
-          variant="line"
-          placeholder="Pesquisar enquete"
-          startElement={<IoSearch size={20} />}
-        />
+        <form
+          id="search-form"
+          onSubmit={handleSearch}
+          className="flex w-full cursor-pointer"
+        >
+          <Input
+            id="nav-search-poll"
+            className="w-full"
+            variant="line"
+            placeholder="Pesquisar enquete"
+            endElement={
+              <Button
+                id="poll-search-submit"
+                className="cursor-pointer"
+                variant="text"
+                type="submit"
+              >
+                <IoSearch size={20} />
+              </Button>
+            }
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </form>
       </nav>
       <div className="flex gap-6 text-base font-semibold">
         {currentUser !== null ? (

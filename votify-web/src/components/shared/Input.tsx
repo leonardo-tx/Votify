@@ -6,16 +6,40 @@ type Props = {
   placeholder?: string;
   className?: string;
   startElement?: ReactNode;
+  endElement?: ReactNode;
 } & InputHTMLAttributes<HTMLInputElement>;
 
 const Input = forwardRef<HTMLInputElement, Props>(
   (
-    { variant = "filled", placeholder, className, startElement, ...props },
+    {
+      variant = "filled",
+      placeholder,
+      className,
+      startElement,
+      endElement,
+      ...props
+    },
     ref,
   ) => {
     const defaultClassNames = styles["common"] + " " + styles[variant];
+    const startElementClassName =
+      startElement === undefined || startElement === null
+        ? ""
+        : styles["input-div-start-element"] + " ";
+    const endElementClassName =
+      endElement === undefined || endElement === null
+        ? ""
+        : styles["input-div-end-element"] + " ";
     return (
-      <div className={styles["input-div"] + " " + className}>
+      <div
+        className={
+          styles["input-div"] +
+          " " +
+          startElementClassName +
+          endElementClassName +
+          className
+        }
+      >
         <input
           ref={ref}
           placeholder={placeholder}
@@ -23,6 +47,7 @@ const Input = forwardRef<HTMLInputElement, Props>(
           {...props}
         />
         <div className={styles["start-element"]}>{startElement}</div>
+        <div className={styles["end-element"]}>{endElement}</div>
       </div>
     );
   },

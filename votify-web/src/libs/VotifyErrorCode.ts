@@ -49,6 +49,7 @@ enum VotifyErrorCode {
   PASSWORD_RESET_CODE_INVALID = "password.reset.code.invalid",
   PASSWORD_RESET_REQUEST_EXISTS = "password.reset.request.exists",
   PASSWORD_RESET_EMAIL_NOT_FOUND = "password.reset.email.not.found",
+  POLL_TITLE_SEARCH_EMPTY = "poll.title.search.empty",
 }
 
 export default VotifyErrorCode;

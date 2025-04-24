@@ -18,4 +18,12 @@ public interface PollRepository extends JpaRepository<Poll, Long> {
         ORDER BY p.startDate DESC
         """)
     Page<Poll> findAllByResponsibleId(@Param("userId") Long userId, Pageable pageable);
+
+    @Query("""
+        SELECT p
+        FROM Poll p
+        WHERE LOWER(p.title) LIKE LOWER(CONCAT('%', :title, '%'))
+        ORDER BY p.startDate DESC
+        """)
+    Page<Poll> findByTitleContainingIgnoreCase(@Param("title") String title, Pageable pageable);
 }

@@ -4,6 +4,8 @@ import UserQueryView from "./users/UserQueryView";
 import UserLoginDTO from "./users/UserLoginDTO";
 import UserDetailedView from "./users/UserDetailedView";
 import VotifyErrorCode from "./VotifyErrorCode";
+import PollSimpleView from "./polls/PollSimpleView";
+import { PageResponse } from "./PageResponse";
 
 export const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
@@ -42,6 +44,31 @@ export const login = async (
     const { data } = await api.post<ApiResponse<UserLoginDTO>>(
       "/auth/login",
       credentials,
+    );
+    return data;
+  });
+};
+
+export const getMyPolls = async (
+  page: number = 0,
+  size: number = 10
+): Promise<ApiResponse<PageResponse<PollSimpleView> | null>> => {
+  return await commonRequester(async () => {
+    const { data } = await api.get<ApiResponse<PageResponse<PollSimpleView>>>(
+      `/polls/me?page=${page}&size=${size}`
+    );
+    return data;
+  });
+};
+
+export const searchPollsByTitle = async (
+  title: string,
+  page: number = 0,
+  size: number = 10
+): Promise<ApiResponse<PageResponse<PollSimpleView> | null>> => {
+  return await commonRequester(async () => {
+    const { data } = await api.get<ApiResponse<PageResponse<PollSimpleView>>>(
+      `/polls/search?title=${encodeURIComponent(title)}&page=${page}&size=${size}`
     );
     return data;
   });

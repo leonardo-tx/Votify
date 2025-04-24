@@ -211,4 +211,74 @@ public class PollControllerTest {
                 .content(objectMapper.writeValueAsString(voteInsertDTO)));
         MockMvcHelper.testUnsuccessfulResponse(resultActions, VotifyErrorCode.POLL_VOTED_ALREADY);
     }
+
+    @Test
+    @Order(1)
+    public void testSearchPollsWithResults() throws Exception {
+        ResultActions resultActions = mockMvc.perform(
+                get("/polls/search")
+                        .param("title", "Test")
+                        .param("page", "0")
+                        .param("size", "10")
+        );
+
+        MockMvcHelper
+                .testSuccessfulResponse(resultActions, HttpStatus.OK)
+                .andExpect(jsonPath("data.pageNumber", is(0)))
+                .andExpect(jsonPath("data.pageSize", is(10)))
+                .andExpect(jsonPath("data.totalElements", is(1)))
+                .andExpect(jsonPath("data.totalPages", is(1)))
+                .andExpect(jsonPath("data.content", hasSize(1)))
+                .andExpect(jsonPath("data.content[0].id", is(1)))
+                .andExpect(jsonPath("data.content[0].title", containsString("Test")))
+                .andExpect(jsonPath("data.content[0].description", containsString("Test")));
+    }
+
+    @Test
+    @Order(1)
+    public void testSearchPollsWithoutResults() throws Exception {
+        ResultActions resultActions = mockMvc.perform(
+                get("/polls/search")
+                        .param("title", "Algo")
+        );
+
+        MockMvcHelper
+                .testSuccessfulResponse(resultActions, HttpStatus.OK)
+                .andExpect(jsonPath("data.pageNumber", is(0)))
+                .andExpect(jsonPath("data.totalElements", is(0)))
+                .andExpect(jsonPath("data.totalPages", is(0)))
+                .andExpect(jsonPath("data.content", hasSize(0)));
+    }
+
+    @Test
+    @Order(1)
+    public void testSearchPollsEmptyQuery() throws Exception {
+        ResultActions resultActions = mockMvc.perform(
+                get("/polls/search")
+                        .param("title", "")
+        );
+
+        MockMvcHelper
+                .testUnsuccessfulResponse(resultActions,  VotifyErrorCode.POLL_TITLE_SEARCH_EMPTY);
+    }
+
+    @Test
+    @Order(1)
+    public void testSearchPollsTestQuery() throws Exception {
+        ResultActions resultActions = mockMvc.perform(
+                get("/polls/search")
+                        .param("title", "Test")
+        );
+
+        MockMvcHelper
+                .testSuccessfulResponse(resultActions, HttpStatus.OK)
+                .andExpect(jsonPath("data.pageNumber", is(0)))
+                .andExpect(jsonPath("data.pageSize", is(10)))
+                .andExpect(jsonPath("data.totalElements", is(1)))
+                .andExpect(jsonPath("data.totalPages", is(1)))
+                .andExpect(jsonPath("data.content", hasSize(1)))
+                .andExpect(jsonPath("data.content[0].id", is(1)))
+                .andExpect(jsonPath("data.content[0].title", containsString("Test")))
+                .andExpect(jsonPath("data.content[0].description", containsString("Test")));
+    }
 }
