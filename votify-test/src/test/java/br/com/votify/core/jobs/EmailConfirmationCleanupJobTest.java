@@ -35,23 +35,22 @@ public class EmailConfirmationCleanupJobTest {
 
     @BeforeEach
     public void setupBeforeEach() {
-        User user = new CommonUser(
-                1L,
-                "silverhand",
-                "Jhonny Silverhand",
-                "jhonny@nightcity.2077",
-                "6Samurai6"
-        );
-        User user2 = new CommonUser(
-                1L,
-                "astarion",
-                "Astarion",
-                "astarion@bg3.gate",
-                "mydarling"
-        );
+        User user = CommonUser.builder()
+                .id(1L)
+                .userName("silverhand")
+                .name("Jhonny Silverhand")
+                .email("jhonny@nightcity.2077")
+                .password("6Samurai6")
+                .build();
+        User user2 = CommonUser.builder()
+                .id(1L)
+                .userName("astarion")
+                .name("Astarion")
+                .email("astarion@bg3.gate")
+                .password("mydarling")
+                .build();
 
         String code = EmailCodeGeneratorUtils.generateEmailConfirmationCode();
-
         emailConfirmations.add(new EmailConfirmation(
                 1L,
                 user,

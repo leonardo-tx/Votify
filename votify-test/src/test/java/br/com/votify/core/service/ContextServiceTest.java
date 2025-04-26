@@ -215,7 +215,7 @@ public class ContextServiceTest {
     
     @Test
     public void deleteUser_WhenAuthenticated_ShouldDeleteSuccessfully() throws VotifyException, NoSuchMethodException {
-        User testUser = new CommonUser(1L, "test-user", "Test User", "test@example.com", "password123");
+        User testUser = new CommonUser();
 
         when(request.getAttribute(HandlerMapping.BEST_MATCHING_HANDLER_ATTRIBUTE)).thenReturn(handlerMethod);
         when(handlerMethod.getMethod()).thenReturn(ContextServiceTest.class.getMethod("methodThatNeedsUserContext"));
@@ -234,7 +234,7 @@ public class ContextServiceTest {
 
     @Test
     public void userFromContextIsClone() throws VotifyException, NoSuchMethodException {
-        User testUser = new CommonUser(1L, "test-user", "Test User", "test@example.com", "password123");
+        User testUser = new CommonUser();
 
         when(request.getAttribute(HandlerMapping.BEST_MATCHING_HANDLER_ATTRIBUTE)).thenReturn(handlerMethod);
         when(handlerMethod.getMethod()).thenReturn(ContextServiceTest.class.getMethod("methodThatNeedsUserContext"));

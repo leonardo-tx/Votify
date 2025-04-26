@@ -1,4 +1,4 @@
-package br.com.votify.web;
+package br.com.votify.test.extensions;
 
 import org.junit.jupiter.api.extension.*;
 import org.openqa.selenium.WebDriver;

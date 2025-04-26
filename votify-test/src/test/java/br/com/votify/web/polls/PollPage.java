@@ -26,7 +26,7 @@ public class PollPage extends BasePage {
     @FindBy(css = "[id^='poll-option-label-']")
     public List<WebElement> optionLabels;
 
-    @FindBy(css = "[id^='poll-input-']")
+    @FindBy(name = "poll-option")
     public List<WebElement> optionInputs;
 
     @FindBy(id = "vote-button")
