@@ -46,7 +46,7 @@ public class PollServiceTest {
 
     @BeforeEach
     public void setupBeforeEach() {
-        testUser = new CommonUser(1L, "testuser", "Test User", "test@example.com", "password123");
+        testUser = new CommonUser();
         Poll testPoll = Poll.builder()
                 .id(1L)
                 .title("Test Poll")

@@ -6,15 +6,10 @@ import br.com.votify.dto.users.UserUpdateEmailRequestDTO;
 import br.com.votify.dto.users.UserUpdateInfoRequestDTO;
 import br.com.votify.dto.users.UserUpdatePasswordRequestDTO;
 import br.com.votify.test.MockMvcHelper;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import br.com.votify.test.suites.ControllerTest;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.*;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -23,17 +18,7 @@ import static org.hamcrest.Matchers.isA;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-@AutoConfigureMockMvc
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-public class UserControllerTest {
-    @Autowired
-    private MockMvc mockMvc;
-
-    @Autowired
-    private ObjectMapper objectMapper;
-
+public class UserControllerTest extends ControllerTest {
     @Test
     @Order(0)
     public void getUserByIdAsGuest() throws Exception {

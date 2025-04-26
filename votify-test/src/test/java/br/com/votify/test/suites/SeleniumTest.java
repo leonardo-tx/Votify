@@ -1,7 +1,8 @@
-package br.com.votify.web;
+package br.com.votify.test.suites;
 
 import br.com.votify.api.VotifyApiApplication;
 import br.com.votify.test.SeleniumHelper;
+import br.com.votify.web.BrowsersProviderExtension;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.openqa.selenium.By;
@@ -15,6 +16,7 @@ import org.springframework.test.annotation.DirtiesContext;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.TimeZone;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -22,11 +24,17 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @SpringBootTest(classes = VotifyApiApplication.class, webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @ExtendWith(BrowsersProviderExtension.class)
-public abstract class BaseTest {
+@Order(2)
+public abstract class SeleniumTest {
     public static final String BASE_URL = "http://localhost:3000";
 
     protected WebDriver webDriver;
     protected WebDriverWait wait;
+
+    @BeforeAll
+    static void setupBeforeAll() {
+        TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
+    }
 
     @BeforeEach
     void setupBeforeEach(WebDriver webDriver) {

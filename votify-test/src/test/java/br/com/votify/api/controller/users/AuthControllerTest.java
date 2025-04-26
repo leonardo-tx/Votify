@@ -5,17 +5,13 @@ import br.com.votify.core.utils.exceptions.VotifyErrorCode;
 import br.com.votify.dto.ApiResponse;
 import br.com.votify.dto.users.*;
 import br.com.votify.test.MockMvcHelper;
+import br.com.votify.test.suites.ControllerTest;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
@@ -23,19 +19,9 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-@AutoConfigureMockMvc
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-public class AuthControllerTest {
+public class AuthControllerTest extends ControllerTest {
     private static PasswordResetResponseDTO passwordResetResponseDTO;
     private static String emailConfirmationCode;
-
-    @Autowired
-    private MockMvc mockMvc;
-
-    @Autowired
-    private ObjectMapper objectMapper;
 
     @Autowired
     private SecurityConfig securityConfig;
@@ -44,8 +30,8 @@ public class AuthControllerTest {
     @Order(0)
     public void register() throws Exception {
         UserRegisterDTO userRegisterDTO = new UserRegisterDTO(
-                "byces",
-                "Byces",
+                "test",
+                "Teste",
                 "123@gmail.com",
                 "12345678"
         );
@@ -53,9 +39,9 @@ public class AuthControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(userRegisterDTO)));
         MockMvcHelper.testSuccessfulResponse(resultActions, HttpStatus.CREATED)
-                .andExpect(jsonPath("data.id", is(4)))
-                .andExpect(jsonPath("data.userName", is("byces")))
-                .andExpect(jsonPath("data.name", is("Byces")))
+                .andExpect(jsonPath("data.id", is(48)))
+                .andExpect(jsonPath("data.userName", is("test")))
+                .andExpect(jsonPath("data.name", is("Teste")))
                 .andExpect(jsonPath("data.email", is("123@gmail.com")))
                 .andExpect(jsonPath("data.role", is("CommonUser")))
                 .andExpect(jsonPath("data.confirmationCode", notNullValue()));

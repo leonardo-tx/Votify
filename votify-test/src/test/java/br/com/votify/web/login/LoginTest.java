@@ -1,7 +1,7 @@
 package br.com.votify.web.login;
 
 import br.com.votify.test.SeleniumHelper;
-import br.com.votify.web.BaseTest;
+import br.com.votify.test.suites.SeleniumTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestTemplate;
 import org.openqa.selenium.By;
@@ -12,14 +12,14 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class LoginTest extends BaseTest {
+public class LoginTest extends SeleniumTest {
     private LoginPage page;
     private static final String TEST_EMAIL = "admin@votify.com.br";
     private static final String TEST_PASSWORD = "admin123";
 
     @BeforeEach
     void setupBeforeEach() {
-        webDriver.get(BASE_URL + "/login");
+        SeleniumHelper.goToPath(webDriver, wait, "/login");
         page = new LoginPage(webDriver);
     }
 

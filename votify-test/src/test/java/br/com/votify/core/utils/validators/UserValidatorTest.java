@@ -42,13 +42,12 @@ public class UserValidatorTest {
 
     @Test
     public void testValidUser() {
-        User user = new AdminUser(
-            null,
-            "littledoge",
-            "Leonardo Teixeira",
-            "123@gmail.com",
-            "19283784you"
-        );
+        User user = AdminUser.builder()
+                .userName("littledoge")
+                .name("Leonardo Teixeira")
+                .email("123@gmail.com")
+                .password("19283784you")
+                .build();
         assertDoesNotThrow(() -> UserValidator.validateFields(user));
     }
 
