@@ -137,9 +137,12 @@ public class PollController {
     }
 
     @DeleteMapping("/{id}/cancel")
-    public ResponseEntity<ApiResponse<Void>> cancelPoll(@PathVariable("id") Long id) throws VotifyException {
+    @NeedsUserContext
+    public ResponseEntity<ApiResponse<Object>> cancelPoll(@PathVariable("id") Long id) throws VotifyException {
         User user = contextService.getUserOrThrow();
-        pollService.cancelPoll(id, user);
-        return ApiResponse.<Void>success(null, HttpStatus.OK).createResponseEntity();
+        Poll poll = pollService.getByIdOrThrow(id);
+        pollService.cancelPoll(poll, user);
+
+        return ApiResponse.success(null, HttpStatus.OK).createResponseEntity();
     }
 }

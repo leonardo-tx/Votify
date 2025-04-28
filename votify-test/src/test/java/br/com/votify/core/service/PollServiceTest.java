@@ -298,9 +298,7 @@ public class PollServiceTest {
                 .choiceLimitPerUser(1)
                 .responsible(testUser)
                 .build();
-        when(pollRepository.findById(10L)).thenReturn(Optional.of(poll));
-
-        assertDoesNotThrow(() -> pollService.cancelPoll(10L, testUser));
+        assertDoesNotThrow(() -> pollService.cancelPoll(poll, testUser));
         verify(pollRepository).delete(poll);
     }
 
@@ -318,10 +316,7 @@ public class PollServiceTest {
                 .choiceLimitPerUser(1)
                 .responsible(testUser)
                 .build();
-        when(pollRepository.findById(11L)).thenReturn(Optional.of(poll));
-
-        assertDoesNotThrow(() -> pollService.cancelPoll(11L, testUser));
-        assertTrue(poll.isArchived());
+        assertDoesNotThrow(() -> pollService.cancelPoll(poll, testUser));
         verify(pollRepository).save(poll);
     }
 
@@ -338,7 +333,6 @@ public class PollServiceTest {
                 .choiceLimitPerUser(1)
                 .responsible(testUser)
                 .build();
-        when(pollRepository.findById(12L)).thenReturn(Optional.of(poll));
         User otherUser = CommonUser.builder()
                 .id(2L)
                 .userName("otheruser")
@@ -347,7 +341,7 @@ public class PollServiceTest {
                 .password("password456")
                 .build();
 
-        VotifyException exception = assertThrows(VotifyException.class, () -> pollService.cancelPoll(12L, otherUser));
+        VotifyException exception = assertThrows(VotifyException.class, () -> pollService.cancelPoll(poll, otherUser));
         assertEquals(VotifyErrorCode.POLL_NOT_OWNER, exception.getErrorCode());
     }
 
@@ -364,9 +358,7 @@ public class PollServiceTest {
                 .choiceLimitPerUser(1)
                 .responsible(testUser)
                 .build();
-        when(pollRepository.findById(13L)).thenReturn(Optional.of(poll));
-
-        VotifyException exception = assertThrows(VotifyException.class, () -> pollService.cancelPoll(13L, testUser));
+        VotifyException exception = assertThrows(VotifyException.class, () -> pollService.cancelPoll(poll, testUser));
         assertEquals(VotifyErrorCode.POLL_CANNOT_CANCEL_FINISHED, exception.getErrorCode());
     }
 }

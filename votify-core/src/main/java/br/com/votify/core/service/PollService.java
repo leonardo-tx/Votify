@@ -122,20 +122,18 @@ public class PollService {
         return pollRepository.findByTitleContainingIgnoreCase(title, Instant.now(), pageable);
     }
 
-    @Transactional
-    public void cancelPoll(Long pollId, User user) throws VotifyException {
-        Poll poll = getByIdOrThrow(pollId);
+    public void cancelPoll(Poll poll, User user) throws VotifyException {
         if (!poll.getResponsible().getId().equals(user.getId())) {
             throw new VotifyException(VotifyErrorCode.POLL_NOT_OWNER);
+        }
+        if (poll.hasEnded()) {
+            throw new VotifyException(VotifyErrorCode.POLL_CANNOT_CANCEL_FINISHED);
         }
         if (poll.hasNotStarted()) {
             pollRepository.delete(poll);
             return;
         }
-        if (poll.hasEnded()) {
-            throw new VotifyException(VotifyErrorCode.POLL_CANNOT_CANCEL_FINISHED);
-        }
-        poll.setArchived(true);
+        poll.setEndDate(Instant.now());
         pollRepository.save(poll);
     }
 }
