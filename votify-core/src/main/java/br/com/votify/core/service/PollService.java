@@ -90,15 +90,16 @@ public class PollService {
         if (!poll.getResponsible().getId().equals(user.getId())) {
             throw new VotifyException(VotifyErrorCode.POLL_NOT_OWNER);
         }
-
         LocalDateTime now = LocalDateTime.now(ZoneId.of("UTC"));
+
+        if (now.isAfter(poll.getEndDate())) {
+            throw new VotifyException(VotifyErrorCode.POLL_CANNOT_CANCEL_FINISHED);
+        }
 
         if (now.isBefore(poll.getStartDate())) {
             pollRepository.delete(poll);
-        } else if (now.isAfter(poll.getEndDate())) {
-            throw new VotifyException(VotifyErrorCode.POLL_CANNOT_CANCEL_FINISHED);
         } else {
-            poll.setArchived(true);
+            poll.setEndDate(now);
             pollRepository.save(poll);
         }
     }

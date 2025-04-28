@@ -285,7 +285,6 @@ public class PollServiceTest {
         when(pollRepository.findById(11L)).thenReturn(Optional.of(poll));
 
         assertDoesNotThrow(() -> pollService.cancelPoll(11L, testUser));
-        assertTrue(poll.isArchived());
         verify(pollRepository).save(poll);
     }
 
