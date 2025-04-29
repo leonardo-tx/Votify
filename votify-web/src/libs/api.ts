@@ -6,6 +6,9 @@ import UserDetailedView from "./users/UserDetailedView";
 import VotifyErrorCode from "./VotifyErrorCode";
 import PollSimpleView from "./polls/PollSimpleView";
 import { PageResponse } from "./PageResponse";
+import UserPasswordResetRequestDto from "@/libs/users/UserPasswordResetRequestDto";
+import UserPasswordResetResponseDto from "@/libs/users/UserPasswordResetResponseDto";
+import UserPasswordResetConfirmDTO from "@/libs/users/UserPasswordResetConfirmDTO";
 
 export const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
@@ -48,6 +51,32 @@ export const login = async (
     return data;
   });
 };
+
+export const forgotPassword = async (
+    request: UserPasswordResetRequestDto,
+): Promise<ApiResponse<UserPasswordResetResponseDto | null>> => {
+  return await commonRequester(async () => {
+    const { data } = await api.post<ApiResponse<UserPasswordResetResponseDto>>(
+        "/auth/forgot-password",
+        request,
+    );
+    return data;
+  });
+};
+
+export const resetPassword = async (
+    request: UserPasswordResetConfirmDTO,
+): Promise<ApiResponse<UserPasswordResetConfirmDTO | null>> => {
+  return await commonRequester(async () => {
+    const { data } = await api.post<ApiResponse<null>>(
+        "/auth/reset-password",
+        request,
+    );
+    return data;
+  });
+};
+
+
 
 export const getMyPolls = async (
   page: number = 0,
