@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
+
 @Repository
 public interface PollRepository extends JpaRepository<Poll, Long> {
     @Query("""
@@ -30,9 +32,9 @@ public interface PollRepository extends JpaRepository<Poll, Long> {
     @Query("""
         SELECT p
         FROM Poll p
-        WHERE p.startDate <= CURRENT_DATE
-        AND p.endDate > CURRENT_DATE
+        WHERE p.startDate <= :now
+        AND p.endDate > :now
         ORDER BY p.endDate ASC
         """)
-    Page<Poll> findAllByActives(Pageable pageable);
+    Page<Poll> findAllByActives(@Param("now") LocalDateTime now, Pageable pageable);
 }

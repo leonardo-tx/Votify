@@ -7,6 +7,7 @@ import VotifyErrorCode from "./VotifyErrorCode";
 import PollSimpleView from "./polls/PollSimpleView";
 import { PageResponse } from "./PageResponse";
 import { PollDetailedView } from "./polls/PollDetailedView";
+import VoteInsertDTO from "./polls/VoteInsertDTO";
 
 export const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
@@ -40,9 +41,9 @@ export const logout = async (): Promise<ApiResponse<null>> => {
 
 export const login = async (
   credentials: UserLoginDTO,
-): Promise<ApiResponse<UserLoginDTO | null>> => {
+): Promise<ApiResponse<null>> => {
   return await commonRequester(async () => {
-    const { data } = await api.post<ApiResponse<UserLoginDTO>>(
+    const { data } = await api.post<ApiResponse<null>>(
       "/auth/login",
       credentials,
     );
@@ -79,7 +80,34 @@ export const getPollById = async (
   id: number,
 ): Promise<ApiResponse<PollDetailedView | null>> => {
   return await commonRequester(async () => {
-    const { data } = await api.get<ApiResponse<UserLoginDTO>>(`/polls/${id}`);
+    const { data } = await api.get<ApiResponse<PollDetailedView>>(
+      `/polls/${id}`,
+    );
+    return data;
+  });
+};
+
+export const getAllActivePolls = async (
+  page: number = 0,
+  size: number = 10,
+): Promise<ApiResponse<PageResponse<PollSimpleView> | null>> => {
+  return await commonRequester(async () => {
+    const { data } = await api.get<ApiResponse<PageResponse<PollSimpleView>>>(
+      `/polls/active?page=${page}&size=${size}`,
+    );
+    return data;
+  });
+};
+
+export const vote = async (
+  id: number,
+  voteOption: VoteInsertDTO,
+): Promise<ApiResponse<number | null>> => {
+  return await commonRequester(async () => {
+    const { data } = await api.post<ApiResponse<number>>(
+      `/polls/${id}/vote`,
+      voteOption,
+    );
     return data;
   });
 };

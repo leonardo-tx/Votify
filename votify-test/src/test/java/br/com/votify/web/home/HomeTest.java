@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestTemplate;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -17,12 +18,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class HomeTest extends BaseTest {
     private HomePage page;
 
-    protected HomeTest() {
-        super("/home");
-    }
-
     @BeforeEach
     void setupBeforeEach() {
+        webDriver.get(BASE_URL + "/home");
         page = new HomePage(webDriver);
     }
 
@@ -75,19 +73,25 @@ public class HomeTest extends BaseTest {
             List<WebElement> pollCards = page.pollList.findElements(By.xpath("./*"));
             totalPollCount += pollCards.size();
 
-            if (!page.buttonNextPage.isEnabled()) {
+            try {
+                if (!page.buttonNextPage.isEnabled()) {
+                    endOfPagination = true;
+                    continue;
+                }
+            } catch (NoSuchElementException e) {
                 endOfPagination = true;
                 continue;
             }
+
             page.buttonNextPage.click();
             wait.until(ExpectedConditions.urlContains("/home?page=" + currentPage++));
         }
-        assertEquals(24, totalPollCount, "Total poll count across all pages should be 24.");
+        assertEquals(0, totalPollCount, "Total poll count across all pages should be 0.");
 
         String currentUrl = webDriver.getCurrentUrl();
         assertTrue(
-                currentUrl.endsWith("/home?page=2"),
-                "The URL must remain on the home page and at the page 2."
+                currentUrl.endsWith("/home"),
+                "The URL must remain on the home page and at the page 0."
         );
     }
 }

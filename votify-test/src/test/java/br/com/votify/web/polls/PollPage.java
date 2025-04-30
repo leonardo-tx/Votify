@@ -34,16 +34,4 @@ public class PollPage extends BasePage {
 
     @FindBy(id = "no-poll-message")
     public WebElement noPollMessage;
-
-    @FindBy(id = "login-email")
-    public WebElement emailInput;
-
-    @FindBy(id = "login-password")
-    public WebElement passwordInput;
-
-    @FindBy(id = "login-submit-button")
-    public WebElement submitButton;
-
-    @FindBy(id="login-button")
-    public WebElement loginButton;
 }

@@ -6,7 +6,6 @@ import br.com.votify.core.domain.entities.users.User;
 import br.com.votify.core.repository.PollRepository;
 import br.com.votify.core.repository.VoteRepository;
 import br.com.votify.core.utils.exceptions.VotifyErrorCode;
-import br.com.votify.core.utils.exceptions.VotifyErrorCode;
 import br.com.votify.core.utils.exceptions.VotifyException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -263,7 +262,7 @@ public class PollServiceTest {
         Pageable pageable = PageRequest.of(0, 10);
         Page<Poll> activePollsPage = new PageImpl<>(List.of(testPolls.get(0), testPolls.get(2)), pageable, 2);
 
-        when(pollRepository.findAllByActives(eq(pageable))).thenReturn(activePollsPage);
+        when(pollRepository.findAllByActives(any(LocalDateTime.class), eq(pageable))).thenReturn(activePollsPage);
 
         Page<Poll> result = pollService.findAllActivePolls(0, 10);
 

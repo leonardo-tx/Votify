@@ -91,7 +91,7 @@ public class PollService {
             throw new VotifyException(VotifyErrorCode.POLL_PAGE_LENGTH_INVALID, 1, Poll.PAGE_SIZE_LIMIT);
         }
         Pageable pageable = PageRequest.of(page, size);
-        return pollRepository.findAllByActives(pageable);
+        return pollRepository.findAllByActives(LocalDateTime.now(ZoneId.of("UTC")), pageable);
     }
 
 

@@ -118,11 +118,16 @@ public class PollController {
     }
 
     @GetMapping("/active")
-    public ResponseEntity<Page<Poll>> getActivePolls(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+    public ResponseEntity<ApiResponse<PageResponse<PollListViewDTO>>> getActivePolls(
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size
     ) throws VotifyException {
-        Page<Poll> activePolls = pollService.findAllActivePolls(page, size);
-        return ResponseEntity.ok(activePolls);
+        Page<Poll> pollPage = pollService.findAllActivePolls(page, size);
+        List<PollListViewDTO> pollDtos = pollPage.getContent().stream()
+                .map(PollListViewDTO::parse)
+                .collect(Collectors.toList());
+
+        PageResponse<PollListViewDTO> pageResponse = PageResponse.from(pollPage, pollDtos);
+        return ApiResponse.success(pageResponse, HttpStatus.OK).createResponseEntity();
     }
 }

@@ -25,19 +25,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public abstract class BaseTest {
     public static final String BASE_URL = "http://localhost:3000";
 
-    protected final String url;
     protected WebDriver webDriver;
     protected WebDriverWait wait;
-
-    protected BaseTest(String path) {
-        url = BASE_URL + path;
-    }
 
     @BeforeEach
     void setupBeforeEach(WebDriver webDriver) {
         this.webDriver = webDriver;
         webDriver.manage().window().maximize();
-        webDriver.get(url);
 
         wait = new WebDriverWait(webDriver, Duration.ofSeconds(5));
     }
