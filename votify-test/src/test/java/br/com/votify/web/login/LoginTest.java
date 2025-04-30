@@ -17,12 +17,9 @@ public class LoginTest extends BaseTest {
     private static final String TEST_EMAIL = "admin@votify.com.br";
     private static final String TEST_PASSWORD = "admin123";
 
-    protected LoginTest() {
-        super("/login");
-    }
-
     @BeforeEach
     void setupBeforeEach() {
+        webDriver.get(BASE_URL + "/login");
         page = new LoginPage(webDriver);
     }
 

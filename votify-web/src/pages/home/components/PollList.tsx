@@ -1,5 +1,3 @@
-"use client";
-
 import PollSimpleView from "@/libs/polls/PollSimpleView";
 import UserQueryView from "@/libs/users/UserQueryView";
 import PollCard from "./PollCard";

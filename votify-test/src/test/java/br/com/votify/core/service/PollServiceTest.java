@@ -6,7 +6,6 @@ import br.com.votify.core.domain.entities.users.User;
 import br.com.votify.core.repository.PollRepository;
 import br.com.votify.core.repository.VoteRepository;
 import br.com.votify.core.utils.exceptions.VotifyErrorCode;
-import br.com.votify.core.utils.exceptions.VotifyErrorCode;
 import br.com.votify.core.utils.exceptions.VotifyException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -233,7 +232,7 @@ public class PollServiceTest {
         when(pollRepository.findByTitleContainingIgnoreCase(eq("t"), any(Pageable.class))).thenReturn(pollPage);
         
         Page<Poll> result = pollService.findByTitle("t", 0, 10);
-        
+
         assertNotNull(result);
         assertEquals(4, result.getContent().size());
     }
@@ -256,5 +255,22 @@ public class PollServiceTest {
                 () -> pollService.getByIdOrThrow(0L)
         );
         assertEquals(VotifyErrorCode.POLL_NOT_FOUND, exception.getErrorCode());
+    }
+
+    @Test
+    public void findAllActivePolls() throws VotifyException {
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Poll> activePollsPage = new PageImpl<>(List.of(testPolls.get(0), testPolls.get(2)), pageable, 2);
+
+        when(pollRepository.findAllByActives(any(LocalDateTime.class), eq(pageable))).thenReturn(activePollsPage);
+
+        Page<Poll> result = pollService.findAllActivePolls(0, 10);
+
+        assertNotNull(result);
+        assertEquals(2, result.getContent().size());
+        assertTrue(result.getContent().contains(testPolls.get(0)));  // Active Poll 1
+        assertTrue(result.getContent().contains(testPolls.get(2)));  // Active Poll 3
+        assertFalse(result.getContent().contains(testPolls.get(1)));  // Inactive Poll 2
+        assertFalse(result.getContent().contains(testPolls.get(3)));  // Inactive Poll 4
     }
 }

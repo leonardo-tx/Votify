@@ -10,7 +10,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -33,16 +32,16 @@ public class PollDetailedViewDTO {
         }
 
         return new PollDetailedViewDTO(
-            entity.getId(),
-            entity.getTitle(),
-            entity.getDescription(),
-            entity.getStartDate(),
-            entity.getEndDate(),
-            entity.isUserRegistration(),
-            entity.getChoiceLimitPerUser(),
-            entity.getResponsible().getId(),
-            votedOption,
-            voteOptions
+                entity.getId(),
+                entity.getTitle(),
+                entity.getDescription(),
+                entity.getStartDate(),
+                entity.getEndDate(),
+                entity.isUserRegistration(),
+                entity.getChoiceLimitPerUser(),
+                entity.getResponsible().getId(),
+                votedOption,
+                voteOptions
         );
     }
 }

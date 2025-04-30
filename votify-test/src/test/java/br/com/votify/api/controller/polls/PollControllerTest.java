@@ -24,6 +24,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -80,6 +81,34 @@ public class PollControllerTest {
                 .andExpect(jsonPath("data.votedOption", is(0)))
                 .andExpect(jsonPath("data.voteOptions", hasSize(5)))
                 .andExpect(jsonPath("data.voteOptions[*].count", everyItem(is(0))));
+    }
+
+    @Test
+    @Order(1)
+    public void testGetPollWithoutUserVote() throws Exception {
+        Cookie[] cookies = MockMvcHelper.login(
+                mockMvc, objectMapper, "common@votify.com.br", "password123"
+        );
+
+        ResultActions result = mockMvc.perform(get("/polls/{id}", 1).cookie(cookies));
+
+        MockMvcHelper.testSuccessfulResponse(result, HttpStatus.OK)
+                .andExpect(jsonPath("data.id", is(1)))
+                .andExpect(jsonPath("data.title", is("Test Poll")))
+                .andExpect(jsonPath("data.description", is("Test Description")))
+                .andExpect(jsonPath("data.voteOptions", hasSize(5)))
+                .andExpect(jsonPath("data.voteOptions[0].name", is("Opção 1")))
+                .andExpect(jsonPath("data.myChoices", is(0)));
+    }
+
+    @Test
+    @Order(1)
+    public void testGetPollNotFound() throws Exception {
+        long nonExistentPollId = 9999L;
+
+        ResultActions resultActions = mockMvc.perform(get("/polls/{id}", nonExistentPollId));
+
+        MockMvcHelper.testUnsuccessfulResponse(resultActions, VotifyErrorCode.POLL_NOT_FOUND);
     }
 
     @Test
@@ -143,73 +172,16 @@ public class PollControllerTest {
 
     @Test
     @Order(1)
-    public void testVotePoll() throws Exception {
-        Cookie[] cookies = MockMvcHelper.login(
-                mockMvc, objectMapper, "common@votify.com.br", "password123"
-        );
+    public void testGetPollByIdNotAuthenticated() throws Exception {
+        ResultActions resultActions = mockMvc.perform(get("/polls/{id}", 1));
 
-        VoteInsertDTO voteInsertDTO = new VoteInsertDTO(16);
-        ResultActions resultActions = mockMvc.perform(post("/polls/{id}/vote", 1)
-                .cookie(cookies)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(voteInsertDTO)));
-        MockMvcHelper.testSuccessfulResponse(resultActions, HttpStatus.CREATED)
-                .andExpect(jsonPath("data", is(16)));
-    }
-
-    @Test
-    @Order(1)
-    public void testInvalidVotePoll() throws Exception {
-        Cookie[] cookies = MockMvcHelper.login(
-                mockMvc, objectMapper, "common@votify.com.br", "password123"
-        );
-
-        VoteInsertDTO voteInsertDTO = new VoteInsertDTO(31);
-        ResultActions resultActions = mockMvc.perform(post("/polls/{id}/vote", 1)
-                .cookie(cookies)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(voteInsertDTO)));
-        MockMvcHelper.testUnsuccessfulResponse(resultActions, VotifyErrorCode.POLL_VOTE_INVALID);
-    }
-
-    @Test
-    @Order(1)
-    public void testEmptyVotePoll() throws Exception {
-        Cookie[] cookies = MockMvcHelper.login(
-                mockMvc, objectMapper, "common@votify.com.br", "password123"
-        );
-
-        VoteInsertDTO voteInsertDTO = new VoteInsertDTO(0);
-        ResultActions resultActions = mockMvc.perform(post("/polls/{id}/vote", 1)
-                .cookie(cookies)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(voteInsertDTO)));
-        MockMvcHelper.testUnsuccessfulResponse(resultActions, VotifyErrorCode.POLL_VOTE_EMPTY);
-    }
-
-    @Test
-    @Order(1)
-    public void testVoteWhenNotAuthenticated() throws Exception {
-        VoteInsertDTO voteInsertDTO = new VoteInsertDTO(1);
-        ResultActions resultActions = mockMvc.perform(post("/polls/{id}/vote", 1)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(voteInsertDTO)));
-        MockMvcHelper.testUnsuccessfulResponse(resultActions, VotifyErrorCode.COMMON_UNAUTHORIZED);
-    }
-
-    @Test
-    @Order(2)
-    public void testVotePollDuplicated() throws Exception {
-        Cookie[] cookies = MockMvcHelper.login(
-                mockMvc, objectMapper, "common@votify.com.br", "password123"
-        );
-
-        VoteInsertDTO voteInsertDTO = new VoteInsertDTO(4);
-        ResultActions resultActions = mockMvc.perform(post("/polls/{id}/vote", 1)
-                .cookie(cookies)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(voteInsertDTO)));
-        MockMvcHelper.testUnsuccessfulResponse(resultActions, VotifyErrorCode.POLL_VOTED_ALREADY);
+        MockMvcHelper.testSuccessfulResponse(resultActions, HttpStatus.OK)
+                .andExpect(jsonPath("data.id", is(1)))
+                .andExpect(jsonPath("data.title", is("Test Poll")))
+                .andExpect(jsonPath("data.description", is("Test Description")))
+                .andExpect(jsonPath("data.voteOptions", hasSize(5)))
+                .andExpect(jsonPath("data.voteOptions[0].name", is("Opção 1")))
+                .andExpect(jsonPath("data.myChoices", is(0)));
     }
 
     @Test
@@ -257,9 +229,7 @@ public class PollControllerTest {
                 get("/polls/search")
                         .param("title", "")
         );
-
-        MockMvcHelper
-                .testUnsuccessfulResponse(resultActions,  VotifyErrorCode.POLL_TITLE_SEARCH_EMPTY);
+        MockMvcHelper.testUnsuccessfulResponse(resultActions, VotifyErrorCode.POLL_TITLE_SEARCH_EMPTY);
     }
 
     @Test
@@ -280,5 +250,96 @@ public class PollControllerTest {
                 .andExpect(jsonPath("data.content[0].id", is(1)))
                 .andExpect(jsonPath("data.content[0].title", containsString("Test")))
                 .andExpect(jsonPath("data.content[0].description", containsString("Test")));
+    }
+
+    @Test
+    @Order(2)
+    public void testVotePoll() throws Exception {
+        Cookie[] cookies = MockMvcHelper.login(
+                mockMvc, objectMapper, "common@votify.com.br", "password123"
+        );
+
+        VoteInsertDTO voteInsertDTO = new VoteInsertDTO(16);
+        ResultActions resultActions = mockMvc.perform(post("/polls/{id}/vote", 1)
+                .cookie(cookies)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(voteInsertDTO)));
+        MockMvcHelper.testSuccessfulResponse(resultActions, HttpStatus.CREATED)
+                .andExpect(jsonPath("data", is(16)));
+    }
+
+    @Test
+    @Order(2)
+    public void testInvalidVotePoll() throws Exception {
+        Cookie[] cookies = MockMvcHelper.login(
+                mockMvc, objectMapper, "common@votify.com.br", "password123"
+        );
+
+        VoteInsertDTO voteInsertDTO = new VoteInsertDTO(31);
+        ResultActions resultActions = mockMvc.perform(post("/polls/{id}/vote", 1)
+                .cookie(cookies)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(voteInsertDTO)));
+        MockMvcHelper.testUnsuccessfulResponse(resultActions, VotifyErrorCode.POLL_VOTE_INVALID);
+    }
+
+    @Test
+    @Order(2)
+    public void testEmptyVotePoll() throws Exception {
+        Cookie[] cookies = MockMvcHelper.login(
+                mockMvc, objectMapper, "common@votify.com.br", "password123"
+        );
+
+        VoteInsertDTO voteInsertDTO = new VoteInsertDTO(0);
+        ResultActions resultActions = mockMvc.perform(post("/polls/{id}/vote", 1)
+                .cookie(cookies)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(voteInsertDTO)));
+        MockMvcHelper.testUnsuccessfulResponse(resultActions, VotifyErrorCode.POLL_VOTE_EMPTY);
+    }
+
+    @Test
+    @Order(2)
+    public void testVoteWhenNotAuthenticated() throws Exception {
+        VoteInsertDTO voteInsertDTO = new VoteInsertDTO(1);
+        ResultActions resultActions = mockMvc.perform(post("/polls/{id}/vote", 1)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(voteInsertDTO)));
+        MockMvcHelper.testUnsuccessfulResponse(resultActions, VotifyErrorCode.COMMON_UNAUTHORIZED);
+    }
+
+    @Test
+    @Order(3)
+    public void testVotePollDuplicated() throws Exception {
+        Cookie[] cookies = MockMvcHelper.login(
+                mockMvc, objectMapper, "common@votify.com.br", "password123"
+        );
+
+        VoteInsertDTO voteInsertDTO = new VoteInsertDTO(4);
+        ResultActions resultActions = mockMvc.perform(post("/polls/{id}/vote", 1)
+                .cookie(cookies)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(voteInsertDTO)));
+        MockMvcHelper.testUnsuccessfulResponse(resultActions, VotifyErrorCode.POLL_VOTED_ALREADY);
+    }
+
+    @Test
+    @Order(3)
+    public void testGetPollWithUserVote() throws Exception {
+
+        Cookie[] cookies = MockMvcHelper.login(
+                mockMvc, objectMapper, "common@votify.com.br", "password123"
+        );
+
+        ResultActions result = mockMvc.perform(get("/polls/{id}", 1)
+                .cookie(cookies));
+
+        MockMvcHelper.testSuccessfulResponse(result, HttpStatus.OK)
+                .andExpect(jsonPath("data.id", is(1)))
+                .andExpect(jsonPath("data.title", is("Test Poll")))
+                .andExpect(jsonPath("data.description", is("Test Description")))
+                .andExpect(jsonPath("data.voteOptions", hasSize(5)))
+                .andExpect(jsonPath("data.voteOptions[0].name", is("Opção 1")))
+                .andExpect(jsonPath("data.myChoices", greaterThan(0)));
     }
 }
