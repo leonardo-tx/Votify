@@ -78,10 +78,18 @@ export const searchPollsByTitle = async (
 
 export const getPollById = async (
   id: number,
+  cookie: string | undefined = undefined,
 ): Promise<ApiResponse<PollDetailedView | null>> => {
   return await commonRequester(async () => {
+    if (cookie === undefined) {
+      const { data } = await api.get<ApiResponse<PollDetailedView>>(
+        `/polls/${id}`,
+      );
+      return data;
+    }
     const { data } = await api.get<ApiResponse<PollDetailedView>>(
       `/polls/${id}`,
+      { headers: { cookie: cookie ?? "" } },
     );
     return data;
   });

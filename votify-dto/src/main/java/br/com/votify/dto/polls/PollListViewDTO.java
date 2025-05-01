@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Data
 @NoArgsConstructor
@@ -14,8 +14,8 @@ public class PollListViewDTO {
     private Long id;
     private String title;
     private String description;
-    private LocalDateTime startDate;
-    private LocalDateTime endDate;
+    private Instant startDate;
+    private Instant endDate;
     private Long responsibleId;
 
     public static PollListViewDTO parse(Poll entity) {

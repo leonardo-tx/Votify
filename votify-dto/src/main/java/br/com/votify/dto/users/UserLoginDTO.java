@@ -16,6 +16,9 @@ public class UserLoginDTO implements DTOInput<User> {
 
     @Override
     public User convertToEntity() {
-        return new CommonUser(null, null, null, email, password);
+        return CommonUser.builder()
+                .email(email)
+                .password(password)
+                .build();
     }
 }

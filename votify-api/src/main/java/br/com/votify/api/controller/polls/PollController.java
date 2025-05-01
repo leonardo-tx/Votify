@@ -1,5 +1,6 @@
 package br.com.votify.api.controller.polls;
 
+import br.com.votify.core.decorators.NeedsUserContext;
 import br.com.votify.core.domain.entities.polls.Vote;
 import br.com.votify.dto.ApiResponse;
 import br.com.votify.dto.PageResponse;
@@ -10,6 +11,8 @@ import br.com.votify.core.service.ContextService;
 import br.com.votify.core.service.PollService;
 import br.com.votify.core.utils.exceptions.VotifyException;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,10 +26,12 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @RequestMapping("/polls")
 public class PollController {
+    private static final Logger log = LoggerFactory.getLogger(PollController.class);
     private final PollService pollService;
     private final ContextService contextService;
 
     @PostMapping("{id}/vote")
+    @NeedsUserContext
     public ResponseEntity<ApiResponse<Integer>> voteAtPoll(
             @PathVariable("id") Long id,
             @RequestBody VoteInsertDTO voteInsertDTO
@@ -40,6 +45,7 @@ public class PollController {
     }
 
     @PostMapping
+    @NeedsUserContext
     public ResponseEntity<ApiResponse<PollDetailedViewDTO>> insertPoll(
             @RequestBody PollInsertDTO pollInsertDTO
     ) throws VotifyException {
@@ -65,6 +71,7 @@ public class PollController {
     }
 
     @GetMapping("/me")
+    @NeedsUserContext
     public ResponseEntity<ApiResponse<PageResponse<PollListViewDTO>>> getMyPolls(
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "10") int size
@@ -102,6 +109,7 @@ public class PollController {
     }
 
     @GetMapping("/{id}")
+    @NeedsUserContext
     public ResponseEntity<ApiResponse<PollQueryDTO>> getPollById(
         @PathVariable("id") Long id
     ) throws VotifyException {

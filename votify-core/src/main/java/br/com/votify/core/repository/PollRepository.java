@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Repository
 public interface PollRepository extends JpaRepository<Poll, Long> {
@@ -25,9 +25,16 @@ public interface PollRepository extends JpaRepository<Poll, Long> {
         SELECT p
         FROM Poll p
         WHERE LOWER(p.title) LIKE LOWER(CONCAT('%', :title, '%'))
-        ORDER BY p.startDate DESC
+        ORDER BY
+            CASE
+                WHEN p.startDate > :now THEN 1
+                WHEN p.endDate > :now THEN 0
+                ELSE 2
+            END,
+            p.endDate
+        ASC
         """)
-    Page<Poll> findByTitleContainingIgnoreCase(@Param("title") String title, Pageable pageable);
+    Page<Poll> findByTitleContainingIgnoreCase(@Param("title") String title, @Param("now") Instant now, Pageable pageable);
 
     @Query("""
         SELECT p
@@ -36,5 +43,5 @@ public interface PollRepository extends JpaRepository<Poll, Long> {
         AND p.endDate > :now
         ORDER BY p.endDate ASC
         """)
-    Page<Poll> findAllByActives(@Param("now") LocalDateTime now, Pageable pageable);
+    Page<Poll> findAllByActives(@Param("now") Instant now, Pageable pageable);
 }

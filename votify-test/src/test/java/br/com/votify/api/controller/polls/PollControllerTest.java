@@ -20,7 +20,8 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
-import java.time.LocalDateTime;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.*;
@@ -55,7 +56,7 @@ public class PollControllerTest {
                 "Test Poll",
                 "Test Description",
                 null,
-                LocalDateTime.now().plusDays(1),
+                Instant.now().plus(Duration.ofDays(1)),
                 false,
                 1,
                 voteOptionInsertDTOS

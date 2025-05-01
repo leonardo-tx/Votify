@@ -6,7 +6,8 @@ import br.com.votify.core.utils.exceptions.VotifyErrorCode;
 import br.com.votify.core.utils.exceptions.VotifyException;
 import org.junit.jupiter.api.Test;
 
-import java.time.LocalDateTime;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 
@@ -14,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class PollValidatorTest {
 
-    private final LocalDateTime now = LocalDateTime.now();
+    private final Instant now = Instant.now();
 
     @Test
     void shouldThrowExceptionWhenTitleIsNull() {
@@ -46,8 +47,8 @@ class PollValidatorTest {
     @Test
     void shouldThrowExceptionWhenStartDateIsAfterEndDate() {
         Poll poll = createValidPoll();
-        poll.setStartDate(now.plusDays(2));
-        poll.setEndDate(now.plusDays(1));
+        poll.setStartDate(now.plus(Duration.ofDays(2)));
+        poll.setEndDate(now.plus(Duration.ofDays(1)));
         poll.setVoteOptions(List.of(new VoteOption(null, "teste 1", 0, poll)));
         poll.setChoiceLimitPerUser(1);
 
@@ -69,8 +70,8 @@ class PollValidatorTest {
         return Poll.builder()
                 .title("Valid Title")
                 .description("Valid Description")
-                .startDate(now.plusDays(1))
-                .endDate(now.plusDays(5))
+                .startDate(now.plus(Duration.ofDays(1)))
+                .endDate(now.plus(Duration.ofDays(5)))
                 .userRegistration(true)
                 .voteOptions(List.of(new VoteOption(), new VoteOption()))
                 .choiceLimitPerUser(2)

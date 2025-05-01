@@ -1,7 +1,6 @@
 import { GetServerSideProps } from "next";
-import { api } from "@/libs/api";
+import { getPollById } from "@/libs/api";
 import { PollDetailedView } from "@/libs/polls/PollDetailedView";
-import type ApiResponse from "@/libs/ApiResponse";
 import VoteForm from "./components/VoteForm";
 import { useState, useEffect } from "react";
 import { formatDistance } from "date-fns";
@@ -25,9 +24,14 @@ export default function PollDetailPage({ poll }: PollPageProps) {
 
   if (!poll) {
     return (
-      <div className="flex justify-center items-center h-full">
-        <p id="no-poll-message">Enquete não encontrada.</p>
-      </div>
+      <>
+        <Head>
+          <title>Enquete não encontrada - Votify</title>
+        </Head>
+        <div className="flex justify-center items-center h-full">
+          <p id="no-poll-message">Enquete não encontrada.</p>
+        </div>
+      </>
     );
   }
 
@@ -41,7 +45,7 @@ export default function PollDetailPage({ poll }: PollPageProps) {
         <title>Enquete: {poll.title} - Votify</title>
       </Head>
       <div className="h-full flex flex-col items-center justify-center p-4">
-        <div className="w-full max-w-xl shadow-lg rounded-lg p-6">
+        <div className="w-full max-w-3xl shadow-lg rounded-lg p-6">
           <h1 className="text-2xl font-extrabold mb-3">{poll.title}</h1>
           <p className="text-base mb-4 whitespace-pre-line">
             {poll.description}
@@ -60,13 +64,7 @@ export default function PollDetailPage({ poll }: PollPageProps) {
           </p>
 
           <div className="mb-6">
-            <h2 className="text-xl font-bold mb-3">Opções de Voto</h2>
-            <VoteForm
-              pollId={poll.id}
-              voteOptions={poll.voteOptions}
-              choiceLimitPerUser={poll.choiceLimitPerUser}
-              initialChoices={poll.myChoices}
-            />
+            <VoteForm poll={poll} />
           </div>
         </div>
       </div>
@@ -79,13 +77,7 @@ export const getServerSideProps: GetServerSideProps<PollPageProps> = async ({
   req,
 }) => {
   const { id } = params as { id: string };
-  try {
-    const { data: resp } = await api.get<ApiResponse<PollDetailedView>>(
-      `/polls/${id}`,
-      { headers: { cookie: req.headers.cookie ?? "" } },
-    );
-    return { props: { poll: resp.data } };
-  } catch {
-    return { props: { poll: null } };
-  }
+  const response = await getPollById(parseInt(id), req.headers.cookie);
+
+  return { props: { poll: response.data } };
 };
