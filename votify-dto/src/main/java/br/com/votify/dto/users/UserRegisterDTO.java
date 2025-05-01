@@ -18,6 +18,11 @@ public final class UserRegisterDTO implements DTOInput<User> {
 
     @Override
     public CommonUser convertToEntity() {
-        return new CommonUser(null, userName, name, email, password);
+        return CommonUser.builder()
+                .userName(userName)
+                .name(name)
+                .email(email)
+                .password(password)
+                .build();
     }
 }

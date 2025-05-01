@@ -230,7 +230,7 @@ public class PollServiceTest {
         Pageable pageable = PageRequest.of(0, 10);
         Page<Poll> pollPage = new PageImpl<>(testPolls, pageable, testPolls.size());
         
-        when(pollRepository.findByTitleContainingIgnoreCase(eq("t"), any(Pageable.class))).thenReturn(pollPage);
+        when(pollRepository.findByTitleContainingIgnoreCase(eq("t"), any(Instant.class), any(Pageable.class))).thenReturn(pollPage);
         
         Page<Poll> result = pollService.findByTitle("t", 0, 10);
 

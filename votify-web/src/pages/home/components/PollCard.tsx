@@ -26,7 +26,7 @@ export default function PollCard({ poll, user, now }: Props) {
     >
       <div className="flex items-center justify-between">
         <Link
-          id={`poll-card-${poll.id}-user-profile-link`}
+          id={`poll-card-user-profile-link-${poll.id}`}
           href={`/home`}
           className="flex gap-2 items-center hover:text-(--foreground-hover)"
         >
@@ -46,7 +46,7 @@ export default function PollCard({ poll, user, now }: Props) {
         </p>
       </div>
       <Link
-        id={`poll-card-${poll.id}-link`}
+        id={`poll-card-link-${poll.id}`}
         href={`/polls/${poll.id}`}
         className="flex flex-col gap-3"
       >

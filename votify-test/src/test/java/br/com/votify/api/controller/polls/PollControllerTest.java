@@ -22,7 +22,6 @@ import org.springframework.test.web.servlet.ResultActions;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.*;

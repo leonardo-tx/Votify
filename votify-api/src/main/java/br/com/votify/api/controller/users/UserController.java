@@ -1,6 +1,7 @@
 package br.com.votify.api.controller.users;
 
 import br.com.votify.api.configuration.SecurityConfig;
+import br.com.votify.core.decorators.NeedsUserContext;
 import br.com.votify.core.domain.entities.users.User;
 import br.com.votify.core.service.EmailConfirmationService;
 import br.com.votify.core.service.UserService;
@@ -23,6 +24,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/users")
 @RequiredArgsConstructor
+@NeedsUserContext
 public class UserController {
     private final UserService userService;
     private final EmailConfirmationService emailConfirmationService;
