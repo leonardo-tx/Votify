@@ -3,22 +3,30 @@
 ![Line Coverage](https://raw.githubusercontent.com/leonardo-tx/Votify/refs/heads/badges/.github/badges/jacoco.svg)
 ![Branch Coverage](https://raw.githubusercontent.com/leonardo-tx/Votify/refs/heads/badges/.github/badges/branches.svg)
 
-O Votify é um projeto em grupo desenvolvido na faculdade Instituto Infnet  
+O Votify é um projeto em grupo desenvolvido na faculdade Instituto Infnet
 no bloco de Engenharia Disciplinada de Softwares.
 
-O sistema tem como objetivo permitir enquetes / votações online de maneira  
+O sistema tem como objetivo permitir enquetes / votações online de maneira
 fácil e prática.
 
 ## Membros
 
+### Product Owner / Orientador
+- Leonardo Silva da Gloria
+
+### Team Leader / Analista de Negócios
+- Leonardo Rego Teixeira
+
+### Arquiteto
+- Victor Matheus Paiva Vianna
+
+### Team Members
 - André Augusto Ferrarez
 - Bruno Thales dos Santos
 - Jonathan de Oliveira Scottini
 - José Luiz Barbosa Costa
-- Leonardo Rego Teixeira
 - Luís Miguel Silva Amorim
 - Maitê Mota Belo de Souza Silva
-- Victor Matheus Paiva Vianna
 
 <details>
   <summary><strong>1. Visão Geral do Projeto</strong></summary>
@@ -27,7 +35,9 @@ O Votify é composto por um sistema modular com os seguintes módulos:
 
 - **votify-api**: Responsável pelos endpoints REST da aplicação.
 - **votify-core**: Contém a lógica de domínio, entidades, repositórios e serviços.
-- **votify-console**: (Opcional) Aplicação de console para testar chamadas à API.
+- **votify-dto**: Contém as DTO's utilizadas pela API.
+- **votify-test**: Onde há todos os testes do projeto.
+- **votify-web**: Aplicação web.
 
 </details>
 
@@ -40,6 +50,7 @@ Para rodar o projeto, é necessário ter instalado:
 - **Maven** (para build e gerenciamento de dependências)
 - **MySQL** (para o banco de dados; certifique-se de ter um schema, por exemplo, `votifydb`)
 - **Git** (para controle de versão)
+- **Yarn** ou **NPM** (para executar o projeto web)
 
 </details>
 
@@ -49,40 +60,25 @@ Para rodar o projeto, é necessário ter instalado:
 ### 3.1 Clonando o Repositório
 ```bash
 git clone https://github.com/leonardo-tx/Votify.git
-cd votify
+cd Votify
 ```
 
 ### 3.2 Configurando o Banco de Dados
-#### Criar e Adicionar ao arquivo application.properties com as configurações abaixo
-#### Criar ele dentro do seguinte path "votify-api/src/main/resources"
+#### No projeto há três template de configurações do projeto:
+- application.properties (Afeta a configuração geral)
+- application-dev.properties (Afeta a configuração apenas do ambiente de desenvolvimento)
+- application-prod.properties (Afeta a configuração apenas do ambiente de produção)
 
-```
-#Configurações da aplicação
-spring.application.name=votify-api
-server.port=sua_porta
+#### Também há 2 arquivos SQL, para colocar dados no início:
+- data-dev.sql (Afeta os dados iniciais apenas do ambiente de desenvolvimento)
+- data-prod.sql (Afeta os dados iniciais apenas do ambiente de produção)
 
-# Configurações do banco de dados
-spring.datasource.url=jdbc:mysql://localhost:3306/votifydb?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&useTimezone=true&serverTimezone=UTC
-spring.datasource.username=seu_usuário
-spring.datasource.password=sua_senha
-spring.jpa.show-sql=true
-spring.jpa.generate-ddl=true
-spring.jpa.hibernate.ddl-auto=create # Para testes usar o create, fora desse ambiente, utilize "update".
-spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQLDialect
+Todos os arquivos se encontram em votify-api/src/main/resources
 
-# Configurações do aplicativo
-app.token.access-token-max-age=900 # Tempo em segundos
-app.token.refresh-token-max-age=2419200 # Tempo em segundos
-app.token.refresh-token-secret=sua_chave_para_o_refresh_token
-app.cookie.http-only=true
-app.cookie.secure=true
-app.cookie.path=/
-app.password-reset.expiration-minutes=15
-```
 ### 3.3 Build do Projeto
 #### Na raiz do projeto, execute:
-```
-mvn clean install
+```bash
+mvn clean install # Adicione o parâmetro -DskipTests para pular os testes
 ```
 </details>
 
@@ -90,18 +86,20 @@ mvn clean install
   <summary><strong>4. Executar a API</strong></summary>
 
 #### Entre no diretório raiz do projeto:
-```
+```bash
 mvn clean install -DskipTests
 mvn spring-boot:run -pl votify-api
 ```
 </details>
 
 <details>
-  <summary><strong>5. Executar o Console</strong></summary>
+  <summary><strong>5. Executar o Servidor WEB</strong></summary>
 
 #### Entre no diretório raiz do projeto:
-```
-mvn clean install -DskipTests
-mvn clean compile exec:java -pl votify-console
+```bash
+cd votify-web
+yarn install # Ou npm install
+yarn run build # Ou npm run build
+yarn run start # Ou npm run start
 ```
 </details>
