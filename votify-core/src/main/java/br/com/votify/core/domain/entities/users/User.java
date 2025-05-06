@@ -1,5 +1,7 @@
 package br.com.votify.core.domain.entities.users;
 
+import br.com.votify.core.domain.entities.polls.Poll;
+import br.com.votify.core.domain.entities.polls.Vote;
 import br.com.votify.core.domain.entities.tokens.EmailConfirmation;
 import br.com.votify.core.domain.entities.tokens.RefreshToken;
 import jakarta.persistence.*;
@@ -60,6 +62,12 @@ public abstract class User implements Cloneable {
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private EmailConfirmation emailConfirmation;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<Vote> votes;
+
+    @OneToMany(mappedBy = "responsible", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<Poll> createdPolls;
 
     public int getPermissions() {
         return PermissionFlags.NONE;

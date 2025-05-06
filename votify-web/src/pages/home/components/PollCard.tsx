@@ -28,11 +28,12 @@ export default function PollCard({ poll, user, now }: Props) {
       <div className="flex items-center justify-between">
         <Link
           id={`poll-card-${poll.id}-user-profile-link`}
-          href={`/home`}
-          className="flex gap-2 items-center hover:text-(--foreground-hover)"
+          href={user?.userName ? `/profile/${user.userName}` : '#'}
+          className={`flex gap-2 items-center ${user?.userName ? 'hover:text-(--foreground-hover) cursor-pointer' : 'cursor-default'}`}
+          onClick={(e) => { if (!user?.userName) e.preventDefault(); }}
         >
           <IoPersonCircle size={25} />
-          <p className="font-normal text-sm">{user?.name ?? "Desconhecido"}</p>
+          <p className="font-normal text-sm">{user?.name ?? "Usuário Desconhecido"}</p>
         </Link>
         <p className="font-normal text-sm">
           {endDate < nowDate.getTime()
