@@ -1,6 +1,7 @@
 package br.com.votify.api.controller.users;
 
 import br.com.votify.api.configuration.SecurityConfig;
+import br.com.votify.core.service.TestEmailService;
 import br.com.votify.core.utils.exceptions.VotifyErrorCode;
 import br.com.votify.dto.ApiResponse;
 import br.com.votify.dto.users.*;
@@ -20,6 +21,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import static org.hamcrest.CoreMatchers.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
@@ -40,6 +42,9 @@ public class AuthControllerTest {
     @Autowired
     private SecurityConfig securityConfig;
 
+    @Autowired
+    private TestEmailService testEmailService;
+
     @Test
     @Order(0)
     public void register() throws Exception {
@@ -57,14 +62,10 @@ public class AuthControllerTest {
                 .andExpect(jsonPath("data.userName", is("byces")))
                 .andExpect(jsonPath("data.name", is("Byces")))
                 .andExpect(jsonPath("data.email", is("123@gmail.com")))
-                .andExpect(jsonPath("data.role", is("CommonUser")))
-                .andExpect(jsonPath("data.confirmationCode", notNullValue()));
+                .andExpect(jsonPath("data.role", is("CommonUser")));
 
-        ApiResponse<UserDetailedViewDTO> apiResponse = objectMapper.readValue(
-                resultActions.andReturn().getResponse().getContentAsByteArray(),
-                new TypeReference<>() {}
-        );
-        emailConfirmationCode = apiResponse.getData().getConfirmationCode();
+        emailConfirmationCode = testEmailService.getLastSentCode();
+        assertNotNull(emailConfirmationCode, "Email confirmation code should not be null");
     }
 
     @Test

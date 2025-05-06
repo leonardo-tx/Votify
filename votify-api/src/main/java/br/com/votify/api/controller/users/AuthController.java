@@ -35,10 +35,7 @@ public class AuthController {
     ) throws VotifyException {
         CommonUser user = userRegisterDTO.convertToEntity();
         User createdUser = userService.register(user);
-        UserDetailedViewDTO userDTO = UserDetailedViewDTO.parse(
-                createdUser,
-                createdUser.getEmailConfirmation().getEmailConfirmationCode()
-        );
+        UserDetailedViewDTO userDTO = UserDetailedViewDTO.parse(createdUser);
         return ApiResponse.success(userDTO, HttpStatus.CREATED).createResponseEntity();
     }
 

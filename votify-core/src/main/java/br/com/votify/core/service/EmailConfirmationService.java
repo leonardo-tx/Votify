@@ -23,6 +23,7 @@ public class EmailConfirmationService {
     private final ContextService contextService;
     private final EmailConfirmationRepository emailConfirmationRepository;
     private final EmailConfirmationExpirationProperties emailConfirmationExpirationProperties;
+    private final EmailService emailService;
 
     @Transactional
     public void confirmEmail(String code, String currentEmail) throws VotifyException {
@@ -65,7 +66,11 @@ public class EmailConfirmationService {
                 codeGenerated,
                 now.plusMinutes(emailConfirmationExpirationProperties.getExpirationMinutes())
         );
-        return emailConfirmationRepository.save(emailConfirmation);
+        
+        EmailConfirmation savedConfirmation = emailConfirmationRepository.save(emailConfirmation);
+        emailService.sendEmailConfirmation(createdUser.getEmail(), codeGenerated);
+        
+        return savedConfirmation;
     }
 
     public List<EmailConfirmation> findExpiredAccounts() {
