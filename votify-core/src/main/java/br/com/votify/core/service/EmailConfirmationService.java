@@ -10,10 +10,12 @@ import br.com.votify.core.utils.exceptions.VotifyErrorCode;
 import br.com.votify.core.utils.exceptions.VotifyException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -25,9 +27,22 @@ public class EmailConfirmationService {
     private final EmailConfirmationRepository emailConfirmationRepository;
     private final EmailConfirmationExpirationProperties emailConfirmationExpirationProperties;
     private final EmailService emailService;
+    private final Environment environment;
 
     @Value("${spring.mail.username:}")
     private String senderEmail;
+
+    private boolean isDevOrTestEnvironment() {
+        String[] profiles = environment.getActiveProfiles();
+        return profiles.length == 0 || Arrays.stream(profiles)
+                .anyMatch(p -> p.contains("dev") || p.contains("test"));
+    }
+
+    private boolean isProdEnvironment() {
+        String[] profiles = environment.getActiveProfiles();
+        return profiles.length > 0 && Arrays.stream(profiles)
+                .anyMatch(p -> p.contains("prod"));
+    }
 
     @Transactional
     public void confirmEmail(String code, String currentEmail) throws VotifyException {
@@ -61,11 +76,6 @@ public class EmailConfirmationService {
             throw new VotifyException(VotifyErrorCode.PENDING_EMAIL_CONFIRMATION);
         }
 
-        if (senderEmail == null || senderEmail.trim().isEmpty()) {
-            System.out.println("Email configuration not set up. Skipping email confirmation.");
-            return null;
-        }
-
         String codeGenerated = EmailCodeGeneratorUtils.generateEmailConfirmationCode();
         LocalDateTime now = LocalDateTime.now();
         EmailConfirmation emailConfirmation = new EmailConfirmation(
@@ -77,8 +87,19 @@ public class EmailConfirmationService {
         );
         
         EmailConfirmation savedConfirmation = emailConfirmationRepository.save(emailConfirmation);
-        emailService.sendEmailConfirmation(createdUser.getEmail(), codeGenerated);
-        
+
+        boolean emailConfigured = senderEmail != null && !senderEmail.trim().isEmpty();
+
+        if (isProdEnvironment() && emailConfigured) {
+            emailService.sendEmailConfirmation(createdUser.getEmail(), codeGenerated);
+
+        } else if (isDevOrTestEnvironment() && emailConfigured) {
+            try {
+                confirmEmail(codeGenerated, createdUser.getEmail());
+            } catch (VotifyException e) {
+                throw new VotifyException(VotifyErrorCode.EMAIL_CONFIRMATION_CODE_INVALID);
+            }
+        }
         return savedConfirmation;
     }
 
