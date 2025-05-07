@@ -9,6 +9,7 @@ import br.com.votify.core.utils.EmailCodeGeneratorUtils;
 import br.com.votify.core.utils.exceptions.VotifyErrorCode;
 import br.com.votify.core.utils.exceptions.VotifyException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +25,9 @@ public class EmailConfirmationService {
     private final EmailConfirmationRepository emailConfirmationRepository;
     private final EmailConfirmationExpirationProperties emailConfirmationExpirationProperties;
     private final EmailService emailService;
+
+    @Value("${spring.mail.username:}")
+    private String senderEmail;
 
     @Transactional
     public void confirmEmail(String code, String currentEmail) throws VotifyException {
@@ -55,6 +59,11 @@ public class EmailConfirmationService {
     public EmailConfirmation addUser(User createdUser, String newEmail) throws VotifyException {
         if (createdUser.getEmailConfirmation() != null) {
             throw new VotifyException(VotifyErrorCode.PENDING_EMAIL_CONFIRMATION);
+        }
+
+        if (senderEmail == null || senderEmail.trim().isEmpty()) {
+            System.out.println("Email configuration not set up. Skipping email confirmation.");
+            return null;
         }
 
         String codeGenerated = EmailCodeGeneratorUtils.generateEmailConfirmationCode();
