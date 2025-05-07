@@ -42,10 +42,10 @@ public class UserService {
         User createdUser = userRepository.save(user);
         EmailConfirmation emailConfirmation = emailConfirmationService.addUser(createdUser, null);
         
-        if (emailConfirmation != null) {
+        if (emailConfirmation != null &&
+            emailConfirmationService.existsByEmail(createdUser.getEmail())) {
             createdUser.setEmailConfirmation(emailConfirmation);
         }
-        
         return createdUser;
     }
 
