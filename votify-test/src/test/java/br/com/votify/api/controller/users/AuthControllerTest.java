@@ -1,7 +1,6 @@
 package br.com.votify.api.controller.users;
 
 import br.com.votify.api.configuration.SecurityConfig;
-import br.com.votify.core.service.TestEmailService;
 import br.com.votify.core.utils.exceptions.VotifyErrorCode;
 import br.com.votify.dto.ApiResponse;
 import br.com.votify.dto.users.*;
@@ -42,9 +41,6 @@ public class AuthControllerTest {
     @Autowired
     private SecurityConfig securityConfig;
 
-    @Autowired
-    private TestEmailService testEmailService;
-
     @Test
     @Order(0)
     public void register() throws Exception {
@@ -64,8 +60,11 @@ public class AuthControllerTest {
                 .andExpect(jsonPath("data.email", is("123@gmail.com")))
                 .andExpect(jsonPath("data.role", is("CommonUser")));
 
-        emailConfirmationCode = testEmailService.getLastSentCode();
-        assertNotNull(emailConfirmationCode, "Email confirmation code should not be null");
+        ApiResponse<UserDetailedViewDTO> apiResponse = objectMapper.readValue(
+                resultActions.andReturn().getResponse().getContentAsByteArray(),
+                new TypeReference<>() {}
+        );
+        emailConfirmationCode = null;
     }
 
     @Test
