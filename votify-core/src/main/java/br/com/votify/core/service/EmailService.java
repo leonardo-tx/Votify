@@ -4,17 +4,24 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @Service
-@RequiredArgsConstructor
 public class EmailService {
-    private final JavaMailSender mailSender;
+    private JavaMailSender mailSender;
     
     @Value("${spring.mail.username:}")
     private String senderEmail;
 
+    @Autowired(required = false)
+    public void setMailSender(JavaMailSender mailSender) {
+        this.mailSender = mailSender;
+    }
+
     public void sendEmailConfirmation(String receiverEmail, String confirmationCode) {
+        if (senderEmail == null || senderEmail.trim().isEmpty() || mailSender == null) {
+            return;
+        }
 
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(senderEmail);
