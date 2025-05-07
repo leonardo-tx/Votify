@@ -34,43 +34,32 @@ public class EmailServiceTest {
 
     @Test
     public void sendEmailConfirmation_WhenEmailConfigured_ShouldSendEmail() {
-        // Arrange
         doNothing().when(mailSender).send(any(SimpleMailMessage.class));
 
-        // Act
         emailService.sendEmailConfirmation(TEST_EMAIL, TEST_CODE);
-
-        // Assert
         verify(mailSender, times(1)).send(any(SimpleMailMessage.class));
     }
 
     @Test
     public void sendEmailConfirmation_WhenNoSenderEmail_ShouldNotSendEmail() {
-        // Arrange
         ReflectionTestUtils.setField(emailService, "senderEmail", "");
 
-        // Act
         emailService.sendEmailConfirmation(TEST_EMAIL, TEST_CODE);
 
-        // Assert
         verifyNoInteractions(mailSender);
     }
 
     @Test
     public void sendEmailConfirmation_WhenNoMailSender_ShouldNotSendEmail() {
-        // Arrange
         emailService.setMailSender(null);
 
-        // Act
         emailService.sendEmailConfirmation(TEST_EMAIL, TEST_CODE);
 
-        // Assert
         verifyNoInteractions(mailSender);
     }
 
     @Test
     public void sendEmailConfirmation_ShouldSetCorrectMessageProperties() {
-        // Arrange
         doAnswer(invocation -> {
             SimpleMailMessage message = invocation.getArgument(0);
             assertEquals(TEST_SENDER, message.getFrom());
@@ -80,10 +69,8 @@ public class EmailServiceTest {
             return null;
         }).when(mailSender).send(any(SimpleMailMessage.class));
 
-        // Act
         emailService.sendEmailConfirmation(TEST_EMAIL, TEST_CODE);
 
-        // Assert
         verify(mailSender, times(1)).send(any(SimpleMailMessage.class));
     }
 } 
