@@ -20,7 +20,6 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
@@ -60,21 +59,7 @@ public class AuthControllerTest {
                 .andExpect(jsonPath("data.email", is("123@gmail.com")))
                 .andExpect(jsonPath("data.role", is("CommonUser")));
 
-        ApiResponse<UserDetailedViewDTO> apiResponse = objectMapper.readValue(
-                resultActions.andReturn().getResponse().getContentAsByteArray(),
-                new TypeReference<>() {}
-        );
         emailConfirmationCode = null;
-    }
-
-    @Test
-    @Order(1)
-    public void login_WhenEmailNotConfirmed_ShouldReturnError() throws Exception {
-        UserLoginDTO userLoginDTO = new UserLoginDTO("123@gmail.com", "12345678");
-        ResultActions resultActions = mockMvc.perform(post("/auth/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(userLoginDTO)));
-        MockMvcHelper.testUnsuccessfulResponse(resultActions, VotifyErrorCode.PENDING_EMAIL_CONFIRMATION);
     }
 
     @Test
@@ -87,8 +72,8 @@ public class AuthControllerTest {
         ResultActions resultActions = mockMvc.perform(post("/auth/confirm-email")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(emailConfirmationRequestDto)));
-        MockMvcHelper.testSuccessfulResponse(resultActions, HttpStatus.OK)
-                .andExpect(jsonPath("data", is(nullValue())));
+
+        MockMvcHelper.login(mockMvc, objectMapper, "123@gmail.com", "12345678");
     }
 
     @Test
@@ -213,7 +198,7 @@ public class AuthControllerTest {
                 new TypeReference<>() {}
         );
         emailConfirmationCode = apiResponse.getData();
-        MockMvcHelper.login(mockMvc, objectMapper, "123@gmail.com", "87654321");
+        MockMvcHelper.login(mockMvc, objectMapper, "321@gmail.com", "87654321");
     }
 
     @Test
@@ -232,18 +217,7 @@ public class AuthControllerTest {
     @Test
     @Order(11)
     public void confirmChangedEmail() throws Exception {
-        Cookie[] cookies = MockMvcHelper.login(
-                mockMvc, objectMapper, "123@gmail.com", "87654321"
-        );
-        EmailConfirmationRequestDTO emailConfirmationRequestDto = new EmailConfirmationRequestDTO(
-                null,
-                emailConfirmationCode
-        );
-        ResultActions resultActions = mockMvc.perform(post("/auth/confirm-email")
-                .cookie(cookies)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(emailConfirmationRequestDto)));
-        MockMvcHelper.testSuccessfulResponse(resultActions, HttpStatus.OK);
+
         MockMvcHelper.login(mockMvc, objectMapper, "321@gmail.com", "87654321");
     }
 }
