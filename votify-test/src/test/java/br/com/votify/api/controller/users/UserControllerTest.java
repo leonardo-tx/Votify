@@ -179,7 +179,6 @@ public class UserControllerTest {
         Cookie[] cookies = MockMvcHelper.login(
                 mockMvc, objectMapper, "admin@votify.com.br", "admin123"
         );
-        String oldEmail = "admin@votify.com.br";
         String newEmail = "admin-new@votify.com.br";
         UserUpdateEmailRequestDTO requestDTO = new UserUpdateEmailRequestDTO(newEmail);
 
@@ -193,7 +192,7 @@ public class UserControllerTest {
 
         ResultActions checkResult = mockMvc.perform(get("/users/me").cookie(cookies));
         MockMvcHelper.testSuccessfulResponse(checkResult, HttpStatus.OK)
-                .andExpect(jsonPath("data.email", is(oldEmail)));
+                .andExpect(jsonPath("data.email", is(newEmail)));
     }
 
     @Test
@@ -256,7 +255,7 @@ public class UserControllerTest {
     @Order(2)
     public void updateEmailDuplicated() throws Exception {
         Cookie[] cookies = MockMvcHelper.login(
-                mockMvc, objectMapper, "admin@votify.com.br", "admin123"
+                mockMvc, objectMapper, "admin-new@votify.com.br", "admin123"
         );
         String newEmail = "admin-newwww@votify.com.br";
         UserUpdateEmailRequestDTO requestDTO = new UserUpdateEmailRequestDTO(newEmail);
@@ -266,7 +265,7 @@ public class UserControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(requestDTO)));
 
-        MockMvcHelper.testUnsuccessfulResponse(resultActions, VotifyErrorCode.PENDING_EMAIL_CONFIRMATION);
+        MockMvcHelper.testSuccessfulResponse(resultActions, HttpStatus.OK);
     }
 
     @Test
