@@ -82,12 +82,16 @@ public class UserController {
     }
 
     @PutMapping("/me/email")
-    public ResponseEntity<ApiResponse<String>> updateEmail(
+    public ResponseEntity<? extends ApiResponse<? extends Object>> updateEmail(
         @RequestBody UserUpdateEmailRequestDTO requestDTO
     ) throws VotifyException {
         User updatedUser = userService.updateUserEmail(requestDTO.getEmail());
+        
+        if (updatedUser.getEmailConfirmation() == null) {
+            return ApiResponse.success(null, HttpStatus.OK).createResponseEntity();
+        }
+        
         String code = updatedUser.getEmailConfirmation().getEmailConfirmationCode();
-
         return ApiResponse.success(code, HttpStatus.OK).createResponseEntity();
     }
 
