@@ -129,8 +129,14 @@ public class UserService {
             throw new VotifyException(VotifyErrorCode.EMAIL_ALREADY_EXISTS);
         }
 
+        if (user.getEmailConfirmation() != null) {
+            throw new VotifyException(VotifyErrorCode.PENDING_EMAIL_CONFIRMATION);
+        }
+
         EmailConfirmation emailConfirmation = emailConfirmationService.addUser(user, email);
-        user.setEmailConfirmation(emailConfirmation);
+        if (emailConfirmation != null) {
+            user.setEmailConfirmation(emailConfirmation);
+        }
 
         return user;
     }
