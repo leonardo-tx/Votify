@@ -44,7 +44,13 @@ public class PasswordResetServiceTest {
 
     @BeforeEach
     public void setup() {
-        testUser = new CommonUser(1L, "testuser", "Test User", testEmail, "encodedPassword");
+        testUser = CommonUser.builder()
+                .id(1L)
+                .userName("testuser")
+                .name("Test User")
+                .email(testEmail)
+                .password("encodedPassword")
+                .build();
     }
 
     @Test

@@ -13,7 +13,7 @@ public class PasswordResetTokenTest {
     @Test
     public void testIsExpired_WhenExpired() {
         Date pastDate = new Date(System.currentTimeMillis() - 1000);
-        User user = new CommonUser(1L, "user", "User Name", "user@example.com", "password");
+        User user = new CommonUser();
         PasswordResetToken token = new PasswordResetToken("CODE", user, pastDate);
         assertTrue(token.isExpired());
     }
@@ -21,14 +21,14 @@ public class PasswordResetTokenTest {
     @Test
     public void testIsExpired_WhenNotExpired() {
         Date futureDate = new Date(System.currentTimeMillis() + 600000);
-        User user = new CommonUser(1L, "user", "User Name", "user@example.com", "password");
+        User user = new CommonUser();
         PasswordResetToken token = new PasswordResetToken("CODE", user, futureDate);
         assertFalse(token.isExpired());
     }
 
     @Test
     public void testGettersAndSetters() {
-        User user = new CommonUser(1L, "user", "User Name", "user@example.com", "password");
+        User user = new CommonUser();
         Date expiryDate = new Date();
         PasswordResetToken token = new PasswordResetToken("CODE1", user, expiryDate);
 
@@ -36,7 +36,7 @@ public class PasswordResetTokenTest {
         assertEquals(user, token.getUser());
         assertEquals(expiryDate, token.getExpiryDate());
 
-        User newUser = new CommonUser(2L, "user2", "User2 Name", "user2@example.com", "password2");
+        User newUser = new CommonUser();
         Date newExpiryDate = new Date(expiryDate.getTime() + 10000);
 
         token.setCode("CODE2");

@@ -15,8 +15,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.Instant;
 import java.util.Optional;
 
 @Service
@@ -26,7 +25,7 @@ public class PollService {
     private final VoteRepository voteRepository;
 
     public Poll createPoll(Poll poll, User responsible) throws VotifyException {
-        LocalDateTime now = LocalDateTime.now(ZoneId.of("UTC"));
+        Instant now = Instant.now();
         if (poll.getStartDate() == null) {
             poll.setStartDate(now);
         }
@@ -50,8 +49,7 @@ public class PollService {
         vote.setPoll(poll);
 
         VoteValidator.validateFields(vote);
-        LocalDateTime now = LocalDateTime.now(ZoneId.of("UTC"));
-        if (now.isBefore(vote.getPoll().getStartDate()) || now.isAfter(vote.getPoll().getEndDate())) {
+        if (poll.isOutOfDate()) {
             throw new VotifyException(VotifyErrorCode.POLL_VOTE_OUT_OF_DATE_INTERVAL);
         }
         if (voteRepository.existsById(vote.getId())) {
@@ -91,7 +89,7 @@ public class PollService {
             throw new VotifyException(VotifyErrorCode.POLL_PAGE_LENGTH_INVALID, 1, Poll.PAGE_SIZE_LIMIT);
         }
         Pageable pageable = PageRequest.of(page, size);
-        return pollRepository.findAllByActives(LocalDateTime.now(ZoneId.of("UTC")), pageable);
+        return pollRepository.findAllByActives(Instant.now(), pageable);
     }
 
 
@@ -121,6 +119,6 @@ public class PollService {
         }
         
         Pageable pageable = PageRequest.of(page, size);
-        return pollRepository.findByTitleContainingIgnoreCase(title, pageable);
+        return pollRepository.findByTitleContainingIgnoreCase(title, Instant.now(), pageable);
     }
 }

@@ -8,8 +8,9 @@ import br.com.votify.core.repository.RefreshTokenRepository;
 import br.com.votify.core.utils.exceptions.VotifyErrorCode;
 import br.com.votify.core.utils.exceptions.VotifyException;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.*;
 
@@ -19,6 +20,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@ExtendWith(MockitoExtension.class)
 public class TokenServiceTest {
     private static RefreshToken refreshToken;
 
@@ -31,12 +33,17 @@ public class TokenServiceTest {
 
     @BeforeEach
     public void setupBeforeEach() {
-        MockitoAnnotations.openMocks(this);
         tokenService = new TokenService(
             refreshTokenRepository,
             new TokenProperties(100, 200, "aiwjeiuqhjiuyhed8qy872yye8qu$%$%$%$#%$yudgsauyg")
         );
-        user = new CommonUser(100L, "userName", "name", "email", "password");
+        user = CommonUser.builder()
+                .id(100L)
+                .userName("testuser")
+                .name("Test User")
+                .email("test@example.com")
+                .password("encodedPassword")
+                .build();
     }
 
     @Test

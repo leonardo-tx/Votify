@@ -1,5 +1,6 @@
 package br.com.votify.core.service;
 
+import br.com.votify.core.decorators.NeedsUserContext;
 import br.com.votify.core.domain.entities.tokens.AuthTokens;
 import br.com.votify.core.domain.entities.tokens.RefreshToken;
 import br.com.votify.core.domain.entities.users.User;
@@ -12,7 +13,10 @@ import lombok.NonNull;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.servlet.HandlerMapping;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -29,17 +33,24 @@ public class ContextService {
     public ContextService(
         UserRepository userRepository,
         TokenService tokenService,
-        HttpServletRequest httpServletRequest
+        HttpServletRequest request
     ) throws VotifyException {
         this.tokenService = tokenService;
         this.userRepository = userRepository;
         this.cookies = new HashMap<>();
-        if (httpServletRequest.getCookies() == null) {
+
+        HandlerMethod handlerMethod = (HandlerMethod)request.getAttribute(
+                HandlerMapping.BEST_MATCHING_HANDLER_ATTRIBUTE
+        );
+        boolean hasMethodAnnotation = handlerMethod.getMethod().isAnnotationPresent(NeedsUserContext.class);
+        boolean hasClassAnnotation = handlerMethod.getBeanType().isAnnotationPresent(NeedsUserContext.class);
+
+        if ((!hasMethodAnnotation && !hasClassAnnotation) || request.getCookies() == null) {
             this.user = null;
             return;
         }
 
-        for (Cookie cookie : httpServletRequest.getCookies()) {
+        for (Cookie cookie : request.getCookies()) {
             this.cookies.put(cookie.getName(), cookie.getValue());
         }
 
@@ -48,9 +59,15 @@ public class ContextService {
             this.user = null;
             return;
         }
-        long id = tokenService.getUserIdFromAccessToken(accessToken);
-        Optional<User> userOptional = userRepository.findById(id);
 
+        long id;
+        try {
+            id = tokenService.getUserIdFromAccessToken(accessToken);
+        } catch (VotifyException e) {
+            this.user = null;
+            return;
+        }
+        Optional<User> userOptional = userRepository.findById(id);
         this.user = userOptional.map(User::clone).orElse(null);
     }
 
@@ -93,6 +110,7 @@ public class ContextService {
         return cookies.getOrDefault(key, defaultValue);
     }
 
+    @Transactional
     public void deleteUser() throws VotifyException {
         User currentUser = getUserOrThrow();
         userRepository.delete(currentUser);

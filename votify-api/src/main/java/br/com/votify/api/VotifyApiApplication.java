@@ -6,7 +6,6 @@ import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-import java.time.LocalDateTime;
 import java.util.TimeZone;
 
 @SpringBootApplication(scanBasePackages = {"br.com.votify"})
@@ -15,6 +14,7 @@ import java.util.TimeZone;
 @EnableScheduling
 public class VotifyApiApplication {
     public static void main(String[] args) {
+        TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
         SpringApplication.run(VotifyApiApplication.class, args);
     }
 }

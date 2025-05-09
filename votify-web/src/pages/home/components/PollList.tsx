@@ -12,7 +12,7 @@ export default function PollList({ polls }: Props) {
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setNow((now) => now + 1000);
+      setNow(Date.now());
     }, 1000);
 
     return () => clearInterval(timer);

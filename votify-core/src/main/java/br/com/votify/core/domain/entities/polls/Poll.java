@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 @Entity
@@ -35,10 +35,10 @@ public class Poll {
     private String description;
 
     @Column(name = "start_date", nullable = false)
-    private LocalDateTime startDate;
+    private Instant startDate;
 
     @Column(name = "end_date", nullable = false)
-    private LocalDateTime endDate;
+    private Instant endDate;
 
     @Column(name = "user_registration", nullable = false)
     @ColumnDefault("0")
@@ -59,4 +59,14 @@ public class Poll {
         foreignKey = @ForeignKey(name = "fk_responsible_poll")
     )
     private User responsible;
+
+    public boolean isOutOfDate() {
+        Instant now = Instant.now();
+        return now.isBefore(startDate) || now.isAfter(endDate);
+    }
+
+    public boolean hasEnded() {
+        Instant now = Instant.now();
+        return now.isAfter(endDate);
+    }
 }
