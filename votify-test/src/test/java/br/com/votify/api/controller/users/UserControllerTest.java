@@ -9,6 +9,7 @@ import br.com.votify.test.MockMvcHelper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.*;
+import org.mockito.internal.matchers.Null;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -188,7 +189,7 @@ public class UserControllerTest {
                 .content(objectMapper.writeValueAsString(requestDTO)));
 
         MockMvcHelper.testSuccessfulResponse(resultActions, HttpStatus.OK)
-                .andExpect(jsonPath("data", isA(String.class)));
+                .andExpect(jsonPath("data", is(nullValue())));
 
         ResultActions checkResult = mockMvc.perform(get("/users/me").cookie(cookies));
         MockMvcHelper.testSuccessfulResponse(checkResult, HttpStatus.OK)

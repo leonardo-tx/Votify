@@ -86,13 +86,9 @@ public class UserController {
         @RequestBody UserUpdateEmailRequestDTO requestDTO
     ) throws VotifyException {
         User updatedUser = userService.updateUserEmail(requestDTO.getEmail());
+
+        return ApiResponse.success(null, HttpStatus.OK).createResponseEntity();
         
-        if (updatedUser.getEmailConfirmation() == null) {
-            return ApiResponse.success(null, HttpStatus.OK).createResponseEntity();
-        }
-        
-        String code = updatedUser.getEmailConfirmation().getEmailConfirmationCode();
-        return ApiResponse.success(code, HttpStatus.OK).createResponseEntity();
     }
 
     @PutMapping("/me/password")
