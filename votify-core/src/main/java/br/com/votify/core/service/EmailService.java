@@ -5,6 +5,7 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
+import br.com.votify.core.utils.email.EmailMessageCode;
 
 @Service
 public class EmailService {
@@ -26,12 +27,8 @@ public class EmailService {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(senderEmail);
         message.setTo(receiverEmail);
-        message.setSubject("Votify - Confirmation Code");
-        message.setText(String.format(
-            "Welcome to Votify! Please confirm your email by using the following code: %s\n\n" +
-            "This code will expire in 30 minutes.",
-            confirmationCode
-        ));
+        message.setSubject(EmailMessageCode.EMAIL_CONFIRMATION.getSubject());
+        message.setText(EmailMessageCode.EMAIL_CONFIRMATION.formatMessage(confirmationCode));
         mailSender.send(message);
     }
 }
