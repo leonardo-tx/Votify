@@ -9,6 +9,7 @@ import br.com.votify.test.MockMvcHelper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.*;
+import org.mockito.internal.matchers.Null;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -179,7 +180,6 @@ public class UserControllerTest {
         Cookie[] cookies = MockMvcHelper.login(
                 mockMvc, objectMapper, "admin@votify.com.br", "admin123"
         );
-        String oldEmail = "admin@votify.com.br";
         String newEmail = "admin-new@votify.com.br";
         UserUpdateEmailRequestDTO requestDTO = new UserUpdateEmailRequestDTO(newEmail);
 
@@ -189,11 +189,11 @@ public class UserControllerTest {
                 .content(objectMapper.writeValueAsString(requestDTO)));
 
         MockMvcHelper.testSuccessfulResponse(resultActions, HttpStatus.OK)
-                .andExpect(jsonPath("data", isA(String.class)));
+                .andExpect(jsonPath("data", is(nullValue())));
 
         ResultActions checkResult = mockMvc.perform(get("/users/me").cookie(cookies));
         MockMvcHelper.testSuccessfulResponse(checkResult, HttpStatus.OK)
-                .andExpect(jsonPath("data.email", is(oldEmail)));
+                .andExpect(jsonPath("data.email", is(newEmail)));
     }
 
     @Test
@@ -256,7 +256,7 @@ public class UserControllerTest {
     @Order(2)
     public void updateEmailDuplicated() throws Exception {
         Cookie[] cookies = MockMvcHelper.login(
-                mockMvc, objectMapper, "admin@votify.com.br", "admin123"
+                mockMvc, objectMapper, "admin-new@votify.com.br", "admin123"
         );
         String newEmail = "admin-newwww@votify.com.br";
         UserUpdateEmailRequestDTO requestDTO = new UserUpdateEmailRequestDTO(newEmail);
@@ -266,7 +266,7 @@ public class UserControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(requestDTO)));
 
-        MockMvcHelper.testUnsuccessfulResponse(resultActions, VotifyErrorCode.PENDING_EMAIL_CONFIRMATION);
+        MockMvcHelper.testSuccessfulResponse(resultActions, HttpStatus.OK);
     }
 
     @Test

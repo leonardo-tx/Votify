@@ -14,18 +14,6 @@ public class UserDetailedViewDTO {
     private String name;
     private String email;
     private String role;
-    private String confirmationCode;
-
-    public static UserDetailedViewDTO parse(User entity, String confirmationCode) {
-        return new UserDetailedViewDTO(
-            entity.getId(),
-            entity.getUserName(),
-            entity.getName(),
-            entity.getEmail(),
-            entity.getClass().getSimpleName(),
-            confirmationCode
-        );
-    }
 
     public static UserDetailedViewDTO parse(User entity) {
         return new UserDetailedViewDTO(
@@ -33,8 +21,7 @@ public class UserDetailedViewDTO {
                 entity.getUserName(),
                 entity.getName(),
                 entity.getEmail(),
-                entity.getClass().getSimpleName(),
-                null
+                entity.getClass().getSimpleName()
         );
     }
 }

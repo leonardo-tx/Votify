@@ -15,6 +15,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.core.env.Environment;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -36,6 +37,12 @@ public class EmailConfirmationServiceTest {
 
     @Mock
     private EmailConfirmationExpirationProperties emailConfirmationExpirationProperties;
+
+    @Mock
+    private EmailService emailService;
+
+    @Mock
+    private Environment environment;
 
     @InjectMocks
     private EmailConfirmationService emailConfirmationService;
@@ -69,6 +76,8 @@ public class EmailConfirmationServiceTest {
                 code,
                 LocalDateTime.now().plusMinutes(30)
         );
+
+        lenient().when(environment.getActiveProfiles()).thenReturn(new String[]{"test"});
     }
 
     @Test
@@ -177,7 +186,7 @@ public class EmailConfirmationServiceTest {
 
     @Test
     public void addUserWhenExistingAccount() throws VotifyException {
-        when(emailConfirmationExpirationProperties.getExpirationMinutes()).thenReturn(1);
+        when(emailConfirmationExpirationProperties.getExpirationMinutes()).thenReturn(30);
         when(emailConfirmationRepository.save(any(EmailConfirmation.class)))
                 .thenAnswer(i -> i.getArguments()[0]);
 
@@ -188,7 +197,7 @@ public class EmailConfirmationServiceTest {
         LocalDateTime now = LocalDateTime.now();
         assertNull(emailConfirmation.getId());
         assertEquals(emailConfirmationFromNewAccount.getUser(), emailConfirmation.getUser());
-        assertTrue(emailConfirmation.getEmailConfirmationExpiration().isBefore(now.plusMinutes(1)));
+        assertTrue(emailConfirmation.getEmailConfirmationExpiration().isBefore(now.plusMinutes(30)));
         assertEquals("jhonny@new.nightcity.2077", emailConfirmation.getNewEmail());
         assertEquals(EmailCodeGeneratorUtils.CODE_LENGTH, emailConfirmation.getEmailConfirmationCode().length());
     }
