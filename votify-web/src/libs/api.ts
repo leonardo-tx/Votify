@@ -91,6 +91,32 @@ export async function confirmEmail(request: EmailConfirmationRequestDTO): Promis
   });
 }
 
+export const forgotPassword = async (
+    request: UserPasswordResetRequestDto,
+): Promise<ApiResponse<UserPasswordResetResponseDto | null>> => {
+  return await commonRequester(async () => {
+    const { data } = await api.post<ApiResponse<UserPasswordResetResponseDto>>(
+        "/auth/forgot-password",
+        request,
+    );
+    return data;
+  });
+};
+
+export const resetPassword = async (
+    request: UserPasswordResetConfirmDTO,
+): Promise<ApiResponse<UserPasswordResetConfirmDTO | null>> => {
+  return await commonRequester(async () => {
+    const { data } = await api.post<ApiResponse<null>>(
+        "/auth/reset-password",
+        request,
+    );
+    return data;
+  });
+};
+
+
+
 export const getMyPolls = async (
   page: number = 0,
   size: number = 10,
