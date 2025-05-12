@@ -1,4 +1,5 @@
 .common {
+    cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -72,4 +73,9 @@
 
 .primary-text:hover {
     color: var(--primary-hover);
+}
+
+.button-disabled {
+    cursor: not-allowed;
+    opacity: 50%;
 }
