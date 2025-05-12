@@ -58,8 +58,8 @@ export default function ForgotPasswordPage() {
                     setError(getErrorMessage(response.errorCode));
                 }
             }
-        } catch (err) {
-            setError("Erro inesperado. Tente novamente.");
+        } catch (err: any) {
+            setError("Erro inesperado. Tente novamente. " + err.response?.data?.errorCode);
         }
 
         setIsLoading(false);
