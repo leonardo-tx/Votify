@@ -33,20 +33,20 @@ const Button = forwardRef<HTMLButtonElement | HTMLAnchorElement, Props>(
     { as = "button", variant = "solid", scheme, className, children, ...props },
     ref,
   ) => {
-    const defaultClassNames =
-      styles["common"] +
-      " " +
-      styles[variant] +
-      (scheme === undefined ? "" : " " + styles[scheme + "-" + variant]);
+    const classNameBuilder = [className, styles["common"], styles[variant]];
+    if (scheme !== undefined) {
+      classNameBuilder.push(styles[scheme + "-" + variant]);
+    }
 
     switch (as) {
       case "button":
         props = props as ButtonProps;
+        if (props.disabled) classNameBuilder.push(styles["button-disabled"]);
         return (
           <button
             ref={ref as Ref<HTMLButtonElement>}
             draggable="false"
-            className={defaultClassNames + " " + className}
+            className={classNameBuilder.join(" ")}
             {...props}
           >
             {children}
@@ -58,7 +58,7 @@ const Button = forwardRef<HTMLButtonElement | HTMLAnchorElement, Props>(
           <a
             ref={ref as Ref<HTMLAnchorElement>}
             draggable="false"
-            className={defaultClassNames + " " + className}
+            className={classNameBuilder.join(" ")}
             {...props}
           >
             {children}
@@ -70,7 +70,7 @@ const Button = forwardRef<HTMLButtonElement | HTMLAnchorElement, Props>(
           <Link
             ref={ref as Ref<HTMLAnchorElement>}
             draggable="false"
-            className={defaultClassNames + " " + className}
+            className={classNameBuilder.join(" ")}
             {...props}
           >
             {children}

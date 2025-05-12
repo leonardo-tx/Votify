@@ -3,15 +3,12 @@ package br.com.votify.api.controller.polls;
 import br.com.votify.core.domain.entities.polls.Vote;
 import br.com.votify.dto.ApiResponse;
 import br.com.votify.dto.PageResponse;
-import br.com.votify.dto.polls.PollDetailedViewDTO;
-import br.com.votify.dto.polls.PollInsertDTO;
-import br.com.votify.dto.polls.PollListViewDTO;
-import br.com.votify.core.domain.entities.polls.Poll;
+import br.com.votify.dto.polls.*;
 import br.com.votify.core.domain.entities.users.User;
+import br.com.votify.core.domain.entities.polls.Poll;
 import br.com.votify.core.service.ContextService;
 import br.com.votify.core.service.PollService;
 import br.com.votify.core.utils.exceptions.VotifyException;
-import br.com.votify.dto.polls.VoteInsertDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -51,7 +48,7 @@ public class PollController {
 
         return ApiResponse.success(pollDto, HttpStatus.CREATED).createResponseEntity();
     }
-    
+
     @GetMapping("/user/{userId}")
     public ResponseEntity<ApiResponse<PageResponse<PollListViewDTO>>> getUserPolls(
             @PathVariable("userId") Long userId,
@@ -62,11 +59,11 @@ public class PollController {
         List<PollListViewDTO> pollDtos = pollPage.getContent().stream()
                 .map(PollListViewDTO::parse)
                 .collect(Collectors.toList());
-        
+
         PageResponse<PollListViewDTO> pageResponse = PageResponse.from(pollPage, pollDtos);
         return ApiResponse.success(pageResponse, HttpStatus.OK).createResponseEntity();
     }
-    
+
     @GetMapping("/me")
     public ResponseEntity<ApiResponse<PageResponse<PollListViewDTO>>> getMyPolls(
             @RequestParam(name = "page", defaultValue = "0") int page,
@@ -74,7 +71,7 @@ public class PollController {
     ) throws VotifyException {
         Optional<User> userOptional = contextService.getUserOptional();
         Long userId = userOptional.map(User::getId).orElse(null);
-        
+
         if (userId == null) {
             PageResponse<PollListViewDTO> pageResponse = new PageResponse<>(List.of(), 0, size, 0, 0, true, true);
             return ApiResponse.success(pageResponse, HttpStatus.OK).createResponseEntity();
@@ -84,7 +81,7 @@ public class PollController {
         List<PollListViewDTO> pollDtos = pollPage.getContent().stream()
                 .map(PollListViewDTO::parse)
                 .collect(Collectors.toList());
-        
+
         PageResponse<PollListViewDTO> pageResponse = PageResponse.from(pollPage, pollDtos);
         return ApiResponse.success(pageResponse, HttpStatus.OK).createResponseEntity();
     }
@@ -96,6 +93,36 @@ public class PollController {
             @RequestParam(name = "size", defaultValue = "10") int size
     ) throws VotifyException {
         Page<Poll> pollPage = pollService.findByTitle(title, page, size);
+        List<PollListViewDTO> pollDtos = pollPage.getContent().stream()
+                .map(PollListViewDTO::parse)
+                .collect(Collectors.toList());
+
+        PageResponse<PollListViewDTO> pageResponse = PageResponse.from(pollPage, pollDtos);
+        return ApiResponse.success(pageResponse, HttpStatus.OK).createResponseEntity();
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<PollQueryDTO>> getPollById(
+        @PathVariable("id") Long id
+    ) throws VotifyException {
+        Optional<User> userOptional = contextService.getUserOptional();
+        Poll poll = pollService.getByIdOrThrow(id);
+        if (userOptional.isPresent()) {
+            Vote vote = pollService.getVote(poll, userOptional.get());
+            PollQueryDTO dto = PollQueryDTO.parse(poll, vote);
+            return ApiResponse.success(dto, HttpStatus.OK).createResponseEntity();
+        }
+        Vote vote = new Vote();
+        PollQueryDTO dto = PollQueryDTO.parse(poll, vote);
+        return ApiResponse.success(dto, HttpStatus.OK).createResponseEntity();
+    }
+
+    @GetMapping("/active")
+    public ResponseEntity<ApiResponse<PageResponse<PollListViewDTO>>> getActivePolls(
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size
+    ) throws VotifyException {
+        Page<Poll> pollPage = pollService.findAllActivePolls(page, size);
         List<PollListViewDTO> pollDtos = pollPage.getContent().stream()
                 .map(PollListViewDTO::parse)
                 .collect(Collectors.toList());
