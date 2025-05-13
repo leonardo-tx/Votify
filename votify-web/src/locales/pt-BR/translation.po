@@ -1,0 +1,10 @@
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: pt-BR\n"
+
+msgid "Welcome to Votify"
+msgstr "Bem-vindo ao Votify"
+
+msgid "Create new poll"
+msgstr "Criar nova enquete"
