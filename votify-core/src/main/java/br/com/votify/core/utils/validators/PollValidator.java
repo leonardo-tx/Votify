@@ -5,12 +5,13 @@ import br.com.votify.core.domain.entities.polls.VoteOption;
 import br.com.votify.core.utils.exceptions.VotifyErrorCode;
 import br.com.votify.core.utils.exceptions.VotifyException;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
 public final class PollValidator {
-    public static void validateFields(Poll poll, LocalDateTime now) throws VotifyException {
+    public static void validateFields(Poll poll, Instant now) throws VotifyException {
         validateTitle(poll.getTitle());
         validateDescription(poll.getDescription());
         validateVoteOptions(poll.getVoteOptions());
@@ -32,7 +33,7 @@ public final class PollValidator {
         }
     }
 
-    public static void validateStartEndDate(LocalDateTime startDate, LocalDateTime endDate, LocalDateTime now) throws VotifyException {
+    public static void validateStartEndDate(Instant startDate, Instant endDate, Instant now) throws VotifyException {
         if (Objects.isNull(startDate) || Objects.isNull(endDate)) {
             throw new VotifyException(VotifyErrorCode.POLL_DATE_EMPTY);
         }

@@ -20,7 +20,7 @@ public class HomeTest extends BaseTest {
 
     @BeforeEach
     void setupBeforeEach() {
-        webDriver.get(BASE_URL + "/home");
+        seleniumHelper.goToPath("/home");
         page = new HomePage(webDriver);
     }
 

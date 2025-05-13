@@ -7,7 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,8 +17,8 @@ import java.util.List;
 public final class PollInsertDTO implements DTOInput<Poll> {
     private String title;
     private String description;
-    private LocalDateTime startDate;
-    private LocalDateTime endDate;
+    private Instant startDate;
+    private Instant endDate;
     private boolean userRegistration;
     private Integer choiceLimitPerUser;
     private List<VoteOptionInsertDTO> voteOptions;

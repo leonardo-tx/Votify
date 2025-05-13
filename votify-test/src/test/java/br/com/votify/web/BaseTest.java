@@ -2,18 +2,20 @@ package br.com.votify.web;
 
 import br.com.votify.api.VotifyApiApplication;
 import br.com.votify.test.SeleniumHelper;
+import br.com.votify.test.extensions.ScreenshotExtension;
+import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.openqa.selenium.By;
-import org.openqa.selenium.Keys;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 
+import java.io.File;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -21,19 +23,20 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest(classes = VotifyApiApplication.class, webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-@ExtendWith(BrowsersProviderExtension.class)
+@ExtendWith({ BrowsersProviderExtension.class, ScreenshotExtension.class })
 public abstract class BaseTest {
-    public static final String BASE_URL = "http://localhost:3000";
+    @Value("${frontend.base.url}")
+    public String baseUrl;
 
+    protected SeleniumHelper seleniumHelper;
     protected WebDriver webDriver;
     protected WebDriverWait wait;
 
     @BeforeEach
     void setupBeforeEach(WebDriver webDriver) {
         this.webDriver = webDriver;
-        webDriver.manage().window().maximize();
-
-        wait = new WebDriverWait(webDriver, Duration.ofSeconds(5));
+        this.wait = new WebDriverWait(webDriver, Duration.ofSeconds(10));
+        this.seleniumHelper = new SeleniumHelper(baseUrl, webDriver, wait);
     }
 
     @AfterEach
@@ -48,11 +51,11 @@ public abstract class BaseTest {
         WebElement header = webDriver.findElement(By.tagName("header"));
         for (int i = 0; i < 20; i++) {
             new Actions(webDriver).sendKeys(Keys.PAGE_DOWN).perform();
-            assertTrue(SeleniumHelper.isInViewport(header, webDriver));
+            assertTrue(seleniumHelper.isInViewport(header));
         }
         for (int i = 0; i < 20; i++) {
             new Actions(webDriver).sendKeys(Keys.PAGE_UP).perform();
-            assertTrue(SeleniumHelper.isInViewport(header, webDriver));
+            assertTrue(seleniumHelper.isInViewport(header));
         }
     }
 
@@ -88,5 +91,28 @@ public abstract class BaseTest {
 
         WebElement githubRepositoryAnchor = footer.findElement(By.id("git-repository-anchor"));
         assertEquals("https://github.com/leonardo-tx/Votify", githubRepositoryAnchor.getDomAttribute("href"));
+    }
+
+    public void captureScreenshot() {
+        try {
+            String projectDir = System.getProperty("user.dir");
+            String screenshotsDirPath = projectDir + "/target/screenshots";
+            File screenshotsDir = new File(screenshotsDirPath);
+
+            if (!screenshotsDir.exists() && !screenshotsDir.mkdirs()) {
+                System.err.println("Failed to create screenshots directory: " + screenshotsDirPath);
+                return;
+            }
+
+            String fileNameBase = Long.toString(Instant.now().getEpochSecond());
+            File screenshotFile = new File(screenshotsDir, fileNameBase + ".png");
+
+            File tempFile = ((TakesScreenshot)webDriver).getScreenshotAs(OutputType.FILE);
+            FileUtils.copyFile(tempFile, screenshotFile);
+
+            System.out.println("Saved screenshot: " + screenshotFile.getAbsolutePath());
+        } catch (Exception e) {
+            System.err.println("Unable to capture the screenshot:  " + e.getMessage());
+        }
     }
 }

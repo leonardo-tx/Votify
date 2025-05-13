@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 @Repository
@@ -36,5 +37,5 @@ public interface PollRepository extends JpaRepository<Poll, Long> {
         AND p.endDate > :now
         ORDER BY p.endDate ASC
         """)
-    Page<Poll> findAllByActives(@Param("now") LocalDateTime now, Pageable pageable);
+    Page<Poll> findAllByActives(@Param("now") Instant now, Pageable pageable);
 }

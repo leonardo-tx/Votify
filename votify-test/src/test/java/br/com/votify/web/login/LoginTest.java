@@ -1,6 +1,5 @@
 package br.com.votify.web.login;
 
-import br.com.votify.test.SeleniumHelper;
 import br.com.votify.web.BaseTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestTemplate;
@@ -19,7 +18,7 @@ public class LoginTest extends BaseTest {
 
     @BeforeEach
     void setupBeforeEach() {
-        webDriver.get(BASE_URL + "/login");
+        seleniumHelper.goToPath("/login");
         page = new LoginPage(webDriver);
     }
 
@@ -31,11 +30,11 @@ public class LoginTest extends BaseTest {
 
     @TestTemplate
     public void checkLoginFormElements() {
-        assertTrue(SeleniumHelper.isInViewport(page.emailInput, webDriver), "Email input should be visible");
-        assertTrue(SeleniumHelper.isInViewport(page.passwordInput, webDriver), "Password input should be visible");
-        assertTrue(SeleniumHelper.isInViewport(page.submitButton, webDriver), "Submit button should be visible");
-        assertTrue(SeleniumHelper.isInViewport(page.forgotPasswordLink, webDriver), "Forgot password link should be visible");
-        assertTrue(SeleniumHelper.isInViewport(page.createAccountLink, webDriver), "Create account link should be visible");
+        assertTrue(seleniumHelper.isInViewport(page.emailInput), "Email input should be visible");
+        assertTrue(seleniumHelper.isInViewport(page.passwordInput), "Password input should be visible");
+        assertTrue(seleniumHelper.isInViewport(page.submitButton), "Submit button should be visible");
+        assertTrue(seleniumHelper.isInViewport(page.forgotPasswordLink), "Forgot password link should be visible");
+        assertTrue(seleniumHelper.isInViewport(page.createAccountLink), "Create account link should be visible");
     }
 
     @TestTemplate
@@ -58,25 +57,24 @@ public class LoginTest extends BaseTest {
     @TestTemplate
     public void testSuccessfulLogin() {
         login(TEST_EMAIL, TEST_PASSWORD);
-
         wait.until(ExpectedConditions.urlContains("/home"));
 
         String currentUrl = webDriver.getCurrentUrl();
         assertNotNull(currentUrl);
         assertTrue(currentUrl.endsWith("/home"), "Should redirect to home page after successful login");
+        assertEquals(2, webDriver.manage().getCookies().size());
     }
 
     @TestTemplate
     public void testLoginAlreadyLoggedIn() {
         login(TEST_EMAIL, TEST_PASSWORD);
         wait.until(ExpectedConditions.urlContains("/home"));
-
-        webDriver.get(BASE_URL + "/login");
-        wait.until(ExpectedConditions.urlContains("/login"));
-
+        seleniumHelper.goToPath("/login");
+        page = new LoginPage(webDriver);
         login(TEST_EMAIL, TEST_PASSWORD);
+
         WebElement errorMessage = wait.until(d -> d.findElement(By.id("login-alert")));
-        assertTrue(SeleniumHelper.isInViewport(errorMessage, webDriver), "Error message should be displayed");
+        assertTrue(seleniumHelper.isInViewport(errorMessage), "Error message should be displayed");
         assertEquals("Você já está logado.", errorMessage.getText(), "Should show already logged in message");
     }
 
@@ -103,7 +101,7 @@ public class LoginTest extends BaseTest {
         login("invalid@email.com", "12345678");
 
         WebElement errorMessage = wait.until(d -> d.findElement(By.id("login-alert")));
-        assertTrue(SeleniumHelper.isInViewport(errorMessage, webDriver), "Error message should be displayed");
+        assertTrue(seleniumHelper.isInViewport(errorMessage), "Error message should be displayed");
         assertEquals("A conta não existe ou a senha está incorreta.", errorMessage.getText(), "Should show invalid credentials message");
     }
 
@@ -112,7 +110,7 @@ public class LoginTest extends BaseTest {
         login("123@gmail.com", "wrongpassword");
 
         WebElement errorMessage = wait.until(d -> d.findElement(By.id("login-alert")));
-        assertTrue(SeleniumHelper.isInViewport(errorMessage, webDriver), "Error message should be displayed");
+        assertTrue(seleniumHelper.isInViewport(errorMessage), "Error message should be displayed");
         assertEquals("A conta não existe ou a senha está incorreta.", errorMessage.getText(), "Should show invalid credentials message");
     }
 

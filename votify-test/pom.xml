@@ -16,16 +16,19 @@
             <groupId>br.com.votify</groupId>
             <artifactId>votify-core</artifactId>
             <version>0.1.0</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>br.com.votify</groupId>
             <artifactId>votify-api</artifactId>
             <version>0.1.0</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>br.com.votify</groupId>
             <artifactId>votify-dto</artifactId>
             <version>0.1.0</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
