@@ -8,11 +8,12 @@ interface Props {
 }
 
 export default function PollList({ polls }: Props) {
-  const [now, setNow] = useState(Date.now());
+  const [now, setNow] = useState(0);
 
   useEffect(() => {
+    setNow(Date.now());
     const timer = setInterval(() => {
-      setNow((now) => now + 1000);
+      setNow(Date.now());
     }, 1000);
 
     return () => clearInterval(timer);

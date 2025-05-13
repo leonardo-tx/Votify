@@ -10,7 +10,10 @@ import { PollDetailedView } from "./polls/PollDetailedView";
 import VoteInsertDTO from "./polls/VoteInsertDTO";
 
 export const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
+  baseURL:
+    typeof window === "undefined"
+      ? `http://${process.env.NEXT_PUBLIC_API_URL}`
+      : `${window.location.origin}/api`,
   withCredentials: true,
 });
 
@@ -78,10 +81,18 @@ export const searchPollsByTitle = async (
 
 export const getPollById = async (
   id: number,
+  cookie: string | undefined = undefined,
 ): Promise<ApiResponse<PollDetailedView | null>> => {
   return await commonRequester(async () => {
+    if (cookie === undefined) {
+      const { data } = await api.get<ApiResponse<PollDetailedView>>(
+        `/polls/${id}`,
+      );
+      return data;
+    }
     const { data } = await api.get<ApiResponse<PollDetailedView>>(
       `/polls/${id}`,
+      { headers: { cookie: cookie ?? "" } },
     );
     return data;
   });
