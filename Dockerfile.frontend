@@ -1,0 +1,33 @@
+FROM node:22.15.0-alpine AS builder
+
+ARG NEXT_PUBLIC_API_URL
+ARG NODE_ENV=production
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+ENV NODE_ENV=$NODE_ENV
+
+WORKDIR /build
+
+COPY votify-web /build
+
+RUN echo NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL >> .env
+RUN echo NODE_ENV=$NODE_ENV >> .env
+
+RUN yarn install --frozen-lockfile
+RUN if [ "$NODE_ENV" = "production" ]; then yarn build; fi
+
+
+FROM node:18-alpine
+
+ARG NODE_ENV=production
+ENV NODE_ENV=$NODE_ENV
+
+WORKDIR /app
+
+COPY --from=builder /build /app
+
+EXPOSE 3000
+CMD if [ "$NODE_ENV" = "development" ]; then \
+      yarn dev; \
+    else \
+      yarn start; \
+    fi

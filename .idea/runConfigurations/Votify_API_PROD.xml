@@ -2,9 +2,9 @@
   <configuration default="false" name="Votify API PROD" type="Application" factoryName="Application">
     <option name="MAIN_CLASS_NAME" value="br.com.votify.api.VotifyApiApplication" />
     <module name="votify-api" />
-    <option name="VM_PARAMETERS" value="-Dspring.profiles.active=prod" />
+    <option name="VM_PARAMETERS" value="-Dspring.profiles.active=prod -Duser.timezone=UTC" />
     <method v="2">
       <option name="Make" enabled="true" />
     </method>
   </configuration>
-</component> 
+</component>
