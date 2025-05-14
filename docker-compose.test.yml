@@ -1,0 +1,56 @@
+services:
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    depends_on:
+      db-test:
+        condition: service_healthy
+    volumes:
+      - ./votify-test/target:/build/votify-test/target-copy
+    environment:
+      FRONTEND_BASE_URL: "http://frontend:3000"
+      DATABASE_NAME: "db-test"
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+      args:
+        NEXT_PUBLIC_API_URL: "test:8081" 
+
+  db-test:
+    image: mysql:9.3.0
+    environment:
+      MYSQL_DATABASE: votifydb
+      MYSQL_ROOT_PASSWORD: Admin@123
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$$MYSQL_ROOT_PASSWORD"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  selenium-hub:
+    image: selenium/hub:4.32.0
+    environment:
+      - GRID_MAX_SESSION=10
+      - GRID_BROWSER_TIMEOUT=300
+      - GRID_TIMEOUT=300
+
+  chrome-node:
+    image: selenium/node-chrome
+    depends_on:
+      - selenium-hub
+    environment:
+      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+
+  firefox-node:
+    image: selenium/node-firefox
+    depends_on:
+      - selenium-hub
+    environment:
+      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443

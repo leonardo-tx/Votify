@@ -1,21 +1,21 @@
 import { GetServerSideProps } from "next";
-import { api } from "@/libs/api";
 import { PollDetailedView } from "@/libs/polls/PollDetailedView";
-import type ApiResponse from "@/libs/ApiResponse";
 import VoteForm from "./components/VoteForm";
 import { useState, useEffect } from "react";
 import { formatDistance } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import Head from "next/head";
+import { getPollById } from "@/libs/api";
 
 interface PollPageProps {
   poll: PollDetailedView | null;
 }
 
 export default function PollDetailPage({ poll }: PollPageProps) {
-  const [now, setNow] = useState(Date.now());
+  const [now, setNow] = useState(0);
 
   useEffect(() => {
+    setNow(Date.now());
     const timer = setInterval(() => {
       setNow(Date.now());
     }, 1000);
@@ -31,7 +31,6 @@ export default function PollDetailPage({ poll }: PollPageProps) {
     );
   }
 
-  const nowDate = new Date(now);
   const startDate = Date.parse(poll.startDate);
   const endDate = Date.parse(poll.endDate);
 
@@ -47,16 +46,15 @@ export default function PollDetailPage({ poll }: PollPageProps) {
             {poll.description}
           </p>
           <p className="text-sm text-gray-500 text-center mb-6">
-            {endDate < nowDate.getTime()
+            {endDate < now
               ? "Terminado "
-              : startDate > nowDate.getTime()
+              : startDate > now
                 ? "Começa "
                 : "Termina "}
-            {formatDistance(
-              startDate > nowDate.getTime() ? startDate : endDate,
-              nowDate,
-              { locale: ptBR, addSuffix: true },
-            )}
+            {formatDistance(startDate > now ? startDate : endDate, now, {
+              locale: ptBR,
+              addSuffix: true,
+            })}
           </p>
 
           <div className="mb-6">
@@ -79,13 +77,7 @@ export const getServerSideProps: GetServerSideProps<PollPageProps> = async ({
   req,
 }) => {
   const { id } = params as { id: string };
-  try {
-    const { data: resp } = await api.get<ApiResponse<PollDetailedView>>(
-      `/polls/${id}`,
-      { headers: { cookie: req.headers.cookie ?? "" } },
-    );
-    return { props: { poll: resp.data } };
-  } catch {
-    return { props: { poll: null } };
-  }
+  const response = await getPollById(parseInt(id), req.headers.cookie);
+
+  return { props: { poll: response.data } };
 };

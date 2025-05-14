@@ -14,10 +14,10 @@ VALUES
 -- Inserir algumas pesquisas de exemplo
 INSERT INTO TB_POLL (id, title, description, user_registration, choice_limit_per_user, start_date, end_date, responsible_id)
 VALUES
-    (1, 'Melhor Linguagem de Programação', 'Qual você considera a melhor linguagem de programação?', FALSE, 1, CURRENT_TIMESTAMP(), DATEADD('DAY', 7, CURRENT_TIMESTAMP()), 1),
-    (2, 'Melhor Framework Web', 'Qual o melhor framework para desenvolvimento web?', TRUE, 1, CURRENT_TIMESTAMP(), DATEADD('DAY', 7, CURRENT_TIMESTAMP()), 1),
-    (3, 'Metodologia Ágil Favorita', 'Qual sua metodologia ágil preferida?', FALSE, 1, CURRENT_TIMESTAMP(), DATEADD('DAY', 7, CURRENT_TIMESTAMP()), 2),
-    (4, 'Selecione seus jogos favoritos', 'Apenas o dessa lista, claro!\n Não dá pra colocar mais que 5 opções :P (Por favor devs, coloquem mais ;-;)', FALSE, 5, CURRENT_TIMESTAMP(), DATEADD('DAY', 14, CURRENT_TIMESTAMP()), 5);
+    (1, 'Melhor Linguagem de Programação', 'Qual você considera a melhor linguagem de programação?', FALSE, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP() + INTERVAL 7 DAY, 1),
+    (2, 'Melhor Framework Web', 'Qual o melhor framework para desenvolvimento web?', TRUE, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP() + INTERVAL 7 DAY, 1),
+    (3, 'Metodologia Ágil Favorita', 'Qual sua metodologia ágil preferida?', FALSE, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP() + INTERVAL 7 DAY, 2),
+    (4, 'Selecione seus jogos favoritos', 'Apenas o dessa lista, claro!\n Não dá pra colocar mais que 5 opções :P (Por favor devs, coloquem mais ;-;)', FALSE, 5, UTC_TIMESTAMP(), UTC_TIMESTAMP() + INTERVAL 14 DAY, 5);
 
 -- Inserir opções para as pesquisas
 INSERT INTO TB_VOTE_OPTION (poll_id, sequence, name, count)

@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 @Entity
@@ -35,10 +35,10 @@ public class Poll {
     private String description;
 
     @Column(name = "start_date", nullable = false)
-    private LocalDateTime startDate;
+    private Instant startDate;
 
     @Column(name = "end_date", nullable = false)
-    private LocalDateTime endDate;
+    private Instant endDate;
 
     @Column(name = "user_registration", nullable = false)
     @ColumnDefault("0")
