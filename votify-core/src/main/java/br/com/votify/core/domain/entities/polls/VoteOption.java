@@ -34,6 +34,10 @@ public class VoteOption {
         count += 1;
     }
 
+    public void decreaseCount() {
+        count -= 1;
+    }
+
     public boolean hasBeenVoted(Vote vote) {
         return (vote.getOption() & 1 << id.getSequence()) != 0;
     }

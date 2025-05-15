@@ -1,6 +1,6 @@
 package br.com.votify.web.login;
 
-import br.com.votify.web.BaseTest;
+import br.com.votify.test.suites.SeleniumTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestTemplate;
 import org.openqa.selenium.By;
@@ -11,14 +11,14 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class LoginTest extends BaseTest {
+public class LoginTest extends SeleniumTest {
     private LoginPage page;
     private static final String TEST_EMAIL = "admin@votify.com.br";
     private static final String TEST_PASSWORD = "admin123";
 
     @BeforeEach
     void setupBeforeEach() {
-        seleniumHelper.goToPath("/login");
+        seleniumHelper.get("/login");
         page = new LoginPage(webDriver);
     }
 
@@ -69,7 +69,7 @@ public class LoginTest extends BaseTest {
     public void testLoginAlreadyLoggedIn() {
         login(TEST_EMAIL, TEST_PASSWORD);
         wait.until(ExpectedConditions.urlContains("/home"));
-        seleniumHelper.goToPath("/login");
+        seleniumHelper.get("/login");
         page = new LoginPage(webDriver);
         login(TEST_EMAIL, TEST_PASSWORD);
 

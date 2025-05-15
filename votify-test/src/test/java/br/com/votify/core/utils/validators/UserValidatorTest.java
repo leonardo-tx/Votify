@@ -42,13 +42,12 @@ public class UserValidatorTest {
 
     @Test
     public void testValidUser() {
-        User user = new AdminUser(
-            null,
-            "littledoge",
-            "Leonardo Teixeira",
-            "123@gmail.com",
-            "19283784you"
-        );
+        User user = AdminUser.builder()
+                .userName("littledoge")
+                .name("Leonardo Teixeira")
+                .email("123@gmail.com")
+                .password("19283784you")
+                .build();
         assertDoesNotThrow(() -> UserValidator.validateFields(user));
     }
 
@@ -286,18 +285,13 @@ public class UserValidatorTest {
     @SuppressWarnings("unused")
     Arbitrary<String> invalidEmails() {
         return Arbitraries.oneOf(
-            // Sem "@"
             Arbitraries.strings()
                 .withChars("abcdefghijklmnopqrstuvwxyz0123456789._%+-")
                 .ofMinLength(User.EMAIL_MIN_LENGTH).ofMaxLength(User.EMAIL_MAX_LENGTH),
-
-            // Sem domínio
             Arbitraries.strings()
                 .withChars("abcdefghijklmnopqrstuvwxyz0123456789._%+-")
                 .ofMinLength(User.EMAIL_MIN_LENGTH).ofMaxLength(User.EMAIL_MAX_LENGTH - 1)
                 .map(localPart -> localPart + "@"),
-
-            // Domínio inválido (com caracteres proibidos)
             Arbitraries.strings()
                 .withChars("!@#$%^&*(){}[]|\\:;'\"<>,?/`~")
                 .ofMinLength(User.EMAIL_MIN_LENGTH).ofMaxLength(User.EMAIL_MAX_LENGTH - 9)

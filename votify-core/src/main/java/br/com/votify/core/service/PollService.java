@@ -16,8 +16,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.Optional;
 
 @Service
@@ -51,8 +49,7 @@ public class PollService {
         vote.setPoll(poll);
 
         VoteValidator.validateFields(vote);
-        Instant now = Instant.now();
-        if (now.isBefore(vote.getPoll().getStartDate()) || now.isAfter(vote.getPoll().getEndDate())) {
+        if (poll.isOutOfDate()) {
             throw new VotifyException(VotifyErrorCode.POLL_VOTE_OUT_OF_DATE_INTERVAL);
         }
         if (voteRepository.existsById(vote.getId())) {
@@ -122,6 +119,6 @@ public class PollService {
         }
         
         Pageable pageable = PageRequest.of(page, size);
-        return pollRepository.findByTitleContainingIgnoreCase(title, pageable);
+        return pollRepository.findByTitleContainingIgnoreCase(title, Instant.now(), pageable);
     }
 }

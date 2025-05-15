@@ -46,7 +46,7 @@ public class PollServiceTest {
 
     @BeforeEach
     public void setupBeforeEach() {
-        testUser = new CommonUser(1L, "testuser", "Test User", "test@example.com", "password123");
+        testUser = new CommonUser();
         Poll testPoll = Poll.builder()
                 .id(1L)
                 .title("Test Poll")
@@ -230,7 +230,7 @@ public class PollServiceTest {
         Pageable pageable = PageRequest.of(0, 10);
         Page<Poll> pollPage = new PageImpl<>(testPolls, pageable, testPolls.size());
         
-        when(pollRepository.findByTitleContainingIgnoreCase(eq("t"), any(Pageable.class))).thenReturn(pollPage);
+        when(pollRepository.findByTitleContainingIgnoreCase(eq("t"), any(Instant.class), any(Pageable.class))).thenReturn(pollPage);
         
         Page<Poll> result = pollService.findByTitle("t", 0, 10);
 
@@ -269,9 +269,9 @@ public class PollServiceTest {
 
         assertNotNull(result);
         assertEquals(2, result.getContent().size());
-        assertTrue(result.getContent().contains(testPolls.get(0)));  // Active Poll 1
-        assertTrue(result.getContent().contains(testPolls.get(2)));  // Active Poll 3
-        assertFalse(result.getContent().contains(testPolls.get(1)));  // Inactive Poll 2
-        assertFalse(result.getContent().contains(testPolls.get(3)));  // Inactive Poll 4
+        assertTrue(result.getContent().contains(testPolls.get(0)));
+        assertTrue(result.getContent().contains(testPolls.get(2)));
+        assertFalse(result.getContent().contains(testPolls.get(1)));
+        assertFalse(result.getContent().contains(testPolls.get(3)));
     }
 }

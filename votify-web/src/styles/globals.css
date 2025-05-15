@@ -42,6 +42,16 @@ svg {
     fill: currentColor;
 }
 
+ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+li {
+    margin: 0;
+}
+
 #__next {
     display: grid;
     grid-template-rows: 80px 1fr 60px;
