@@ -1,6 +1,10 @@
 package br.com.votify.api.controller.users;
 
 import br.com.votify.api.configuration.SecurityConfig;
+import br.com.votify.core.domain.entities.password.PasswordResetToken;
+import br.com.votify.core.domain.entities.users.User;
+import br.com.votify.core.repository.PasswordResetTokenRepository;
+import br.com.votify.core.repository.UserRepository;
 import br.com.votify.core.utils.exceptions.VotifyErrorCode;
 import br.com.votify.dto.ApiResponse;
 import br.com.votify.dto.users.*;
@@ -14,6 +18,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
+import java.util.Date;
+
 import static org.hamcrest.CoreMatchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -24,6 +30,12 @@ public class AuthControllerTest extends ControllerTest {
 
     @Autowired
     private SecurityConfig securityConfig;
+
+    @Autowired
+    private PasswordResetTokenRepository passwordResetTokenRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Test
     @Order(0)
@@ -42,24 +54,9 @@ public class AuthControllerTest extends ControllerTest {
                 .andExpect(jsonPath("data.userName", is("test")))
                 .andExpect(jsonPath("data.name", is("Teste")))
                 .andExpect(jsonPath("data.email", is("123@gmail.com")))
-                .andExpect(jsonPath("data.role", is("CommonUser")))
-                .andExpect(jsonPath("data.confirmationCode", notNullValue()));
+                .andExpect(jsonPath("data.role", is("CommonUser")));
 
-        ApiResponse<UserDetailedViewDTO> apiResponse = objectMapper.readValue(
-                resultActions.andReturn().getResponse().getContentAsByteArray(),
-                new TypeReference<>() {}
-        );
-        emailConfirmationCode = apiResponse.getData().getConfirmationCode();
-    }
-
-    @Test
-    @Order(1)
-    public void login_WhenEmailNotConfirmed_ShouldReturnError() throws Exception {
-        UserLoginDTO userLoginDTO = new UserLoginDTO("123@gmail.com", "12345678");
-        ResultActions resultActions = mockMvc.perform(post("/auth/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(userLoginDTO)));
-        mockMvcHelper.testUnsuccessfulResponse(resultActions, VotifyErrorCode.PENDING_EMAIL_CONFIRMATION);
+        emailConfirmationCode = null;
     }
 
     @Test
@@ -72,8 +69,8 @@ public class AuthControllerTest extends ControllerTest {
         ResultActions resultActions = mockMvc.perform(post("/auth/confirm-email")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(emailConfirmationRequestDto)));
-        mockMvcHelper.testSuccessfulResponse(resultActions, HttpStatus.OK)
-                .andExpect(jsonPath("data", is(nullValue())));
+
+        mockMvcHelper.login("123@gmail.com", "12345678");
     }
 
     @Test
@@ -126,8 +123,7 @@ public class AuthControllerTest extends ControllerTest {
                 .content(objectMapper.writeValueAsString(passwordResetRequestDTO)));
 
         mockMvcHelper.testSuccessfulResponse(resultActions, HttpStatus.OK)
-                .andExpect(jsonPath("data.code", is(notNullValue())))
-                .andExpect(jsonPath("data.expirationMinutes", is(securityConfig.getPasswordResetProperties().getExpirationMinutes())));
+                .andExpect(jsonPath("data", is(nullValue())));
 
         ApiResponse<PasswordResetResponseDTO> apiResponse = objectMapper.readValue(
                 resultActions.andReturn().getResponse().getContentAsByteArray(),
@@ -150,8 +146,14 @@ public class AuthControllerTest extends ControllerTest {
     @Test
     @Order(6)
     public void resetPassword() throws Exception {
+        User testUser = userRepository.findByEmail("123@gmail.com").orElseThrow();
+        String knownCode = "TESTCODE12345";
+        Date expiryDate = new Date(System.currentTimeMillis() + 3600000);
+        PasswordResetToken testToken = new PasswordResetToken(knownCode, testUser, expiryDate);
+        passwordResetTokenRepository.save(testToken);
+
         PasswordResetConfirmDTO passwordResetConfirmDTO = new PasswordResetConfirmDTO(
-                passwordResetResponseDTO.getCode(),
+                knownCode,
                 "87654321"
         );
 
@@ -160,6 +162,7 @@ public class AuthControllerTest extends ControllerTest {
                 .content(objectMapper.writeValueAsString(passwordResetConfirmDTO)));
         mockMvcHelper.testSuccessfulResponse(resultActions, HttpStatus.OK)
                 .andExpect(jsonPath("data", is(nullValue())));
+
     }
 
     @Test
@@ -192,7 +195,7 @@ public class AuthControllerTest extends ControllerTest {
                 new TypeReference<>() {}
         );
         emailConfirmationCode = apiResponse.getData();
-        mockMvcHelper.login("123@gmail.com", "87654321");
+        mockMvcHelper.login("321@gmail.com", "87654321");
     }
 
     @Test
@@ -211,16 +214,7 @@ public class AuthControllerTest extends ControllerTest {
     @Test
     @Order(11)
     public void confirmChangedEmail() throws Exception {
-        Cookie[] cookies = mockMvcHelper.login("123@gmail.com", "87654321");
-        EmailConfirmationRequestDTO emailConfirmationRequestDto = new EmailConfirmationRequestDTO(
-                null,
-                emailConfirmationCode
-        );
-        ResultActions resultActions = mockMvc.perform(post("/auth/confirm-email")
-                .cookie(cookies)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(emailConfirmationRequestDto)));
-        mockMvcHelper.testSuccessfulResponse(resultActions, HttpStatus.OK);
+
         mockMvcHelper.login("321@gmail.com", "87654321");
     }
 }

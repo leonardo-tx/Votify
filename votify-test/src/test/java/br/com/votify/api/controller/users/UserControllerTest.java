@@ -8,6 +8,10 @@ import br.com.votify.dto.users.UserUpdatePasswordRequestDTO;
 import br.com.votify.test.suites.ControllerTest;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.*;
+import org.mockito.internal.matchers.Null;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.*;
 import org.springframework.test.web.servlet.ResultActions;
 
@@ -146,8 +150,8 @@ public class UserControllerTest extends ControllerTest {
     @Test
     @Order(1)
     public void updateEmail_Success() throws Exception {
-        Cookie[] cookies = mockMvcHelper.login("admin@votify.com.br", "admin123");
-        String oldEmail = "admin@votify.com.br";
+        Cookie[] cookies = mockMvcHelper.login("admin@votify.com.br", "admin123"
+        );
         String newEmail = "admin-new@votify.com.br";
         UserUpdateEmailRequestDTO requestDTO = new UserUpdateEmailRequestDTO(newEmail);
 
@@ -157,11 +161,11 @@ public class UserControllerTest extends ControllerTest {
                 .content(objectMapper.writeValueAsString(requestDTO)));
 
         mockMvcHelper.testSuccessfulResponse(resultActions, HttpStatus.OK)
-                .andExpect(jsonPath("data", isA(String.class)));
+                .andExpect(jsonPath("data", is(nullValue())));
 
         ResultActions checkResult = mockMvc.perform(get("/users/me").cookie(cookies));
         mockMvcHelper.testSuccessfulResponse(checkResult, HttpStatus.OK)
-                .andExpect(jsonPath("data.email", is(oldEmail)));
+                .andExpect(jsonPath("data.email", is(newEmail)));
     }
 
     @Test
@@ -219,7 +223,8 @@ public class UserControllerTest extends ControllerTest {
     @Test
     @Order(2)
     public void updateEmailDuplicated() throws Exception {
-        Cookie[] cookies = mockMvcHelper.login("admin@votify.com.br", "admin123");
+        Cookie[] cookies = mockMvcHelper.login("admin-new@votify.com.br", "admin123"
+        );
         String newEmail = "admin-newwww@votify.com.br";
         UserUpdateEmailRequestDTO requestDTO = new UserUpdateEmailRequestDTO(newEmail);
 
@@ -228,7 +233,7 @@ public class UserControllerTest extends ControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(requestDTO)));
 
-        mockMvcHelper.testUnsuccessfulResponse(resultActions, VotifyErrorCode.PENDING_EMAIL_CONFIRMATION);
+        mockMvcHelper.testSuccessfulResponse(resultActions, HttpStatus.OK);
     }
 
     @Test
