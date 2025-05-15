@@ -40,12 +40,10 @@ public class UserService {
         user.setId(null);
 
         User createdUser = userRepository.save(user);
-        EmailConfirmation emailConfirmation = emailConfirmationService.addUser(createdUser, null);
-        
-        if (emailConfirmation != null &&
-            emailConfirmationService.existsByEmail(createdUser.getEmail())) {
-            createdUser.setEmailConfirmation(emailConfirmation);
-        }
+
+        Optional<EmailConfirmation> emailConfirmation = emailConfirmationService.addUser(createdUser, null);
+        emailConfirmation.ifPresent(user::setEmailConfirmation);
+
         return createdUser;
     }
 
@@ -133,10 +131,8 @@ public class UserService {
             throw new VotifyException(VotifyErrorCode.PENDING_EMAIL_CONFIRMATION);
         }
 
-        EmailConfirmation emailConfirmation = emailConfirmationService.addUser(user, email);
-        if (emailConfirmation != null) {
-            user.setEmailConfirmation(emailConfirmation);
-        }
+        Optional<EmailConfirmation> emailConfirmation = emailConfirmationService.addUser(user, email);
+        emailConfirmation.ifPresent(user::setEmailConfirmation);
 
         return user;
     }

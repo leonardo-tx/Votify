@@ -56,7 +56,7 @@ public class UserServiceTest {
         when(userRepository.existsByEmail(user.getEmail())).thenReturn(false);
         when(userRepository.existsByUserName(user.getUserName())).thenReturn(false);
         when(passwordEncoderService.encryptPassword(user.getPassword())).thenReturn(user.getPassword());
-        when(emailConfirmationService.addUser(user, null)).thenReturn(new EmailConfirmation());
+        when(emailConfirmationService.addUser(user, null)).thenReturn(Optional.of(new EmailConfirmation()));
         when(userRepository.save(user)).thenReturn(user);
 
         User userFromService = assertDoesNotThrow(() -> userService.register(user));
@@ -342,7 +342,7 @@ public class UserServiceTest {
         String newEmail = "jhonny.new@nightcity.2077";
         when(contextService.getUserOrThrow()).thenReturn(user);
         when(userRepository.existsByEmail(newEmail)).thenReturn(false);
-        when(emailConfirmationService.addUser(user, newEmail)).thenReturn(new EmailConfirmation());
+        when(emailConfirmationService.addUser(user, newEmail)).thenReturn(Optional.of(new EmailConfirmation()));
 
         User updatedUser = userService.updateUserEmail(newEmail);
 
