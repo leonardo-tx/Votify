@@ -45,12 +45,6 @@ public class EmailConfirmationServiceTest {
     @Mock
     private Environment environment;
 
-    @Mock
-    private EmailService emailService;
-
-    @Mock
-    private EmailProperties emailProperties;
-
     @InjectMocks
     private EmailConfirmationService emailConfirmationService;
 
@@ -176,16 +170,14 @@ public class EmailConfirmationServiceTest {
     @Test
     public void addUserWhenNewAccount() throws VotifyException {
         when(emailConfirmationExpirationProperties.getExpirationMinutes()).thenReturn(1);
-        when(emailProperties.isConfirmation()).thenReturn(true);
         when(emailConfirmationRepository.save(any(EmailConfirmation.class)))
                 .thenAnswer(i -> i.getArguments()[0]);
 
-        Optional<EmailConfirmation> emailConfirmationOptional = emailConfirmationService.addUser(
+        EmailConfirmation emailConfirmation = emailConfirmationService.addUser(
                 emailConfirmationFromNewAccount.getUser(),
                 null
         );
-        assertTrue(emailConfirmationOptional.isPresent());
-        EmailConfirmation emailConfirmation = emailConfirmationOptional.get();
+        assertNotNull(emailConfirmation);
 
         LocalDateTime now = LocalDateTime.now();
         assertNull(emailConfirmation.getId());
@@ -201,10 +193,10 @@ public class EmailConfirmationServiceTest {
         when(emailConfirmationRepository.save(any(EmailConfirmation.class)))
                 .thenAnswer(i -> i.getArguments()[0]);
 
-        Optional<EmailConfirmation> emailConfirmationOptional = emailConfirmationService.addUser(
+        Optional<EmailConfirmation> emailConfirmationOptional = Optional.ofNullable(emailConfirmationService.addUser(
                 emailConfirmationFromExistingAccount.getUser(),
                 "jhonny@new.nightcity.2077"
-        );
+        ));
         assertTrue(emailConfirmationOptional.isPresent());
         EmailConfirmation emailConfirmation = emailConfirmationOptional.get();
 
