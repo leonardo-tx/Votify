@@ -18,7 +18,6 @@ export default function PollCard({ poll, user, now }: Props) {
 
   const startDate = Date.parse(poll.startDate);
   const endDate = Date.parse(poll.endDate);
-  const nowDate = new Date(now);
 
   return (
     <div
@@ -35,16 +34,15 @@ export default function PollCard({ poll, user, now }: Props) {
           <p className="font-normal text-sm">{user?.name ?? "Desconhecido"}</p>
         </Link>
         <p className="font-normal text-sm">
-          {endDate < nowDate.getTime()
+          {endDate < now
             ? "Terminado "
-            : startDate > nowDate.getTime()
+            : startDate > now
               ? "Começa "
               : "Termina "}
-          {formatDistance(
-            startDate > nowDate.getTime() ? startDate : endDate,
-            nowDate,
-            { locale: ptBR, addSuffix: true },
-          )}
+          {formatDistance(startDate > now ? startDate : endDate, now, {
+            locale: ptBR,
+            addSuffix: true,
+          })}
         </p>
       </div>
       <Link

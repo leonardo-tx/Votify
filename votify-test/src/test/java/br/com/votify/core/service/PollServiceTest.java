@@ -18,7 +18,8 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
-import java.time.LocalDateTime;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -50,7 +51,7 @@ public class PollServiceTest {
                 .id(1L)
                 .title("Test Poll")
                 .description("Test Description")
-                .endDate(LocalDateTime.now().plusDays(1))
+                .endDate(Instant.now().plus(Duration.ofDays(1)))
                 .userRegistration(false)
                 .voteOptions(List.of(
                         new VoteOption(new VoteOptionIdentifier(1L, 0), "Option 1", 0, null),
@@ -65,7 +66,7 @@ public class PollServiceTest {
                 .id(2L)
                 .title("Test Poll 2")
                 .description("Test Description 2")
-                .endDate(LocalDateTime.now().plusDays(2))
+                .endDate(Instant.now().plus(Duration.ofDays(2)))
                 .userRegistration(false)
                 .voteOptions(List.of(
                         new VoteOption(new VoteOptionIdentifier(2L, 0), "Option 1", 0, null),
@@ -82,8 +83,8 @@ public class PollServiceTest {
                 .id(3L)
                 .title("Test Poll 3")
                 .description("Test Description 3")
-                .startDate(LocalDateTime.now().plusDays(1))
-                .endDate(LocalDateTime.now().plusDays(2))
+                .startDate(Instant.now().plus(Duration.ofDays(1)))
+                .endDate(Instant.now().plus(Duration.ofDays(2)))
                 .userRegistration(true)
                 .voteOptions(List.of(
                         new VoteOption(new VoteOptionIdentifier(3L, 0), "Option 1", 0, null),
@@ -100,8 +101,8 @@ public class PollServiceTest {
                 .id(4L)
                 .title("Test Poll 4")
                 .description("Test Description 4")
-                .startDate(LocalDateTime.now().minusDays(2))
-                .endDate(LocalDateTime.now().minusDays(1))
+                .startDate(Instant.now().minus(Duration.ofDays(2)))
+                .endDate(Instant.now().minus(Duration.ofDays(1)))
                 .userRegistration(false)
                 .voteOptions(List.of(
                         new VoteOption(new VoteOptionIdentifier(4L, 0), "Option 1", 15, null),
@@ -145,7 +146,7 @@ public class PollServiceTest {
     public void voteValid() {
         Vote vote = new Vote(null, 4, null, null);
         Poll poll = testPolls.get(0);
-        poll.setStartDate(LocalDateTime.now());
+        poll.setStartDate(Instant.now());
 
         VoteIdentifier voteId = new VoteIdentifier(poll.getId(), testUser.getId());
 
@@ -161,7 +162,7 @@ public class PollServiceTest {
     public void voteWithUserAlreadyVoted() {
         Vote vote = new Vote(null, 4, null, null);
         Poll poll = testPolls.get(0);
-        poll.setStartDate(LocalDateTime.now());
+        poll.setStartDate(Instant.now());
 
         VoteIdentifier voteId = new VoteIdentifier(poll.getId(), testUser.getId());
 
@@ -262,7 +263,7 @@ public class PollServiceTest {
         Pageable pageable = PageRequest.of(0, 10);
         Page<Poll> activePollsPage = new PageImpl<>(List.of(testPolls.get(0), testPolls.get(2)), pageable, 2);
 
-        when(pollRepository.findAllByActives(any(LocalDateTime.class), eq(pageable))).thenReturn(activePollsPage);
+        when(pollRepository.findAllByActives(any(Instant.class), eq(pageable))).thenReturn(activePollsPage);
 
         Page<Poll> result = pollService.findAllActivePolls(0, 10);
 

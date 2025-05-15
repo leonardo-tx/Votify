@@ -6,15 +6,19 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
+import org.openqa.selenium.remote.RemoteWebDriver;
+
+import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.List;
 import java.util.stream.Stream;
 
 public class BrowsersProviderExtension implements TestTemplateInvocationContextProvider {
-    private final boolean isCI;
+    private final boolean isDocker;
 
     public BrowsersProviderExtension() {
-        String ci = System.getenv("CI");
-        isCI = ci != null && ci.equals("true");
+        isDocker = new File("/.dockerenv").exists();
     }
 
     @Override
@@ -75,17 +79,32 @@ public class BrowsersProviderExtension implements TestTemplateInvocationContextP
 
     private WebDriver createChromeDriver() {
         ChromeOptions options = new ChromeOptions();
-        if (isCI) {
-            options.addArguments("--no-sandbox", "--disable-dev-shm-usage", "--headless");
+        options.addArguments("--window-size=1920,1080");
+        if (!isDocker) {
+            return new ChromeDriver(options);
         }
-        return new ChromeDriver(options);
+        options.addArguments("--no-sandbox", "--disable-dev-shm-usage", "--headless");
+
+        try {
+            return new RemoteWebDriver(new URL("http://selenium-hub:4444/wd/hub"), options);
+        } catch (MalformedURLException e) {
+            throw new RuntimeException("URL do Selenium Grid inválida", e);
+        }
     }
 
     private WebDriver createFirefoxDriver() {
         FirefoxOptions options = new FirefoxOptions();
-        if (isCI) {
-            options.addArguments("--headless");
+        options.addArguments("--width=1920");
+        options.addArguments("--height=1080");
+        if (!isDocker) {
+            return new FirefoxDriver(options);
         }
-        return new FirefoxDriver(options);
+        options.addArguments("--headless");
+
+        try {
+            return new RemoteWebDriver(new URL("http://selenium-hub:4444/wd/hub"), options);
+        } catch (MalformedURLException e) {
+            throw new RuntimeException("URL do Selenium Grid inválida", e);
+        }
     }
 }

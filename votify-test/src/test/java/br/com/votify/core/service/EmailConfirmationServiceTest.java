@@ -2,6 +2,7 @@ package br.com.votify.core.service;
 
 import br.com.votify.core.domain.entities.tokens.EmailConfirmation;
 import br.com.votify.core.domain.entities.tokens.EmailConfirmationExpirationProperties;
+import br.com.votify.core.domain.entities.tokens.EmailProperties;
 import br.com.votify.core.domain.entities.users.CommonUser;
 import br.com.votify.core.domain.entities.users.User;
 import br.com.votify.core.repository.EmailConfirmationRepository;
@@ -43,6 +44,12 @@ public class EmailConfirmationServiceTest {
 
     @Mock
     private Environment environment;
+
+    @Mock
+    private EmailService emailService;
+
+    @Mock
+    private EmailProperties emailProperties;
 
     @InjectMocks
     private EmailConfirmationService emailConfirmationService;
@@ -169,13 +176,17 @@ public class EmailConfirmationServiceTest {
     @Test
     public void addUserWhenNewAccount() throws VotifyException {
         when(emailConfirmationExpirationProperties.getExpirationMinutes()).thenReturn(1);
+        when(emailProperties.isConfirmation()).thenReturn(true);
         when(emailConfirmationRepository.save(any(EmailConfirmation.class)))
                 .thenAnswer(i -> i.getArguments()[0]);
 
-        EmailConfirmation emailConfirmation = emailConfirmationService.addUser(
+        Optional<EmailConfirmation> emailConfirmationOptional = emailConfirmationService.addUser(
                 emailConfirmationFromNewAccount.getUser(),
                 null
         );
+        assertTrue(emailConfirmationOptional.isPresent());
+        EmailConfirmation emailConfirmation = emailConfirmationOptional.get();
+
         LocalDateTime now = LocalDateTime.now();
         assertNull(emailConfirmation.getId());
         assertEquals(emailConfirmationFromNewAccount.getUser(), emailConfirmation.getUser());
@@ -190,13 +201,17 @@ public class EmailConfirmationServiceTest {
         when(emailConfirmationRepository.save(any(EmailConfirmation.class)))
                 .thenAnswer(i -> i.getArguments()[0]);
 
-        EmailConfirmation emailConfirmation = emailConfirmationService.addUser(
+        Optional<EmailConfirmation> emailConfirmationOptional = emailConfirmationService.addUser(
                 emailConfirmationFromExistingAccount.getUser(),
                 "jhonny@new.nightcity.2077"
         );
+        assertTrue(emailConfirmationOptional.isPresent());
+        EmailConfirmation emailConfirmation = emailConfirmationOptional.get();
+
         LocalDateTime now = LocalDateTime.now();
         assertNull(emailConfirmation.getId());
         assertEquals(emailConfirmationFromNewAccount.getUser(), emailConfirmation.getUser());
+        assertTrue(emailConfirmation.getEmailConfirmationExpiration().isBefore(now.plusMinutes(30)));
         assertTrue(emailConfirmation.getEmailConfirmationExpiration().isBefore(now.plusMinutes(30)));
         assertEquals("jhonny@new.nightcity.2077", emailConfirmation.getNewEmail());
         assertEquals(EmailCodeGeneratorUtils.CODE_LENGTH, emailConfirmation.getEmailConfirmationCode().length());
