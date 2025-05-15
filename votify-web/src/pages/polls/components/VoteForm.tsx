@@ -1,47 +1,48 @@
-import VoteOptionView from "@/libs/polls/VoteOptionView";
 import { currentUserAtom } from "@/libs/users/atoms/currentUserAtom";
 import { useAtomValue } from "jotai";
 import styles from "./styles/VoteForm.module.css";
-import { FormEventHandler, useState } from "react";
+import { FormEventHandler, Fragment, useState } from "react";
 import Button from "@/components/shared/Button";
 import { useRouter } from "next/navigation";
 import { vote } from "@/libs/api";
+import { PollDetailedView } from "@/libs/polls/PollDetailedView";
 
 interface Props {
-  pollId: number;
-  voteOptions: VoteOptionView[];
-  choiceLimitPerUser: number;
-  initialChoices: number;
+  poll: PollDetailedView;
 }
 
-export default function VoteForm({
-  pollId,
-  voteOptions,
-  choiceLimitPerUser,
-  initialChoices,
-}: Props) {
+export default function VoteForm({ poll }: Props) {
   const currentUser = useAtomValue(currentUserAtom);
   const router = useRouter();
-  const [choices, setChoices] = useState(initialChoices);
+  const [choices, setChoices] = useState(poll?.myChoices ?? 0);
+  const [selectedCount, setSelectedCount] = useState(0);
 
-  if (!voteOptions) {
+  if (!poll) {
     return <></>;
   }
 
   let totalVoteCount = 0;
-  voteOptions.forEach((voteOption) => (totalVoteCount += voteOption.voteCount));
+  poll.voteOptions.forEach(
+    (voteOption) => (totalVoteCount += voteOption.voteCount),
+  );
 
   const onChange = (optionNumber: number) => {
-    if (isMultiple) {
-      setChoices((oldChoices) => oldChoices ^ (1 << optionNumber));
+    if (!isMultiple) {
+      setChoices(1 << optionNumber);
+      setSelectedCount(1);
       return;
     }
-    setChoices(1 << optionNumber);
+    const optionIsAlreadyVoted = (choices & (1 << optionNumber)) !== 0;
+    if (!optionIsAlreadyVoted && selectedCount === poll.choiceLimitPerUser) {
+      return;
+    }
+    setChoices((oldChoices) => oldChoices ^ (1 << optionNumber));
+    setSelectedCount((value) => (optionIsAlreadyVoted ? value - 1 : value + 1));
   };
 
   const onSubmit: FormEventHandler<HTMLFormElement> = async (event) => {
     event.preventDefault();
-    const response = await vote(pollId, { value: choices });
+    const response = await vote(poll.id, { value: choices });
 
     if (response.success) {
       router.refresh();
@@ -51,49 +52,52 @@ export default function VoteForm({
   };
 
   const isAuthenticated = currentUser !== null;
-  const isMultiple = choiceLimitPerUser > 1;
-  const hasVoted = initialChoices !== 0;
-  const disabled = !isAuthenticated || hasVoted;
-
-  const getClassNameForLabel = (i: number): string => {
-    const labelClassNames = [styles["vote-label"]];
-    if (!disabled) labelClassNames.push(styles["vote-label-not-disabled"]);
-    if ((choices & (1 << i)) !== 0) {
-      labelClassNames.push(styles["vote-label-selected"]);
-    }
-    return labelClassNames.join(" ");
-  };
+  const isMultiple = poll.choiceLimitPerUser > 1;
+  const hasVoted = poll.myChoices !== 0;
+  const nowDate = Date.now();
+  const startDate = Date.parse(poll.startDate);
+  const endDate = Date.parse(poll.endDate);
+  const activePoll = nowDate >= startDate && nowDate <= endDate;
 
   return (
-    <form onSubmit={onSubmit} className="flex flex-col gap-3">
-      {voteOptions.map((opt, i) => (
-        <label key={i} className={getClassNameForLabel(i)}>
+    <form onSubmit={onSubmit} className="flex flex-col gap-4 relative">
+      {poll.voteOptions.map((opt, i) => (
+        <div className="relative flex" key={i}>
           <input
+            id={`poll-option-${i}`}
             type={isMultiple ? "checkbox" : "radio"}
             name="poll-option"
             value={i}
-            disabled={!isAuthenticated || hasVoted}
+            disabled={!isAuthenticated || hasVoted || !activePoll}
             checked={(choices & (1 << i)) !== 0}
             onChange={(e) => onChange(parseInt(e.currentTarget.value))}
-            className={styles["vote-box"]}
+            className={styles["vote-option-input"]}
           />
-          <span className="flex-1">{opt.name}</span>
-          <span className="text-sm">
-            {opt.voteCount} (
-            {((opt.voteCount / totalVoteCount) * 100).toFixed(2)}%)
-          </span>
-        </label>
+          <label
+            htmlFor={`poll-option-${i}`}
+            className={styles["vote-option-label"]}
+          >
+            <span>{opt.name}</span>
+            <span className="text-sm">
+              {opt.voteCount}{" "}
+              {totalVoteCount > 0 &&
+                "(" +
+                  ((opt.voteCount / totalVoteCount) * 100).toFixed(2) +
+                  "%)"}
+            </span>
+          </label>
+        </div>
       ))}
-      {!hasVoted && (
-        <Button
-          scheme="primary"
-          disabled={!isAuthenticated || choices === 0}
-          className="w-full"
-          variant="outline"
-        >
-          {isAuthenticated ? "Votar" : "Faça login para votar"}
-        </Button>
-      )}
+      <Button
+        id="vote-button"
+        style={{ display: !hasVoted && activePoll ? "block" : "none" }}
+        scheme="primary"
+        disabled={!isAuthenticated || selectedCount === 0}
+        className="w-full"
+        variant="outline"
+      >
+        {isAuthenticated ? "Votar" : "Faça login para votar"}
+      </Button>
     </form>
   );
 }

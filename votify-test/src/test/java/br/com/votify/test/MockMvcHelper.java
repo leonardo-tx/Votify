@@ -5,9 +5,12 @@ import br.com.votify.core.utils.exceptions.VotifyException;
 import br.com.votify.dto.users.UserLoginDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.Cookie;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
+import org.springframework.stereotype.Service;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
@@ -19,10 +22,12 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
+@RequiredArgsConstructor
 public class MockMvcHelper {
-    public static Cookie[] login(
-            MockMvc mockMvc,
-            ObjectMapper objectMapper,
+    private final MockMvc mockMvc;
+    private final ObjectMapper objectMapper;
+
+    public Cookie[] login(
             String email,
             String password
     ) throws Exception {
@@ -37,7 +42,7 @@ public class MockMvcHelper {
         return mvcResult.getResponse().getCookies();
     }
 
-    public static ResultActions testSuccessfulResponse(
+    public ResultActions testSuccessfulResponse(
             ResultActions resultActions,
             HttpStatusCode httpStatusCode
     ) throws Exception {
@@ -49,7 +54,7 @@ public class MockMvcHelper {
         return resultActions;
     }
 
-    public static ResultActions testUnsuccessfulResponse(
+    public ResultActions testUnsuccessfulResponse(
             ResultActions resultActions,
             VotifyErrorCode votifyErrorCode,
             Object... messageArguments
@@ -64,9 +69,7 @@ public class MockMvcHelper {
         return resultActions;
     }
 
-    public static void loginExpectingError(
-            MockMvc mockMvc,
-            ObjectMapper objectMapper,
+    public void loginExpectingError(
             String email,
             String password,
             VotifyErrorCode expectedErrorCode

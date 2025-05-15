@@ -42,13 +42,13 @@ public class UserServiceTest {
 
     @BeforeEach
     public void setupBeforeEach() {
-        this.user = new CommonUser(
-                1L,
-                "silverhand",
-                "Jhonny Silverhand",
-                "jhonny@nightcity.2077",
-                "6Samurai6"
-        );
+        this.user = CommonUser.builder()
+                .id(1L)
+                .userName("silverhand")
+                .name("Jhonny Silverhand")
+                .email("jhonny@nightcity.2077")
+                .password("6Samurai6")
+                .build();
     }
 
     @Test

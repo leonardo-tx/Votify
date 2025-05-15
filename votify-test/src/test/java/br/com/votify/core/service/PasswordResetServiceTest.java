@@ -15,6 +15,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -44,7 +46,13 @@ public class PasswordResetServiceTest {
 
     @BeforeEach
     public void setup() {
-        testUser = new CommonUser(1L, "testuser", "Test User", testEmail, "encodedPassword");
+        testUser = CommonUser.builder()
+                .id(1L)
+                .userName("testuser")
+                .name("Test User")
+                .email(testEmail)
+                .password("encodedPassword")
+                .build();
     }
 
     @Test
@@ -94,7 +102,7 @@ public class PasswordResetServiceTest {
     @Test
     public void resetPassword_Success() throws VotifyException {
         String testCode = "TESTCODE";
-        Date futureDate = new Date(System.currentTimeMillis() + 600000); // 10 minutos no futuro
+        Date futureDate = Date.from(Instant.now().plus(Duration.ofMinutes(10)));
         PasswordResetToken token = new PasswordResetToken(testCode, testUser, futureDate);
 
         when(passwordResetTokenRepository.findByCode(testCode)).thenReturn(Optional.of(token));

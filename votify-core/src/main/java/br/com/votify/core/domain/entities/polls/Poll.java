@@ -59,4 +59,14 @@ public class Poll {
         foreignKey = @ForeignKey(name = "fk_responsible_poll")
     )
     private User responsible;
+
+    public boolean isOutOfDate() {
+        Instant now = Instant.now();
+        return now.isBefore(startDate) || now.isAfter(endDate);
+    }
+
+    public boolean hasEnded() {
+        Instant now = Instant.now();
+        return now.isAfter(endDate);
+    }
 }

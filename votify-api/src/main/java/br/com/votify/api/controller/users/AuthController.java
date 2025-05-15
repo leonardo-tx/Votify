@@ -1,6 +1,7 @@
 package br.com.votify.api.controller.users;
 
 import br.com.votify.api.configuration.SecurityConfig;
+import br.com.votify.core.decorators.NeedsUserContext;
 import br.com.votify.core.domain.entities.tokens.AuthTokens;
 import br.com.votify.core.domain.entities.users.CommonUser;
 import br.com.votify.core.domain.entities.users.User;
@@ -40,6 +41,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
+    @NeedsUserContext
     public ResponseEntity<ApiResponse<Object>> login(
             @RequestBody UserLoginDTO userLoginDTO,
             HttpServletResponse response
@@ -61,6 +63,7 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
+    @NeedsUserContext
     public ResponseEntity<ApiResponse<Object>> logout(HttpServletResponse response) {
         userService.logout();
 
@@ -79,6 +82,7 @@ public class AuthController {
     }
 
     @PostMapping("/refresh-tokens")
+    @NeedsUserContext
     public ResponseEntity<ApiResponse<Object>> refreshTokens(HttpServletResponse response) throws VotifyException {
         AuthTokens authTokens = userService.getContext().refreshTokens();
 
@@ -115,6 +119,7 @@ public class AuthController {
     }
 
     @PostMapping("/confirm-email")
+    @NeedsUserContext
     public ResponseEntity<ApiResponse<Object>> confirmEmail(@RequestBody EmailConfirmationRequestDTO emailConfirmationRequestDto) throws VotifyException {
         emailConfirmationService.confirmEmail(
                 emailConfirmationRequestDto.getCode(),
