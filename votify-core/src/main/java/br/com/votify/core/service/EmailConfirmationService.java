@@ -2,7 +2,6 @@ package br.com.votify.core.service;
 
 import br.com.votify.core.domain.entities.tokens.EmailConfirmation;
 import br.com.votify.core.domain.entities.tokens.EmailConfirmationExpirationProperties;
-import br.com.votify.core.domain.entities.tokens.EmailProperties;
 import br.com.votify.core.domain.entities.users.User;
 import br.com.votify.core.repository.EmailConfirmationRepository;
 import br.com.votify.core.repository.UserRepository;
@@ -19,7 +18,6 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -73,7 +71,7 @@ public class EmailConfirmationService {
         return emailConfirmationRepository.existsByUserEmail(email);
     }
 
-    public Optional<EmailConfirmation> addUser(User createdUser, String newEmail) throws VotifyException {
+    public EmailConfirmation addUser(User createdUser, String newEmail) throws VotifyException {
         if (createdUser.getEmailConfirmation() != null) {
             throw new VotifyException(VotifyErrorCode.PENDING_EMAIL_CONFIRMATION);
         }

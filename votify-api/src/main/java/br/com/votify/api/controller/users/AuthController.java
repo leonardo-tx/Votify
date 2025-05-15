@@ -21,6 +21,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Optional;
+
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
@@ -99,15 +101,19 @@ public class AuthController {
     }
 
     @PostMapping("/forgot-password")
-    public ResponseEntity<ApiResponse<PasswordResetResponseDTO>> requestPasswordReset(
+    public ResponseEntity<ApiResponse<Object>> requestPasswordReset(
             @RequestBody PasswordResetRequestDTO requestDTO) throws VotifyException {
 
-        String code = passwordResetService.createPasswordResetRequest(requestDTO.getEmail());
-        PasswordResetResponseDTO responseDTO = new PasswordResetResponseDTO(
-            code,
-            securityConfig.getPasswordResetProperties().getExpirationMinutes()
-        );
-        return ApiResponse.success(responseDTO, HttpStatus.OK).createResponseEntity();
+        Optional<String> codeOptional = passwordResetService.createPasswordResetRequest(requestDTO.getEmail());
+
+        if (codeOptional.isPresent()) {
+
+            System.err.println("AuthController: PasswordResetService returned a code (value: [" + codeOptional.get() +"]). " +
+                               "This indicates an issue with email sending/configuration in a non-dev/test environment. " +
+                               "API continues to return generic success response.");
+        }
+
+        return ApiResponse.success(null, HttpStatus.OK).createResponseEntity();
     }
 
     @PostMapping("/reset-password")

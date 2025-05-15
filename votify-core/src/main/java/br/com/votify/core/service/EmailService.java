@@ -31,4 +31,17 @@ public class EmailService {
         message.setText(EmailMessageCode.EMAIL_CONFIRMATION.formatMessage(confirmationCode));
         mailSender.send(message);
     }
+
+    public void sendPasswordResetEmail(String receiverEmail, String resetCode) {
+        if (senderEmail == null || senderEmail.trim().isEmpty() || mailSender == null) {
+            return;
+        }
+
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(senderEmail);
+        message.setTo(receiverEmail);
+        message.setSubject(EmailMessageCode.PASSWORD_RESET.getSubject());
+        message.setText(EmailMessageCode.PASSWORD_RESET.formatMessage(resetCode));
+        mailSender.send(message);
+    }
 }
