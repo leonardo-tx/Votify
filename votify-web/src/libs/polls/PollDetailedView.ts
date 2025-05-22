@@ -9,5 +9,5 @@ export interface PollDetailedView {
   choiceLimitPerUser: number;
   responsibleId: number;
   voteOptions: VoteOptionView[];
-  myChoices: number;
+  votedOption: number;
 }

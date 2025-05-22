@@ -12,7 +12,7 @@ import VoteInsertDTO from "./polls/VoteInsertDTO";
 export const api = axios.create({
   baseURL:
     typeof window === "undefined"
-      ? `http://${process.env.NEXT_PUBLIC_API_URL}`
+      ? `http://${process.env.NEXT_PUBLIC_API_URL}/api`
       : `${window.location.origin}/api`,
   withCredentials: true,
 });

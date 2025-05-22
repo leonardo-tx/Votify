@@ -6,6 +6,8 @@ import { formatDistance } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import Head from "next/head";
 import { getPollById } from "@/libs/api";
+import { useAtomValue } from "jotai";
+import { socketAtom } from "@/libs/socket/atoms/socketAtom";
 
 interface PollPageProps {
   poll: PollDetailedView | null;
@@ -13,15 +15,20 @@ interface PollPageProps {
 
 export default function PollDetailPage({ poll }: PollPageProps) {
   const [now, setNow] = useState(0);
+  const socket = useAtomValue(socketAtom);
 
   useEffect(() => {
     setNow(Date.now());
     const timer = setInterval(() => {
       setNow(Date.now());
     }, 1000);
+    socket?.activate();
 
-    return () => clearInterval(timer);
-  }, []);
+    return () => {
+      socket?.deactivate();
+      clearInterval(timer);
+    };
+  }, [socket]);
 
   if (!poll) {
     return (
@@ -63,7 +70,7 @@ export default function PollDetailPage({ poll }: PollPageProps) {
           </p>
 
           <div className="mb-6">
-            <VoteForm poll={poll} />
+            <VoteForm initialPoll={poll} />
           </div>
         </div>
       </div>
