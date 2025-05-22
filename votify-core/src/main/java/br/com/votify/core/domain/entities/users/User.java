@@ -20,11 +20,11 @@ import java.util.List;
 @Getter
 @Setter
 @Table(
-        name = "TB_USER",
-        indexes = {
-                @Index(columnList = "userName", unique = true),
-                @Index(columnList = "email", unique = true)
-        }
+    name = "TB_USER",
+    indexes = {
+        @Index(columnList = "userName", unique = true),
+        @Index(columnList = "email", unique = true)
+    }
 )
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "USER_TYPE", discriminatorType = DiscriminatorType.STRING)
