@@ -135,4 +135,14 @@ public class PollController {
         PageResponse<PollListViewDTO> pageResponse = PageResponse.from(pollPage, pollDtos);
         return ApiResponse.success(pageResponse, HttpStatus.OK).createResponseEntity();
     }
+
+    @DeleteMapping("/{id}/cancel")
+    @NeedsUserContext
+    public ResponseEntity<ApiResponse<Object>> cancelPoll(@PathVariable("id") Long id) throws VotifyException {
+        User user = contextService.getUserOrThrow();
+        Poll poll = pollService.getByIdOrThrow(id);
+        pollService.cancelPoll(poll, user);
+
+        return ApiResponse.success(null, HttpStatus.OK).createResponseEntity();
+    }
 }

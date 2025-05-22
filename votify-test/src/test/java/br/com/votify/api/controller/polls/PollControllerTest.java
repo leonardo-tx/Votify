@@ -18,8 +18,7 @@ import java.util.List;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.Matchers.hasSize;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 public class PollControllerTest extends ControllerTest {
@@ -43,8 +42,8 @@ public class PollControllerTest extends ControllerTest {
                 voteOptionInsertDTOS
         );
 
-
         Cookie[] cookies = mockMvcHelper.login("common@votify.com.br", "password123");
+
         ResultActions resultActions = mockMvc.perform(post("/polls")
                 .cookie(cookies)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -105,7 +104,6 @@ public class PollControllerTest extends ControllerTest {
     @Order(1)
     public void testGetMyPollsWhenAuthenticated() throws Exception {
         Cookie[] cookies = mockMvcHelper.login("common@votify.com.br", "password123");
-
         ResultActions resultActions = mockMvc.perform(get("/polls/me")
                 .cookie(cookies));
         mockMvcHelper.testSuccessfulResponse(resultActions, HttpStatus.OK)
@@ -315,5 +313,87 @@ public class PollControllerTest extends ControllerTest {
                 .andExpect(jsonPath("data.description", is("Test Description")))
                 .andExpect(jsonPath("data.voteOptions", hasSize(5)))
                 .andExpect(jsonPath("data.myChoices", is(16)));
+    }
+
+    @Test
+    @Order(4)
+    public void testCancelPollAsOwner() throws Exception {
+        Cookie[] cookies = mockMvcHelper.login("common@votify.com.br", "password123");
+        ResultActions cancelResult = mockMvc.perform(delete("/polls/{id}/cancel", 14)
+                .cookie(cookies));
+        mockMvcHelper.testSuccessfulResponse(cancelResult, HttpStatus.OK);
+    }
+
+    @Test
+    @Order(4)
+    public void testCancelPollAsNonOwner() throws Exception {
+        Cookie[] cookies = mockMvcHelper.login("admin@votify.com.br", "admin123");
+        ResultActions cancelResult = mockMvc.perform(delete("/polls/{id}/cancel", 3)
+                .cookie(cookies));
+        mockMvcHelper.testUnsuccessfulResponse(cancelResult, VotifyErrorCode.POLL_NOT_OWNER);
+    }
+
+    @Test
+    @Order(5)
+    public void testCancelPollBeforeStartIntegration() throws Exception {
+        List<VoteOptionInsertDTO> voteOptions = List.of(
+                new VoteOptionInsertDTO("Opção 1"),
+                new VoteOptionInsertDTO("Opção 2")
+        );
+        Instant futureStart = Instant.now().plus(Duration.ofDays(2));
+        Instant futureEnd = Instant.now().plus(Duration.ofDays(3));
+        PollInsertDTO pollInsertDTO = new PollInsertDTO(
+                "Future Poll",
+                "Poll que ainda não começou",
+                futureStart,
+                futureEnd,
+                false,
+                1,
+                voteOptions
+        );
+        Cookie[] cookies = mockMvcHelper.login("common@votify.com.br", "password123");
+        ResultActions createResult = mockMvc.perform(post("/polls")
+                .cookie(cookies)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(pollInsertDTO)));
+        int pollId = mockMvcHelper.extractId(createResult, "$.data.id");
+        ResultActions cancelResult = mockMvc.perform(delete("/polls/{id}/cancel", pollId)
+                .cookie(cookies));
+        mockMvcHelper.testSuccessfulResponse(cancelResult, HttpStatus.OK);
+        ResultActions getResult = mockMvc.perform(get("/polls/user/{id}", 15)
+                .cookie(cookies));
+        getResult.andExpect(jsonPath("data.content[?(@.title=='Future Poll')]").doesNotExist());
+    }
+
+    @Test
+    @Order(6)
+    public void testCancelPollDuringVotingIntegration() throws Exception {
+        Instant now = Instant.now();
+        PollInsertDTO pollInsertDTO = new PollInsertDTO(
+                "In Progress Poll",
+                "Poll em andamento",
+                null,
+                now.plus(Duration.ofHours(1)),
+                false,
+                1,
+                List.of(
+                        new VoteOptionInsertDTO("Opção 1"),
+                        new VoteOptionInsertDTO("Opção 2")
+                )
+        );
+        Cookie[] cookies = mockMvcHelper.login("common@votify.com.br", "password123");
+        ResultActions createResult = mockMvc.perform(post("/polls")
+                .cookie(cookies)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(pollInsertDTO)));
+
+        int pollId = mockMvcHelper.extractId(createResult, "$.data.id");
+        ResultActions cancelResult = mockMvc.perform(delete("/polls/{id}/cancel", pollId)
+                .cookie(cookies));
+        mockMvcHelper.testSuccessfulResponse(cancelResult, HttpStatus.OK);
+
+        ResultActions getResult = mockMvc.perform(get("/polls/user/{id}", 15)
+                .cookie(cookies));
+        mockMvcHelper.testSuccessfulResponse(getResult, HttpStatus.OK);
     }
 }

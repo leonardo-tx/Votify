@@ -27,6 +27,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -46,7 +47,13 @@ public class PollServiceTest {
 
     @BeforeEach
     public void setupBeforeEach() {
-        testUser = new CommonUser();
+        testUser = CommonUser.builder()
+                .id(1L)
+                .userName("testuser")
+                .name("Test User")
+                .email("test@example.com")
+                .password("password123")
+                .build();
         Poll testPoll = Poll.builder()
                 .id(1L)
                 .title("Test Poll")
@@ -59,6 +66,7 @@ public class PollServiceTest {
                         new VoteOption(new VoteOptionIdentifier(1L, 2), "Option 3", 0, null)
                 ))
                 .choiceLimitPerUser(1)
+                .responsible(testUser)
                 .build();
         testPolls.add(testPoll);
 
@@ -76,6 +84,7 @@ public class PollServiceTest {
                         new VoteOption(new VoteOptionIdentifier(2L, 4), "Option 5", 0, null)
                 ))
                 .choiceLimitPerUser(1)
+                .responsible(testUser)
                 .build();
         testPolls.add(testPoll2);
 
@@ -94,6 +103,7 @@ public class PollServiceTest {
                         new VoteOption(new VoteOptionIdentifier(3L, 4), "Option 5", 0, null)
                 ))
                 .choiceLimitPerUser(3)
+                .responsible(testUser)
                 .build();
         testPolls.add(testPoll3);
 
@@ -110,6 +120,7 @@ public class PollServiceTest {
                         new VoteOption(new VoteOptionIdentifier(4L, 2), "Option 3", 99, null)
                 ))
                 .choiceLimitPerUser(3)
+                .responsible(testUser)
                 .build();
         testPolls.add(testPoll4);
     }
@@ -137,7 +148,6 @@ public class PollServiceTest {
         Poll poll = testPolls.get(2);
         when(pollRepository.save(poll)).thenReturn(poll);
 
-
         Poll createdPoll = assertDoesNotThrow(() -> pollService.createPoll(poll, testUser));
         assertNotNull(createdPoll);
     }
@@ -150,8 +160,8 @@ public class PollServiceTest {
 
         VoteIdentifier voteId = new VoteIdentifier(poll.getId(), testUser.getId());
 
-        when(voteRepository.save(vote)).thenReturn(vote);
         when(voteRepository.existsById(voteId)).thenReturn(false);
+        when(voteRepository.save(vote)).thenReturn(vote);
 
         Vote createdVote = assertDoesNotThrow(() -> pollService.vote(vote, poll, testUser));
         assertEquals(new VoteIdentifier(poll.getId(), testUser.getId()), createdVote.getId());
@@ -273,5 +283,82 @@ public class PollServiceTest {
         assertTrue(result.getContent().contains(testPolls.get(2)));
         assertFalse(result.getContent().contains(testPolls.get(1)));
         assertFalse(result.getContent().contains(testPolls.get(3)));
+    }
+
+    @Test
+    public void cancelPollBeforeStart() {
+        Poll poll = Poll.builder()
+                .id(10L)
+                .title("Future Poll")
+                .description("Poll que não iniciou")
+                .startDate(Instant.now().plus(Duration.ofDays(1)))
+                .endDate(Instant.now().plus(Duration.ofDays(2)))
+                .userRegistration(false)
+                .voteOptions(List.of(new VoteOption(new VoteOptionIdentifier(10L, 0), "Option 1", 0, null)))
+                .choiceLimitPerUser(1)
+                .responsible(testUser)
+                .build();
+        assertDoesNotThrow(() -> pollService.cancelPoll(poll, testUser));
+        verify(pollRepository).delete(poll);
+    }
+
+    @Test
+    public void cancelPollDuringVoting() {
+        Instant now = Instant.now();
+        Poll poll = Poll.builder()
+                .id(11L)
+                .title("In Progress Poll")
+                .description("Poll em andamento")
+                .startDate(now.minus(Duration.ofHours(1)))
+                .endDate(now.plus(Duration.ofHours(1)))
+                .userRegistration(false)
+                .voteOptions(List.of(new VoteOption(new VoteOptionIdentifier(11L, 0), "Option 1", 0, null)))
+                .choiceLimitPerUser(1)
+                .responsible(testUser)
+                .build();
+        assertDoesNotThrow(() -> pollService.cancelPoll(poll, testUser));
+        verify(pollRepository).save(poll);
+    }
+
+    @Test
+    public void cancelPollByNotOwner() {
+        Poll poll = Poll.builder()
+                .id(12L)
+                .title("Poll of TestUser")
+                .description("Poll de testUser")
+                .startDate(Instant.now().plus(Duration.ofDays(1)))
+                .endDate(Instant.now().plus(Duration.ofDays(2)))
+                .userRegistration(false)
+                .voteOptions(List.of(new VoteOption(new VoteOptionIdentifier(12L, 0), "Option 1", 0, null)))
+                .choiceLimitPerUser(1)
+                .responsible(testUser)
+                .build();
+        User otherUser = CommonUser.builder()
+                .id(2L)
+                .userName("otheruser")
+                .name("Other User")
+                .email("other@example.com")
+                .password("password456")
+                .build();
+
+        VotifyException exception = assertThrows(VotifyException.class, () -> pollService.cancelPoll(poll, otherUser));
+        assertEquals(VotifyErrorCode.POLL_NOT_OWNER, exception.getErrorCode());
+    }
+
+    @Test
+    public void cancelPollAfterEnd() {
+        Poll poll = Poll.builder()
+                .id(13L)
+                .title("Finished Poll")
+                .description("Poll finalizada")
+                .startDate(Instant.now().minus(Duration.ofDays(2)))
+                .endDate(Instant.now().minus(Duration.ofDays(1)))
+                .userRegistration(false)
+                .voteOptions(List.of(new VoteOption(new VoteOptionIdentifier(13L, 0), "Option 1", 0, null)))
+                .choiceLimitPerUser(1)
+                .responsible(testUser)
+                .build();
+        VotifyException exception = assertThrows(VotifyException.class, () -> pollService.cancelPoll(poll, testUser));
+        assertEquals(VotifyErrorCode.POLL_CANNOT_CANCEL_FINISHED, exception.getErrorCode());
     }
 }

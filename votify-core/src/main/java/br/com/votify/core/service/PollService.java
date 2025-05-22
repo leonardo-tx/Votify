@@ -113,12 +113,27 @@ public class PollService {
         if (size < 1 || size > Poll.PAGE_SIZE_LIMIT) {
             throw new VotifyException(VotifyErrorCode.POLL_PAGE_LENGTH_INVALID, 1, Poll.PAGE_SIZE_LIMIT);
         }
-        
+
         if (title == null || title.isBlank()) {
             throw new VotifyException(VotifyErrorCode.POLL_TITLE_SEARCH_EMPTY);
         }
-        
+
         Pageable pageable = PageRequest.of(page, size);
         return pollRepository.findByTitleContainingIgnoreCase(title, Instant.now(), pageable);
+    }
+
+    public void cancelPoll(Poll poll, User user) throws VotifyException {
+        if (!poll.getResponsible().getId().equals(user.getId())) {
+            throw new VotifyException(VotifyErrorCode.POLL_NOT_OWNER);
+        }
+        if (poll.hasEnded()) {
+            throw new VotifyException(VotifyErrorCode.POLL_CANNOT_CANCEL_FINISHED);
+        }
+        if (poll.hasNotStarted()) {
+            pollRepository.delete(poll);
+            return;
+        }
+        poll.setEndDate(Instant.now());
+        pollRepository.save(poll);
     }
 }
