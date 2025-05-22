@@ -7,6 +7,8 @@
     --foreground-hover: #4f4f4f;
     --primary: #757aad;
     --primary-hover: #61648e;
+    --red: #b2173e;
+    --red-hover: #9b1537;
     --text-color: #1f2937;
     --card-bg: #fefefe;
     --card-shadow: rgba(0, 0, 0, 0.05);
@@ -26,6 +28,8 @@
         --foreground-hover: #d1d1d1;
         --primary: #8f95d3;
         --primary-hover: #91a2ef;
+        --red: #d65364;
+        --red-hover: #e56274;
         --border-color: #374151;
         --card-bg: #2a282b;
         --card-shadow: rgba(255, 255, 255, 0.05);
