@@ -120,7 +120,7 @@ export default function LoginPage() {
                 variant="text"
                 scheme="primary"
                 id="create-account-link"
-                href="/auth/register"
+                href="/signup"
                 className="text-blue-600 hover:text-blue-700"
               >
                 Criar conta

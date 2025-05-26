@@ -8,6 +8,9 @@ import PollSimpleView from "./polls/PollSimpleView";
 import { PageResponse } from "./PageResponse";
 import { PollDetailedView } from "./polls/PollDetailedView";
 import VoteInsertDTO from "./polls/VoteInsertDTO";
+import PollUpdateDTO from "./polls/PollUpdateDTO";
+import UserSignUpDTO from "@/libs/users/UserSignUpDTO";
+
 
 export const api = axios.create({
   baseURL:
@@ -49,6 +52,30 @@ export const login = async (
     const { data } = await api.post<ApiResponse<null>>(
       "/auth/login",
       credentials,
+    );
+    return data;
+  });
+};
+export const signup = async (
+    credentials: UserSignUpDTO,
+): Promise<ApiResponse<UserSignUpDTO | null>> => {
+  return await commonRequester(async () => {
+    const { data } = await api.post<ApiResponse<UserSignUpDTO>>(
+        "/auth/register",
+        credentials,
+    );
+    return data;
+  });
+};
+
+export const updatePoll = async (
+    id: number,
+    pollData: PollUpdateDTO,
+): Promise<ApiResponse<PollSimpleView>> => {
+  return await commonRequester(async () => {
+    const { data } = await api.put<ApiResponse<PollSimpleView>>(
+        `/polls/${id}`,
+        pollData
     );
     return data;
   });

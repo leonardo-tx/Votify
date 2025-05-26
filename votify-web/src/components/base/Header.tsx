@@ -140,7 +140,7 @@ export default function Header() {
               <IoLogInOutline size={20} />
               Entrar
             </Button>
-            <Button as="Link" id="signup-button" scheme="primary" href="/home">
+            <Button as="Link" id="signup-button" scheme="primary" href="/signup">
               <IoPerson size={20} />
               Criar Conta
             </Button>
