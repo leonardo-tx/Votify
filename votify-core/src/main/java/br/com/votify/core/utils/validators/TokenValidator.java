@@ -69,8 +69,7 @@ public final class TokenValidator {
             }
         } catch (VotifyException e) {
             throw e;
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new VotifyException(errorCode);
         }
     }
