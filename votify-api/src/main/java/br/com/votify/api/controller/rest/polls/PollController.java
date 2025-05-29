@@ -2,6 +2,7 @@ package br.com.votify.api.controller.rest.polls;
 
 import br.com.votify.core.decorators.NeedsUserContext;
 import br.com.votify.core.domain.entities.polls.Vote;
+import br.com.votify.core.utils.exceptions.VotifyErrorCode;
 import br.com.votify.dto.ApiResponse;
 import br.com.votify.dto.PageResponse;
 import br.com.votify.dto.polls.*;
@@ -10,6 +11,7 @@ import br.com.votify.core.domain.entities.polls.Poll;
 import br.com.votify.core.service.ContextService;
 import br.com.votify.core.service.PollService;
 import br.com.votify.core.utils.exceptions.VotifyException;
+import br.com.votify.dto.users.UserQueryDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -144,5 +146,30 @@ public class PollController {
         pollService.cancelPoll(poll, user);
 
         return ApiResponse.success(null, HttpStatus.OK).createResponseEntity();
+    }
+
+    @GetMapping("/{id}/voters")
+    @NeedsUserContext
+    public ResponseEntity<ApiResponse<PageResponse<UserQueryDTO>>> getPollVoters(
+            @PathVariable("id") Long id,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size
+    ) throws VotifyException {
+        User currentUser = contextService.getUserOrThrow();
+        Poll poll = pollService.getByIdOrThrow(id);
+
+        boolean isOwner = poll.getResponsible().getId().equals(currentUser.getId());
+        boolean registrationEnabled = poll.isUserRegistration();
+        if (!isOwner || !registrationEnabled) {
+            throw new VotifyException(VotifyErrorCode.POLL_VOTERS_UNAUTHORIZED);
+        }
+
+        Page<User> users = pollService.getVotersByPoll(poll, page, size);
+        List<UserQueryDTO> userDtos = users.getContent().stream()
+                .map(user -> UserQueryDTO.parse(user, currentUser))
+                .collect(Collectors.toList());
+
+        PageResponse<UserQueryDTO> pageResponse = PageResponse.from(users, userDtos);
+        return ApiResponse.success(pageResponse, HttpStatus.OK).createResponseEntity();
     }
 }

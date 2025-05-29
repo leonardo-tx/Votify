@@ -6,6 +6,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestTemplate;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Cookie;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 
 import java.util.List;
@@ -141,5 +142,36 @@ public class PollTest extends SeleniumTest {
             String labelText = webDriver.findElement(By.cssSelector("label[for='" + optionInput.getAttribute("id") + "']")).getText();
             assertEquals(expectedFinalTexts.get(i), labelText);
         }
+    }
+
+    @TestTemplate
+    public void shouldNotDisplayVotersList_whenRegistrationIsFalse() throws Exception {
+        List<Cookie> adminCookies = seleniumHelper.getLoginCookies(new UserLoginDTO("admin@votify.com.br", "admin123"));
+        seleniumHelper.get("/");
+        for (Cookie cookie : adminCookies) {
+            webDriver.manage().addCookie(cookie);
+        }
+        seleniumHelper.get("/polls/1");
+        PollPage page = new PollPage(webDriver);
+        try {
+            page.votersSectionTitle.isDisplayed();
+            fail("A seção de votantes foi encontrada, mas não deveria (userRegistration: false).");
+        } catch (NoSuchElementException e) {
+            assertTrue(true, "Seção de votantes corretamente não encontrada (userRegistration: false).");
+        }
+    }
+
+    @TestTemplate
+    public void shouldDisplayVotersList_forOwner_whenRegistrationIsEnabled() throws Exception {
+        List<Cookie> adminCookies = seleniumHelper.getLoginCookies(new UserLoginDTO("admin@votify.com.br", "admin123"));
+        assertNotNull(adminCookies, "Login como admin falhou.");
+        seleniumHelper.get("/");
+        for (Cookie cookie : adminCookies) {
+            webDriver.manage().addCookie(cookie);
+        }
+        seleniumHelper.get("/polls/2");
+        PollPage page = new PollPage(webDriver);
+        assertTrue(page.votersSectionTitle.isDisplayed(), "Título da seção de votantes não está visível.");
+        assertEquals("Participantes Registrados", page.votersSectionTitle.getText());
     }
 }

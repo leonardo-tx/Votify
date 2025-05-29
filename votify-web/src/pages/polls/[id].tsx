@@ -6,8 +6,10 @@ import { formatDistance } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import Head from "next/head";
 import { getPollById } from "@/libs/api";
-import { useAtomValue } from "jotai";
 import { socketAtom } from "@/libs/socket/atoms/socketAtom";
+import { useAtomValue } from "jotai";
+import { currentUserAtom } from "@/libs/users/atoms/currentUserAtom";
+import VotersList from "@/pages/polls/components/VotersList";
 
 interface PollPageProps {
   poll: PollDetailedView | null;
@@ -16,6 +18,8 @@ interface PollPageProps {
 export default function PollDetailPage({ poll }: PollPageProps) {
   const [now, setNow] = useState(0);
   const socket = useAtomValue(socketAtom);
+  const currentUser = useAtomValue(currentUserAtom);
+  const currentLoggedInUserId = currentUser?.id;
 
   useEffect(() => {
     setNow(Date.now());
@@ -46,6 +50,9 @@ export default function PollDetailPage({ poll }: PollPageProps) {
   const startDate = Date.parse(poll.startDate);
   const endDate = Date.parse(poll.endDate);
 
+  const shouldShowVotersList =
+    poll.userRegistration && currentLoggedInUserId === poll.responsibleId;
+
   return (
     <>
       <Head>
@@ -72,6 +79,17 @@ export default function PollDetailPage({ poll }: PollPageProps) {
           <div className="mb-6">
             <VoteForm initialPoll={poll} />
           </div>
+          {shouldShowVotersList && (
+            <div className="mt-8 pt-6 border-t border-gray-200">
+              <h2
+                id="voters-list-ul"
+                className="text-xl font-semibold mb-4 text-gray-700"
+              >
+                Participantes Registrados
+              </h2>
+              <VotersList pollId={poll.id} />
+            </div>
+          )}
         </div>
       </div>
     </>
