@@ -5,9 +5,10 @@ import { useEffect, useState } from "react";
 
 interface Props {
   polls?: { poll: PollSimpleView; user: UserQueryView | null }[];
+  showUser?: boolean;
 }
 
-export default function PollList({ polls }: Props) {
+export default function PollList({ polls, showUser = true }: Props) {
   const [now, setNow] = useState(0);
 
   useEffect(() => {
@@ -31,6 +32,7 @@ export default function PollList({ polls }: Props) {
           poll={item.poll}
           user={item.user}
           now={now}
+          showUser={showUser}
         />
       ))}
     </div>
