@@ -22,6 +22,8 @@ public class PollQueryDTO {
     private Long responsibleId;
     private List<VoteOptionViewDTO> voteOptions;
     private int myChoices;
+    private boolean userRegistration;
+
 
     public static PollQueryDTO parse(Poll poll, Vote vote) {
         List<VoteOptionViewDTO> optionsDto = poll.getVoteOptions()
@@ -37,7 +39,9 @@ public class PollQueryDTO {
                 poll.getChoiceLimitPerUser(),
                 poll.getResponsible().getId(),
                 optionsDto,
-                vote.getOption()
+                vote.getOption(),
+                poll.isUserRegistration()
+
         );
     }
 }
