@@ -94,7 +94,9 @@ VALUES
     -- Senha elderBlood22
     (46, 'ciri', 'Ciri Fiona', 'ciri@witchermail.com', '$2a$12$RjfNS43f9sg8KA8HdLDRP.rJEDyT9dSYhvWcQdeOYhojYmcaRi6IG', 'COMMON'),
     -- Senha wolfMentorX
-    (47, 'vesemir', 'Vesemir Wolf', 'vesemir@witchermail.com', '$2a$12$yGVdmY/TRUCUNBNPYYeqNu0KTyxvgTaDMOSzbXiZHhxHD5cNCbPm6', 'COMMON');
+    (47, 'vesemir', 'Vesemir Wolf', 'vesemir@witchermail.com', '$2a$12$yGVdmY/TRUCUNBNPYYeqNu0KTyxvgTaDMOSzbXiZHhxHD5cNCbPm6', 'COMMON'),
+    -- Senha noPolls
+    (48, 'noPolls', 'No Polls', 'noPolls@votify.com.br', '$2a$12$yGVdmY/TRUCUNBNPYYeqNu0KTyxvgTaDMOSzbXiZHhxHD5cNCbPm6', 'COMMON');
 
 
 

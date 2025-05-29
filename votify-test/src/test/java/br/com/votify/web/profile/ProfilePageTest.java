@@ -18,8 +18,26 @@ public class ProfilePageTest extends SeleniumTest {
         seleniumHelper.get("/profile/admin");
         ProfilePage profilePage = new ProfilePage(webDriver);
 
-        assertEquals("admin", profilePage.getUserName(), "O nome do usuário não corresponde ao esperado.");
+        assertEquals("Administrator", profilePage.getUserName(), "O nome do usuário não corresponde ao esperado.");
         assertEquals("@admin", profilePage.getUserUsername(), "O username não corresponde ao esperado.");
         assertTrue(profilePage.isCreatedPollsSectionVisible(), "A seção de enquetes criadas deveria estar visível.");
+    }
+
+    @TestTemplate
+    public void shouldDisplayErrorWhenProfileNotFound() {
+        seleniumHelper.get("/profile/usuariodesconhecido99");
+        ProfilePage profilePage = new ProfilePage(webDriver);
+
+        assertTrue(profilePage.isErrorLoadingProfileTitleVisible(), "O título de erro para perfil não encontrado deveria estar visível.");
+        assertEquals("Perfil não encontrado.", profilePage.getErrorMessageText(), "A mensagem de erro não corresponde à esperada para perfil não encontrado.");
+    }
+
+    @TestTemplate
+    public void shouldDisplayMessageWhenUserHasNoPolls() {
+        seleniumHelper.get("/profile/noPolls"); 
+        ProfilePage profilePage = new ProfilePage(webDriver);
+
+        assertTrue(profilePage.isNoPollsMessageVisible(), "A mensagem para usuário sem enquetes deveria estar visível.");
+        assertEquals("Você ainda não criou nenhuma enquete.", profilePage.getNoPollsMessageText(), "O texto da mensagem para usuário sem enquetes não corresponde ao esperado.");
     }
 } 

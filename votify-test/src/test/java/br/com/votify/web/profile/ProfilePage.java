@@ -8,22 +8,26 @@ import java.util.List;
 
 public class ProfilePage extends BasePage {
 
-    @FindBy(xpath = "//div[contains(@class, 'bg-white') and contains(@class, 'shadow-xl')]//div[contains(@class, 'text-center')]/h1")
+    @FindBy(id = "user-profile-name")
     private WebElement userNameText;
 
-    @FindBy(xpath = "//div[contains(@class, 'bg-white') and contains(@class, 'shadow-xl')]//div[contains(@class, 'text-center')]/p")
+    @FindBy(id = "user-profile-username")
     private WebElement userUsernameText;
 
-    @FindBy(xpath = "//h2[contains(text(), 'Enquetes Criadas')]")
+    @FindBy(id = "user-profile-created-polls-title")
     private WebElement createdPollsSectionTitle;
 
+    @FindBy(css = "[id^='poll-card-']")
     private List<WebElement> pollCards;
     
-    @FindBy(xpath = "//h1[contains(text(), 'Erro ao carregar perfil')]")
+    @FindBy(id = "profile-error-title")
     private WebElement errorLoadingProfileTitle;
 
-    @FindBy(xpath = "//p[contains(@class, 'text-gray-700')]")
+    @FindBy(id = "profile-error-message")
     private WebElement errorMessageText;
+
+    @FindBy(id = "user-profile-no-polls-message")
+    private WebElement noPollsMessageText;
 
     public ProfilePage(WebDriver webDriver) {
         super(webDriver);
@@ -64,6 +68,22 @@ public class ProfilePage extends BasePage {
     public String getErrorMessageText() {
         try {
             return errorMessageText.getText();
+        } catch (org.openqa.selenium.NoSuchElementException e) {
+            return "";
+        }
+    }
+
+    public boolean isNoPollsMessageVisible() {
+        try {
+            return noPollsMessageText.isDisplayed();
+        } catch (org.openqa.selenium.NoSuchElementException e) {
+            return false;
+        }
+    }
+
+    public String getNoPollsMessageText() {
+        try {
+            return noPollsMessageText.getText();
         } catch (org.openqa.selenium.NoSuchElementException e) {
             return "";
         }
