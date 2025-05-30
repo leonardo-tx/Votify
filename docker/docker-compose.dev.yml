@@ -1,8 +1,8 @@
 services:
   api-dev:
     build:
-      context: .
-      dockerfile: Dockerfile.api
+      context: ../
+      dockerfile: docker/Dockerfile.api
     ports:
       - "8081:8081"
     depends_on:
@@ -14,8 +14,8 @@ services:
 
   frontend:
     build:
-      context: .
-      dockerfile: Dockerfile.frontend
+      context: ../
+      dockerfile: docker/Dockerfile.frontend
     ports:
       - "3000:3000"
     volumes:

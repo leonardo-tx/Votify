@@ -16,7 +16,7 @@
           </list>
         </option>
         <option name="commandLineOptions" value="--build" />
-        <option name="sourceFilePath" value="docker-compose.yml" />
+        <option name="sourceFilePath" value="docker/docker-compose.yml" />
         <option name="upDetach" value="false" />
       </settings>
     </deployment>

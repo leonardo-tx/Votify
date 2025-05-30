@@ -1,23 +1,23 @@
 services:
   api:
     build:
-      context: .
-      dockerfile: Dockerfile.api
+      context: ../
+      dockerfile: docker/Dockerfile.api
     ports:
       - "8081:8081"
     depends_on:
       db-prod:
         condition: service_healthy
     environment:
-      JAVA_ARGS: "-Dspring.profiles.active=prod -Duser.timezone=UTC"
+      JAVA_ARGS: "-Duser.timezone=UTC"
       DATABASE_NAME: "db-prod"
       DB_PASSWORD: ${DB_PASSWORD}
       REFRESH_TOKEN_SECRET: ${REFRESH_TOKEN_SECRET}
 
   frontend:
     build:
-      context: .
-      dockerfile: Dockerfile.frontend
+      context: ../
+      dockerfile: docker/Dockerfile.frontend
       args:
         NEXT_PUBLIC_API_URL: "api:8081"
     ports:
