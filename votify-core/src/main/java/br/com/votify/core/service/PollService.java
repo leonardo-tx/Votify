@@ -27,7 +27,7 @@ public class PollService {
     public Poll createPoll(Poll poll, User responsible) throws VotifyException {
         Instant now = Instant.now();
         if (poll.getStartDate() == null) {
-            poll.setStartDate(now);
+            poll.setStartDate(now.plusMinutes(1));
         }
         PollValidator.validateFields(poll, now);
         poll.setResponsible(responsible);
