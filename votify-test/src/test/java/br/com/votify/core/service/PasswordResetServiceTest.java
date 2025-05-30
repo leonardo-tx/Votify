@@ -14,6 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.core.env.Environment;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -38,6 +39,12 @@ public class PasswordResetServiceTest {
     @Mock
     private PasswordResetProperties passwordResetProperties;
 
+    @Mock
+    private Environment environment;
+
+    @Mock
+    private EmailService emailService;
+
     @InjectMocks
     private PasswordResetService passwordResetService;
 
@@ -57,6 +64,8 @@ public class PasswordResetServiceTest {
 
     @Test
     public void createPasswordResetRequest_Success() throws VotifyException {
+        when(environment.getActiveProfiles()).thenReturn(new String[]{"test"});
+
         when(userRepository.findByEmail(testEmail)).thenReturn(Optional.of(testUser));
         when(passwordResetProperties.getExpirationMinutes()).thenReturn(15);
         when(passwordResetTokenRepository.findByUserAndExpiryDateAfter(eq(testUser), any(Date.class)))
@@ -64,7 +73,7 @@ public class PasswordResetServiceTest {
 
         when(passwordResetTokenRepository.save(any(PasswordResetToken.class))).thenAnswer(i -> i.getArgument(0));
 
-        String code = passwordResetService.createPasswordResetRequest(testEmail);
+        Optional<String> code = passwordResetService.createPasswordResetRequest(testEmail);
 
         assertNotNull(code);
         verify(passwordResetTokenRepository).findByUserAndExpiryDateAfter(eq(testUser), any(Date.class));
