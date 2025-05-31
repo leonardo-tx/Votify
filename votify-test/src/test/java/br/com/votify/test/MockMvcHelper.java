@@ -31,7 +31,7 @@ public class MockMvcHelper {
     ) throws Exception {
         UserLoginDTO userLoginDTO = new UserLoginDTO(email, password);
         MvcResult mvcResult = testSuccessfulResponse(
-                mockMvc.perform(post("/auth/login")
+                mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(userLoginDTO))
                 ),
@@ -73,7 +73,7 @@ public class MockMvcHelper {
             VotifyErrorCode expectedErrorCode
     ) throws Exception {
         UserLoginDTO userLoginDTO = new UserLoginDTO(email, password);
-        ResultActions resultActions = mockMvc.perform(post("/auth/login")
+        ResultActions resultActions = mockMvc.perform(post("/api/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(userLoginDTO))
         );

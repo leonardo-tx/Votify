@@ -1,6 +1,7 @@
 package br.com.votify.core.service;
 
 import br.com.votify.core.domain.entities.polls.*;
+import br.com.votify.core.domain.events.PollUpdateEvent;
 import br.com.votify.core.repository.VoteRepository;
 import br.com.votify.core.utils.validators.PollValidator;
 import br.com.votify.core.domain.entities.users.User;
@@ -10,6 +11,7 @@ import br.com.votify.core.utils.exceptions.VotifyException;
 import br.com.votify.core.utils.validators.VoteValidator;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -23,6 +25,7 @@ import java.util.Optional;
 public class PollService {
     private final PollRepository pollRepository;
     private final VoteRepository voteRepository;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     public Poll createPoll(Poll poll, User responsible) throws VotifyException {
         Instant now = Instant.now();
@@ -60,7 +63,11 @@ public class PollService {
                 voteOption.incrementCount();
             }
         }
-        return voteRepository.save(vote);
+        pollRepository.save(poll);
+        Vote createdVote = voteRepository.save(vote);
+
+        applicationEventPublisher.publishEvent(new PollUpdateEvent(this, poll));
+        return createdVote;
     }
 
     public Vote getVote(Poll poll, User user) {
