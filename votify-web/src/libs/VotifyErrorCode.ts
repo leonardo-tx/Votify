@@ -23,6 +23,8 @@ enum VotifyErrorCode {
   ACCESS_TOKEN_INVALID = "access.token.invalid",
   LOGIN_UNAUTHORIZED = "login.unauthorized",
   LOGIN_ALREADY_LOGGED = "login.already.logged",
+  EMAIL_ALREADY_CONFIRMED = 'email.already.confirmed',
+  EMAIL_CONFIRMATION_CODE_INVALID = 'email.confirmation.code.invalid',
   COMMON_UNAUTHORIZED = "common.unauthorized",
   INTERNAL = "internal",
   BAD_REQUEST = "bad.request",
