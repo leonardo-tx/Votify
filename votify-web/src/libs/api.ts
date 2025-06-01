@@ -79,7 +79,9 @@ export const resetPassword = async (
   });
 };
 
-export async function confirmEmail(request: EmailConfirmationRequestDTO): Promise<ApiResponse<null>> {
+export const confirmEmail = async (
+    request: EmailConfirmationRequestDTO,
+  ): Promise<ApiResponse<null>> => {
     return await commonRequester(async () => {
     const { data } = await api.post<ApiResponse<null>>(
       `/auth/confirm-email`, {
@@ -90,32 +92,6 @@ export async function confirmEmail(request: EmailConfirmationRequestDTO): Promis
     return data;
   });
 }
-
-export const forgotPassword = async (
-    request: UserPasswordResetRequestDto,
-): Promise<ApiResponse<UserPasswordResetResponseDto | null>> => {
-  return await commonRequester(async () => {
-    const { data } = await api.post<ApiResponse<UserPasswordResetResponseDto>>(
-        "/auth/forgot-password",
-        request,
-    );
-    return data;
-  });
-};
-
-export const resetPassword = async (
-    request: UserPasswordResetConfirmDTO,
-): Promise<ApiResponse<UserPasswordResetConfirmDTO | null>> => {
-  return await commonRequester(async () => {
-    const { data } = await api.post<ApiResponse<null>>(
-        "/auth/reset-password",
-        request,
-    );
-    return data;
-  });
-};
-
-
 
 export const getMyPolls = async (
   page: number = 0,

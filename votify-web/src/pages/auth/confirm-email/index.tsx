@@ -25,21 +25,16 @@ function ConfirmEmailPage() {
         }
 
         const handleConfirm = async () => {
-            try {
-                const response = await confirmEmail({ email, code });
-                if (response.success) {
+            const response = await confirmEmail({ email, code });
+            if (response.success) {
 
-                    setStatus('success');
-                    setMessage('Email confirmado com sucesso! Redirecionando...');
-                    setTimeout(() => navigate('/login'), 3000);
-                } else {
-                    setStatus('error');
-                    setMessage(getErrorMessage(response.errorCode));
-                    setTimeout(() => navigate('/'), 4000);
-                }
-            } catch (err: any) {
+                setStatus('success');
+                setMessage('Email confirmado com sucesso! Redirecionando...');
+                setTimeout(() => navigate('/login'), 3000);
+            } else {
                 setStatus('error');
-                setMessage("Erro inesperado. Tente novamente." + err.response?.data?.errorCode);
+                setMessage(getErrorMessage(response.errorCode));
+                setTimeout(() => navigate('/'), 4000);
             }
         };
 
