@@ -1,9 +1,9 @@
 package br.com.votify.core.utils.validators;
 
-import br.com.votify.core.domain.entities.polls.Poll;
-import br.com.votify.core.domain.entities.polls.Vote;
-import br.com.votify.core.domain.entities.polls.VoteOption;
-import br.com.votify.core.domain.entities.users.CommonUser;
+import br.com.votify.core.model.poll.Poll;
+import br.com.votify.core.model.poll.Vote;
+import br.com.votify.core.model.poll.field.VoteOption;
+import br.com.votify.infra.persistence.user.UserEntity;
 import br.com.votify.core.utils.exceptions.VotifyErrorCode;
 import br.com.votify.core.utils.exceptions.VotifyException;
 import net.jqwik.api.*;
@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class VoteValidatorTest {
     @Test
     public void testValidVote() {
-        User user = new CommonUser();
+        UserEntity user = new CommonUser();
         Poll poll = new Poll();
         poll.setChoiceLimitPerUser(2);
         poll.setVoteOptions(List.of(
@@ -34,7 +34,7 @@ public class VoteValidatorTest {
 
     @Test
     public void testVoteWithNullUser() {
-        User user = null;
+        UserEntity user = null;
         Poll poll = new Poll();
         poll.setChoiceLimitPerUser(2);
         poll.setVoteOptions(List.of(
@@ -55,7 +55,7 @@ public class VoteValidatorTest {
 
     @Test
     public void testVoteWithNullPoll() {
-        User user = new CommonUser();
+        UserEntity user = new CommonUser();
         Poll poll = null;
 
         Vote vote = new Vote(null, 17, poll, user);

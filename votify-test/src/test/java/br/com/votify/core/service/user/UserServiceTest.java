@@ -1,20 +1,20 @@
-package br.com.votify.core.service;
+package br.com.votify.core.service.user;
 
-import br.com.votify.core.domain.entities.tokens.AuthTokens;
-import br.com.votify.core.domain.entities.tokens.EmailConfirmation;
-import br.com.votify.core.domain.entities.tokens.RefreshToken;
-import br.com.votify.core.domain.entities.users.*;
-import br.com.votify.core.repository.PollRepository;
-import br.com.votify.core.repository.UserRepository;
+import br.com.votify.core.model.user.User;
+import br.com.votify.core.model.user.UserRegister;
+import br.com.votify.core.properties.user.UserProperties;
+import br.com.votify.core.repository.poll.PollRepository;
+import br.com.votify.core.repository.poll.VoteRepository;
+import br.com.votify.core.repository.user.UserRepository;
 import br.com.votify.core.utils.exceptions.VotifyErrorCode;
 import br.com.votify.core.utils.exceptions.VotifyException;
+import br.com.votify.infra.persistence.user.UserEntity;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.ArrayList;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -40,37 +40,46 @@ public class UserServiceTest {
     @Mock
     private PollRepository pollRepository;
 
+    @Mock
+    private VoteRepository voteRepository;
+
+    @Mock
+    private UserProperties userProperties;
+
     @InjectMocks
     private UserService userService;
 
-    private CommonUser user;
+    private UserRegister userRegister;
 
     @BeforeEach
-    public void setupBeforeEach() {
-        this.user = CommonUser.builder()
-                .id(1L)
-                .userName("silverhand")
-                .name("Jhonny Silverhand")
-                .email("jhonny@nightcity.2077")
-                .password("6Samurai6")
-                .votes(new ArrayList<>())
-                .polls(new ArrayList<>())
-                .build();
+    public void setupBeforeEach() throws VotifyException {
+        this.userRegister = new UserRegister(
+                "silverhand",
+                "Jhonny Silverhand",
+                "jhonny@nightcity.2077",
+                "6Samurai6"
+        );
     }
 
     @Test
     public void createValidUser() throws VotifyException {
-        when(userRepository.existsByEmail(user.getEmail())).thenReturn(false);
-        when(userRepository.existsByUserName(user.getUserName())).thenReturn(false);
-        when(passwordEncoderService.encryptPassword(user.getPassword())).thenReturn(user.getPassword());
-        when(emailConfirmationService.addUser(user, null)).thenReturn(new EmailConfirmation());
-        when(userRepository.save(user)).thenReturn(user);
+        UserRegister userRegister = new UserRegister(
+                "silverhand",
+                "Jhonny Silverhand",
+                "jhonny@nightcity.2077",
+                "6Samurai6"
+        );
 
-        User userFromService = assertDoesNotThrow(() -> userService.register(user));
+        when(userRepository.existsByEmail(userRegister.getEmail())).thenReturn(false);
+        when(userRepository.existsByUserName(userRegister.getUserName())).thenReturn(false);
+        when(passwordEncoderService.encryptPassword(userRegister.getPassword()))
+                .thenReturn(userRegister.getPassword().getValue());
+        doNothing().when(emailConfirmationService).addEmailConfirmation(any(User.class), null);
+        when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
+
+        User userFromService = assertDoesNotThrow(() -> userService.register(userRegister));
         assertNotNull(userFromService);
         assertNull(userFromService.getId());
-
-        verify(passwordEncoderService).encryptPassword(user.getPassword());
     }
 
     @Test
@@ -99,7 +108,7 @@ public class UserServiceTest {
     @Test
     public void getUserById() {
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
-        User user = assertDoesNotThrow(() -> userService.getUserById(1L));
+        UserEntity user = assertDoesNotThrow(() -> userService.getUserById(1L));
 
         assertNotNull(user);
     }
@@ -185,9 +194,9 @@ public class UserServiceTest {
     }
 
     @Test
-    public void deleteUser() {
-        assertDoesNotThrow(() -> userService.deleteUser(user));
-        verify(userRepository).deleteById(user.getId());
+    public void delete() {
+        assertDoesNotThrow(() -> userService.delete(user));
+        verify(userRepository).delete(user);
     }
 
     @Test
@@ -230,9 +239,9 @@ public class UserServiceTest {
 
         when(contextService.getUserOrThrow()).thenReturn(user);
         when(userRepository.existsByUserName(newUserName)).thenReturn(false);
-        when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArguments()[0]);
+        when(userRepository.save(any(UserEntity.class))).thenAnswer(i -> i.getArguments()[0]);
 
-        User updatedUser = userService.updateUserInfo(newName, newUserName);
+        UserEntity updatedUser = userService.updateUserInfo(newName, newUserName);
 
         assertNotNull(updatedUser);
         assertEquals(newName, updatedUser.getName());
@@ -246,9 +255,9 @@ public class UserServiceTest {
         String newName = "Johnny Only Name Updated";
 
         when(contextService.getUserOrThrow()).thenReturn(user);
-        when(userRepository.save(any(User.class))).thenReturn(user);
+        when(userRepository.save(any(UserEntity.class))).thenReturn(user);
 
-        User updatedUser = userService.updateUserInfo(newName, null);
+        UserEntity updatedUser = userService.updateUserInfo(newName, null);
 
         assertNotNull(updatedUser);
         assertEquals(newName, updatedUser.getName());
@@ -263,9 +272,9 @@ public class UserServiceTest {
         String newName = "Johnny Only Name Updated";
 
         when(contextService.getUserOrThrow()).thenReturn(user);
-        when(userRepository.save(any(User.class))).thenReturn(user);
+        when(userRepository.save(any(UserEntity.class))).thenReturn(user);
 
-        User updatedUser = userService.updateUserInfo(newName, "");
+        UserEntity updatedUser = userService.updateUserInfo(newName, "");
 
         assertNotNull(updatedUser);
         assertEquals(newName, updatedUser.getName());
@@ -280,9 +289,9 @@ public class UserServiceTest {
         String newUserName = "diamondhand";
 
         when(contextService.getUserOrThrow()).thenReturn(user);
-        when(userRepository.save(any(User.class))).thenReturn(user);
+        when(userRepository.save(any(UserEntity.class))).thenReturn(user);
 
-        User updatedUser = userService.updateUserInfo("  ", newUserName);
+        UserEntity updatedUser = userService.updateUserInfo("  ", newUserName);
 
         assertNotNull(updatedUser);
         assertEquals(user.getName(), updatedUser.getName());
@@ -305,7 +314,7 @@ public class UserServiceTest {
         );
 
         assertEquals(VotifyErrorCode.USER_NAME_ALREADY_EXISTS, exception.getErrorCode());
-        verify(userRepository, never()).save(any(User.class));
+        verify(userRepository, never()).save(any(UserEntity.class));
     }
 
     @Test
@@ -317,7 +326,7 @@ public class UserServiceTest {
         when(contextService.getUserOrThrow()).thenReturn(user);
         when(passwordEncoderService.checkPassword(user, oldPassword)).thenReturn(true);
         when(passwordEncoderService.encryptPassword(newPassword)).thenReturn(encryptedNewPassword);
-        when(userRepository.save(any(User.class))).thenReturn(user);
+        when(userRepository.save(any(UserEntity.class))).thenReturn(user);
 
         assertDoesNotThrow(() -> userService.updateUserPassword(oldPassword, newPassword));
 
@@ -341,7 +350,7 @@ public class UserServiceTest {
 
         assertEquals(VotifyErrorCode.INVALID_OLD_PASSWORD, exception.getErrorCode());
         verify(passwordEncoderService, never()).encryptPassword(anyString());
-        verify(userRepository, never()).save(any(User.class));
+        verify(userRepository, never()).save(any(UserEntity.class));
     }
 
     @Test
@@ -351,7 +360,7 @@ public class UserServiceTest {
         when(userRepository.existsByEmail(newEmail)).thenReturn(false);
         when(emailConfirmationService.addUser(user, newEmail)).thenReturn(new EmailConfirmation());
 
-        User updatedUser = userService.updateUserEmail(newEmail);
+        UserEntity updatedUser = userService.updateUserEmail(newEmail);
 
         assertNotNull(updatedUser);
         assertNotEquals(newEmail, updatedUser.getEmail());
@@ -370,7 +379,7 @@ public class UserServiceTest {
 
         assertEquals(VotifyErrorCode.EMAIL_ALREADY_EXISTS, exception.getErrorCode());
         assertNotEquals("rogue@afterlife.2077", user.getEmail());
-        verify(userRepository, never()).save(any(User.class));
+        verify(userRepository, never()).save(any(UserEntity.class));
     }
 
     @Test
@@ -390,7 +399,7 @@ public class UserServiceTest {
         assertEquals(VotifyErrorCode.EMAIL_INVALID_LENGTH, exceptionBlank.getErrorCode());
 
         assertNotEquals("   ", user.getEmail());
-        verify(userRepository, never()).save(any(User.class));
+        verify(userRepository, never()).save(any(UserEntity.class));
     }
 
     @Test
@@ -398,11 +407,11 @@ public class UserServiceTest {
         String sameEmail = user.getEmail();
         when(contextService.getUserOrThrow()).thenReturn(user);
 
-        User resultUser = userService.updateUserEmail(sameEmail);
+        UserEntity resultUser = userService.updateUserEmail(sameEmail);
 
         assertNotNull(resultUser);
         assertEquals(sameEmail, resultUser.getEmail());
         verify(userRepository, never()).existsByEmail(anyString());
-        verify(userRepository, never()).save(any(User.class));
+        verify(userRepository, never()).save(any(UserEntity.class));
     }
 }

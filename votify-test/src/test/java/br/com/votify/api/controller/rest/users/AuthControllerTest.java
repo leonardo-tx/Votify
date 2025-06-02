@@ -127,7 +127,7 @@ public class AuthControllerTest extends ControllerTest {
 
         mockMvcHelper.testSuccessfulResponse(resultActions, HttpStatus.OK)
                 .andExpect(jsonPath("data.code", is(notNullValue())))
-                .andExpect(jsonPath("data.expirationMinutes", is(securityConfig.getPasswordResetProperties().getExpirationMinutes())));
+                .andExpect(jsonPath("data.expirationMinutes", is(securityConfig.getUserProperties().getResetPasswordConfirmationExpirationMinutes())));
 
         ApiResponse<PasswordResetResponseDTO> apiResponse = objectMapper.readValue(
                 resultActions.andReturn().getResponse().getContentAsByteArray(),
