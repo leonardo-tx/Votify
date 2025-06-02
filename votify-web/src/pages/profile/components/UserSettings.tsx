@@ -36,6 +36,7 @@ const UserSettings: React.FC = () => {
             onClick={handleEditProfile}
             scheme="primary"
             disabled={isDeleting}
+            id="edit-profile-button"
           >
             Editar Informações do Usuário
           </Button>
@@ -44,6 +45,7 @@ const UserSettings: React.FC = () => {
             scheme="red"
             variant="text"
             disabled={isDeleting}
+            id="delete-account-button"
           >
             {isDeleting ? "Deletando..." : "Deletar Conta"}
           </Button>

@@ -72,12 +72,18 @@ export default function EditProfilePage() {
           className="shadow-md rounded-lg p-6 space-y-4 flex flex-col gap-2"
         >
           {formError && (
-            <p className="text-red-500 text-sm bg-red-100 p-3 rounded">
+            <p 
+              className="text-red-500 text-sm bg-red-100 p-3 rounded" 
+              id="profile-form-error-message"
+            >
               {formError}
             </p>
           )}
           {successMessage && (
-            <p className="text-green-500 text-sm bg-green-100 p-3 rounded">
+            <p 
+              className="text-green-500 text-sm bg-green-100 p-3 rounded" 
+              id="profile-form-success-message"
+            >
               {successMessage}
             </p>
           )}
@@ -88,6 +94,7 @@ export default function EditProfilePage() {
             </label>
             <Input
               type="text"
+              name="name"
               id="name"
               value={userInfo.name}
               onChange={(e) =>
@@ -103,6 +110,7 @@ export default function EditProfilePage() {
             </label>
             <Input
               type="text"
+              name="userName"
               id="userName"
               value={userInfo.userName}
               onChange={(e) =>
@@ -113,7 +121,12 @@ export default function EditProfilePage() {
             />
           </div>
 
-          <Button className="self-center" scheme="primary" type="submit">
+          <Button
+            className="self-center"
+            scheme="primary"
+            type="submit"
+            id="save-profile-button"
+          >
             Salvar Alterações
           </Button>
         </form>
