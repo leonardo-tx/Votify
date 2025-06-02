@@ -18,7 +18,7 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
-public class AuthControllerTest extends ControllerTest {
+class AuthControllerTest extends ControllerTest {
     private static PasswordResetResponseDTO passwordResetResponseDTO;
     private static String emailConfirmationCode;
 
@@ -27,7 +27,7 @@ public class AuthControllerTest extends ControllerTest {
 
     @Test
     @Order(0)
-    public void register() throws Exception {
+    void register() throws Exception {
         UserRegisterDTO userRegisterDTO = new UserRegisterDTO(
                 "test",
                 "Teste",
@@ -54,7 +54,7 @@ public class AuthControllerTest extends ControllerTest {
 
     @Test
     @Order(1)
-    public void login_WhenEmailNotConfirmed_ShouldReturnError() throws Exception {
+    void login_WhenEmailNotConfirmed_ShouldReturnError() throws Exception {
         UserLoginDTO userLoginDTO = new UserLoginDTO("123@gmail.com", "12345678");
         ResultActions resultActions = mockMvc.perform(post("/api/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -64,7 +64,7 @@ public class AuthControllerTest extends ControllerTest {
 
     @Test
     @Order(2)
-    public void confirmEmail() throws Exception {
+    void confirmEmail() throws Exception {
         EmailConfirmationRequestDTO emailConfirmationRequestDto = new EmailConfirmationRequestDTO(
                 "123@gmail.com",
                 emailConfirmationCode
@@ -78,7 +78,7 @@ public class AuthControllerTest extends ControllerTest {
 
     @Test
     @Order(3)
-    public void login_WhenEmailConfirmed_ShouldReturnTokens() throws Exception {
+    void login_WhenEmailConfirmed_ShouldReturnTokens() throws Exception {
         UserLoginDTO userLoginDTO = new UserLoginDTO("123@gmail.com", "12345678");
         ResultActions resultActions = mockMvc.perform(post("/api/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -91,7 +91,7 @@ public class AuthControllerTest extends ControllerTest {
 
     @Test
     @Order(4)
-    public void logout() throws Exception {
+    void logout() throws Exception {
         Cookie[] cookies = mockMvcHelper.login("123@gmail.com", "12345678");
 
         ResultActions resultActions = mockMvc.perform(post("/api/auth/logout")
@@ -106,7 +106,7 @@ public class AuthControllerTest extends ControllerTest {
 
     @Test
     @Order(4)
-    public void refreshTokens() throws Exception {
+    void refreshTokens() throws Exception {
         Cookie[] cookies = mockMvcHelper.login("123@gmail.com", "12345678");
 
         ResultActions resultActions = mockMvc.perform(post("/api/auth/refresh-tokens")
@@ -119,7 +119,7 @@ public class AuthControllerTest extends ControllerTest {
 
     @Test
     @Order(4)
-    public void forgotPassword() throws Exception {
+    void forgotPassword() throws Exception {
         PasswordResetRequestDTO passwordResetRequestDTO = new PasswordResetRequestDTO("123@gmail.com");
         ResultActions resultActions = mockMvc.perform(post("/api/auth/forgot-password")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -127,7 +127,7 @@ public class AuthControllerTest extends ControllerTest {
 
         mockMvcHelper.testSuccessfulResponse(resultActions, HttpStatus.OK)
                 .andExpect(jsonPath("data.code", is(notNullValue())))
-                .andExpect(jsonPath("data.expirationMinutes", is(securityConfig.getPasswordResetProperties().getExpirationMinutes())));
+                .andExpect(jsonPath("data.expirationMinutes", is(securityConfig.getUserProperties().getResetPasswordConfirmationExpirationMinutes())));
 
         ApiResponse<PasswordResetResponseDTO> apiResponse = objectMapper.readValue(
                 resultActions.andReturn().getResponse().getContentAsByteArray(),
@@ -138,7 +138,7 @@ public class AuthControllerTest extends ControllerTest {
 
     @Test
     @Order(5)
-    public void forgotPasswordDuplicated() throws Exception {
+    void forgotPasswordDuplicated() throws Exception {
         PasswordResetRequestDTO passwordResetRequestDTO = new PasswordResetRequestDTO("123@gmail.com");
         ResultActions resultActions = mockMvc.perform(post("/api/auth/forgot-password")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -149,7 +149,7 @@ public class AuthControllerTest extends ControllerTest {
 
     @Test
     @Order(6)
-    public void resetPassword() throws Exception {
+    void resetPassword() throws Exception {
         PasswordResetConfirmDTO passwordResetConfirmDTO = new PasswordResetConfirmDTO(
                 passwordResetResponseDTO.getCode(),
                 "87654321"
@@ -164,7 +164,7 @@ public class AuthControllerTest extends ControllerTest {
 
     @Test
     @Order(7)
-    public void loginAfterPasswordReset() throws Exception {
+    void loginAfterPasswordReset() throws Exception {
         UserLoginDTO userLoginDTO = new UserLoginDTO("123@gmail.com", "87654321");
         ResultActions resultActions = mockMvc.perform(post("/api/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -177,7 +177,7 @@ public class AuthControllerTest extends ControllerTest {
 
     @Test
     @Order(8)
-    public void loginAfterChangingEmail() throws Exception {
+    void loginAfterChangingEmail() throws Exception {
         Cookie[] cookies = mockMvcHelper.login("123@gmail.com", "87654321");
         UserUpdateEmailRequestDTO userUpdateEmailRequestDTO = new UserUpdateEmailRequestDTO("321@gmail.com");
 
@@ -197,7 +197,7 @@ public class AuthControllerTest extends ControllerTest {
 
     @Test
     @Order(10)
-    public void confirmChangedEmailNotAuthenticated() throws Exception {
+    void confirmChangedEmailNotAuthenticated() throws Exception {
         EmailConfirmationRequestDTO emailConfirmationRequestDto = new EmailConfirmationRequestDTO(
                 null,
                 emailConfirmationCode
@@ -210,7 +210,7 @@ public class AuthControllerTest extends ControllerTest {
 
     @Test
     @Order(11)
-    public void confirmChangedEmail() throws Exception {
+    void confirmChangedEmail() throws Exception {
         Cookie[] cookies = mockMvcHelper.login("123@gmail.com", "87654321");
         EmailConfirmationRequestDTO emailConfirmationRequestDto = new EmailConfirmationRequestDTO(
                 null,

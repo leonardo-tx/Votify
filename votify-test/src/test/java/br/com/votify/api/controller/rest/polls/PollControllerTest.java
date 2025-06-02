@@ -21,10 +21,10 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
-public class PollControllerTest extends ControllerTest {
+class PollControllerTest extends ControllerTest {
     @Test
     @Order(0)
-    public void testInsertPoll() throws Exception {
+    void testInsertPoll() throws Exception {
         List<VoteOptionInsertDTO> voteOptionInsertDTOS = List.of(
                 new VoteOptionInsertDTO("Opção 1"),
                 new VoteOptionInsertDTO("Opção 2"),
@@ -63,7 +63,7 @@ public class PollControllerTest extends ControllerTest {
 
     @Test
     @Order(1)
-    public void testGetPollWithoutUserVote() throws Exception {
+    void testGetPollWithoutUserVote() throws Exception {
         Cookie[] cookies = mockMvcHelper.login("common@votify.com.br", "password123");
 
         ResultActions result = mockMvc.perform(get("/api/polls/{id}", 14)
@@ -78,7 +78,7 @@ public class PollControllerTest extends ControllerTest {
 
     @Test
     @Order(1)
-    public void testGetPollNotFound() throws Exception {
+    void testGetPollNotFound() throws Exception {
         long nonExistentPollId = 9999L;
 
         ResultActions result = mockMvc.perform(get("/api/polls/{id}", nonExistentPollId));
@@ -87,7 +87,7 @@ public class PollControllerTest extends ControllerTest {
 
     @Test
     @Order(1)
-    public void testGetUserPolls() throws Exception {
+    void testGetUserPolls() throws Exception {
         ResultActions resultActions = mockMvc.perform(get("/api/polls/user/{id}", 3));
         mockMvcHelper.testSuccessfulResponse(resultActions, HttpStatus.OK)
                 .andExpect(jsonPath("data.pageNumber", is(0)))
@@ -101,7 +101,7 @@ public class PollControllerTest extends ControllerTest {
 
     @Test
     @Order(1)
-    public void testGetMyPollsWhenAuthenticated() throws Exception {
+    void testGetMyPollsWhenAuthenticated() throws Exception {
         Cookie[] cookies = mockMvcHelper.login("common@votify.com.br", "password123");
         ResultActions resultActions = mockMvc.perform(get("/api/polls/me")
                 .cookie(cookies));
@@ -117,7 +117,7 @@ public class PollControllerTest extends ControllerTest {
 
     @Test
     @Order(1)
-    public void testGetMyPollsWhenNotAuthenticated() throws Exception {
+    void testGetMyPollsWhenNotAuthenticated() throws Exception {
         ResultActions resultActions = mockMvc.perform(get("/api/polls/me"));
         mockMvcHelper.testSuccessfulResponse(resultActions, HttpStatus.OK)
                 .andExpect(jsonPath("data.pageNumber", is(0)))
@@ -131,7 +131,7 @@ public class PollControllerTest extends ControllerTest {
 
     @Test
     @Order(1)
-    public void testGetActivePollsNotAuthenticated() throws Exception {
+    void testGetActivePollsNotAuthenticated() throws Exception {
         ResultActions resultActions = mockMvc.perform(get("/api/polls/active"));
         mockMvcHelper.testSuccessfulResponse(resultActions, HttpStatus.OK)
                 .andExpect(jsonPath("data.pageNumber", is(0)))
@@ -145,7 +145,7 @@ public class PollControllerTest extends ControllerTest {
 
     @Test
     @Order(1)
-    public void testGetActivePollsWhenAuthenticated() throws Exception {
+    void testGetActivePollsWhenAuthenticated() throws Exception {
         Cookie[] cookies = mockMvcHelper.login("common@votify.com.br", "password123");
 
         ResultActions resultActions = mockMvc.perform(get("/api/polls/active")
@@ -162,7 +162,7 @@ public class PollControllerTest extends ControllerTest {
 
     @Test
     @Order(1)
-    public void testGetPollByIdNotAuthenticated() throws Exception {
+    void testGetPollByIdNotAuthenticated() throws Exception {
         ResultActions resultActions = mockMvc.perform(get("/api/polls/{id}", 14));
 
         mockMvcHelper.testSuccessfulResponse(resultActions, HttpStatus.OK)
@@ -176,7 +176,7 @@ public class PollControllerTest extends ControllerTest {
 
     @Test
     @Order(1)
-    public void testSearchPollsWithResults() throws Exception {
+    void testSearchPollsWithResults() throws Exception {
         ResultActions resultActions = mockMvc.perform(
                 get("/api/polls/search")
                         .param("title", "Qual")
@@ -195,7 +195,7 @@ public class PollControllerTest extends ControllerTest {
 
     @Test
     @Order(1)
-    public void testSearchPollsWithoutResults() throws Exception {
+    void testSearchPollsWithoutResults() throws Exception {
         ResultActions resultActions = mockMvc.perform(
                 get("/api/polls/search")
                         .param("title", "Algo")
@@ -210,7 +210,7 @@ public class PollControllerTest extends ControllerTest {
 
     @Test
     @Order(1)
-    public void testSearchPollsEmptyQuery() throws Exception {
+    void testSearchPollsEmptyQuery() throws Exception {
         ResultActions resultActions = mockMvc.perform(
                 get("/api/polls/search")
                         .param("title", "")
@@ -220,7 +220,7 @@ public class PollControllerTest extends ControllerTest {
 
     @Test
     @Order(1)
-    public void testSearchPollsTestQuery() throws Exception {
+    void testSearchPollsTestQuery() throws Exception {
         ResultActions resultActions = mockMvc.perform(
                 get("/api/polls/search")
                         .param("title", "Test")
@@ -237,7 +237,7 @@ public class PollControllerTest extends ControllerTest {
 
     @Test
     @Order(2)
-    public void testVotePoll() throws Exception {
+    void testVotePoll() throws Exception {
         Cookie[] cookies = mockMvcHelper.login("common@votify.com.br", "password123");
 
         VoteInsertDTO voteInsertDTO = new VoteInsertDTO(16);
@@ -251,7 +251,7 @@ public class PollControllerTest extends ControllerTest {
 
     @Test
     @Order(2)
-    public void testInvalidVotePoll() throws Exception {
+    void testInvalidVotePoll() throws Exception {
         Cookie[] cookies = mockMvcHelper.login("common@votify.com.br", "password123");
 
         VoteInsertDTO voteInsertDTO = new VoteInsertDTO(31);
@@ -264,7 +264,7 @@ public class PollControllerTest extends ControllerTest {
 
     @Test
     @Order(2)
-    public void testEmptyVotePoll() throws Exception {
+    void testEmptyVotePoll() throws Exception {
         Cookie[] cookies = mockMvcHelper.login("common@votify.com.br", "password123");
 
         VoteInsertDTO voteInsertDTO = new VoteInsertDTO(0);
@@ -277,7 +277,7 @@ public class PollControllerTest extends ControllerTest {
 
     @Test
     @Order(2)
-    public void testVoteWhenNotAuthenticated() throws Exception {
+    void testVoteWhenNotAuthenticated() throws Exception {
         VoteInsertDTO voteInsertDTO = new VoteInsertDTO(1);
         ResultActions resultActions = mockMvc.perform(post("/api/polls/{id}/vote", 14)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -287,7 +287,7 @@ public class PollControllerTest extends ControllerTest {
 
     @Test
     @Order(3)
-    public void testVotePollDuplicated() throws Exception {
+    void testVotePollDuplicated() throws Exception {
         Cookie[] cookies = mockMvcHelper.login("common@votify.com.br", "password123");
 
         VoteInsertDTO voteInsertDTO = new VoteInsertDTO(4);
@@ -300,7 +300,7 @@ public class PollControllerTest extends ControllerTest {
 
     @Test
     @Order(3)
-    public void testGetPollWithUserVote() throws Exception {
+    void testGetPollWithUserVote() throws Exception {
         Cookie[] cookies = mockMvcHelper.login("common@votify.com.br", "password123");
 
         ResultActions result = mockMvc.perform(get("/api/polls/{id}", 14)
@@ -315,7 +315,7 @@ public class PollControllerTest extends ControllerTest {
 
     @Test
     @Order(4)
-    public void testCancelPollAsOwner() throws Exception {
+    void testCancelPollAsOwner() throws Exception {
         Cookie[] cookies = mockMvcHelper.login("common@votify.com.br", "password123");
         ResultActions cancelResult = mockMvc.perform(delete("/api/polls/{id}/cancel", 14)
                 .cookie(cookies));
@@ -324,7 +324,7 @@ public class PollControllerTest extends ControllerTest {
 
     @Test
     @Order(4)
-    public void testCancelPollAsNonOwner() throws Exception {
+    void testCancelPollAsNonOwner() throws Exception {
         Cookie[] cookies = mockMvcHelper.login("admin@votify.com.br", "admin123");
         ResultActions cancelResult = mockMvc.perform(delete("/api/polls/{id}/cancel", 3)
                 .cookie(cookies));
@@ -333,7 +333,7 @@ public class PollControllerTest extends ControllerTest {
 
     @Test
     @Order(5)
-    public void testCancelPollBeforeStartIntegration() throws Exception {
+    void testCancelPollBeforeStartIntegration() throws Exception {
         List<VoteOptionInsertDTO> voteOptions = List.of(
                 new VoteOptionInsertDTO("Opção 1"),
                 new VoteOptionInsertDTO("Opção 2")
@@ -365,7 +365,7 @@ public class PollControllerTest extends ControllerTest {
 
     @Test
     @Order(6)
-    public void testCancelPollDuringVotingIntegration() throws Exception {
+    void testCancelPollDuringVotingIntegration() throws Exception {
         Instant now = Instant.now();
         PollInsertDTO pollInsertDTO = new PollInsertDTO(
                 "In Progress Poll",

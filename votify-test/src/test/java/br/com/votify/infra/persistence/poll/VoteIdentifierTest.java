@@ -1,4 +1,4 @@
-package br.com.votify.core.domain.entities.polls;
+package br.com.votify.infra.persistence.poll;
 
 import org.junit.jupiter.api.Test;
 

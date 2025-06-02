@@ -1,5 +1,6 @@
 package br.com.votify.api.controller.rest.users;
 
+import br.com.votify.core.model.user.field.Email;
 import br.com.votify.core.utils.exceptions.VotifyErrorCode;
 import br.com.votify.dto.users.UserUpdateEmailRequestDTO;
 import br.com.votify.dto.users.UserUpdateInfoRequestDTO;
@@ -16,10 +17,10 @@ import static org.hamcrest.Matchers.isA;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
-public class UserControllerTest extends ControllerTest {
+class UserControllerTest extends ControllerTest {
     @Test
     @Order(0)
-    public void getUserByIdAsGuest() throws Exception {
+    void getUserByIdAsGuest() throws Exception {
         ResultActions resultActions = mockMvc.perform(get("/api/users/{id}", 2));
         mockMvcHelper.testSuccessfulResponse(resultActions, HttpStatus.OK)
                 .andExpect(jsonPath("data.id", is(2)))
@@ -31,7 +32,7 @@ public class UserControllerTest extends ControllerTest {
 
     @Test
     @Order(0)
-    public void getUserByIdAsCommonUser() throws Exception {
+    void getUserByIdAsCommonUser() throws Exception {
         Cookie[] cookies = mockMvcHelper.login("common@votify.com.br", "password123");
         ResultActions resultActions = mockMvc.perform(get("/api/users/{id}", 1)
                 .cookie(cookies));
@@ -45,7 +46,7 @@ public class UserControllerTest extends ControllerTest {
 
     @Test
     @Order(0)
-    public void getUserByIdAsModeratorUser() throws Exception {
+    void getUserByIdAsModeratorUser() throws Exception {
         Cookie[] cookies = mockMvcHelper.login("moderator@votify.com.br", "moderator321");
         ResultActions resultActions = mockMvc.perform(get("/api/users/{id}", 1)
                 .cookie(cookies));
@@ -59,7 +60,7 @@ public class UserControllerTest extends ControllerTest {
 
     @Test
     @Order(0)
-    public void getUserByIdAsAdminUser() throws Exception {
+    void getUserByIdAsAdminUser() throws Exception {
         Cookie[] cookies = mockMvcHelper.login("admin@votify.com.br", "admin123");
         ResultActions resultActions = mockMvc.perform(get("/api/users/{id}", 3)
                 .cookie(cookies));
@@ -73,7 +74,7 @@ public class UserControllerTest extends ControllerTest {
 
     @Test
     @Order(0)
-    public void getSelf() throws Exception {
+    void getSelf() throws Exception {
         Cookie[] cookies = mockMvcHelper.login("common@votify.com.br", "password123");
         ResultActions resultActions = mockMvc.perform(get("/api/users/me")
                 .cookie(cookies));
@@ -87,14 +88,14 @@ public class UserControllerTest extends ControllerTest {
 
     @Test
     @Order(0)
-    public void getSelfNotLogged() throws Exception {
+    void getSelfNotLogged() throws Exception {
         ResultActions resultActions = mockMvc.perform(get("/api/users/me"));
         mockMvcHelper.testUnsuccessfulResponse(resultActions, VotifyErrorCode.COMMON_UNAUTHORIZED);
     }
     
     @Test
     @Order(1)
-    public void updatePassword_Success() throws Exception {
+    void updatePassword_Success() throws Exception {
         Cookie[] cookies = mockMvcHelper.login("moderator@votify.com.br", "moderator321");
         UserUpdatePasswordRequestDTO requestDTO = new UserUpdatePasswordRequestDTO("moderator321", "newSecurePass123");
 
@@ -116,7 +117,7 @@ public class UserControllerTest extends ControllerTest {
 
     @Test
     @Order(1)
-    public void updatePassword_Fail_InvalidOldPassword() throws Exception {
+    void updatePassword_Fail_InvalidOldPassword() throws Exception {
         Cookie[] cookies = mockMvcHelper.login("common@votify.com.br", "password123");
         UserUpdatePasswordRequestDTO requestDTO = new UserUpdatePasswordRequestDTO("wrongOldPassword", "newPass");
 
@@ -130,7 +131,7 @@ public class UserControllerTest extends ControllerTest {
 
     @Test
     @Order(1)
-    public void updatePassword_Fail_NotLogged() throws Exception {
+    void updatePassword_Fail_NotLogged() throws Exception {
         UserUpdatePasswordRequestDTO requestDTO = new UserUpdatePasswordRequestDTO("anyPassword", "newPass");
 
         ResultActions resultActions = mockMvc.perform(put("/api/users/me/password")
@@ -142,7 +143,7 @@ public class UserControllerTest extends ControllerTest {
 
     @Test
     @Order(1)
-    public void updateEmail_Success() throws Exception {
+    void updateEmail_Success() throws Exception {
         Cookie[] cookies = mockMvcHelper.login("admin@votify.com.br", "admin123");
         String oldEmail = "admin@votify.com.br";
         String newEmail = "admin-new@votify.com.br";
@@ -164,7 +165,7 @@ public class UserControllerTest extends ControllerTest {
 
     @Test
     @Order(1)
-    public void updateEmail_Fail_EmailExists() throws Exception {
+    void updateEmail_Fail_EmailExists() throws Exception {
         Cookie[] cookies = mockMvcHelper.login("common@votify.com.br", "password123");
         String existingEmail = "moderator@votify.com.br";
         UserUpdateEmailRequestDTO requestDTO = new UserUpdateEmailRequestDTO(existingEmail);
@@ -179,7 +180,7 @@ public class UserControllerTest extends ControllerTest {
 
     @Test
     @Order(1)
-    public void updateEmail_Fail_InvalidEmail() throws Exception {
+    void updateEmail_Fail_InvalidEmail() throws Exception {
         Cookie[] cookies = mockMvcHelper.login("common@votify.com.br", "password123");
 
         UserUpdateEmailRequestDTO requestDTOBlank = new UserUpdateEmailRequestDTO("   ");
@@ -190,8 +191,8 @@ public class UserControllerTest extends ControllerTest {
         mockMvcHelper.testUnsuccessfulResponse(
                 resultActionsBlank,
                 VotifyErrorCode.EMAIL_INVALID_LENGTH,
-                User.EMAIL_MIN_LENGTH,
-                User.EMAIL_MAX_LENGTH
+                Email.MIN_LENGTH,
+                Email.MAX_LENGTH
         );
 
         UserUpdateEmailRequestDTO requestDTONull = new UserUpdateEmailRequestDTO(null);
@@ -204,7 +205,7 @@ public class UserControllerTest extends ControllerTest {
 
     @Test
     @Order(1)
-    public void updateEmail_Fail_NotLogged() throws Exception {
+    void updateEmail_Fail_NotLogged() throws Exception {
         UserUpdateEmailRequestDTO requestDTO = new UserUpdateEmailRequestDTO("new@email.com");
 
         ResultActions resultActions = mockMvc.perform(put("/api/users/me/email")
@@ -216,7 +217,7 @@ public class UserControllerTest extends ControllerTest {
 
     @Test
     @Order(2)
-    public void updateEmailDuplicated() throws Exception {
+    void updateEmailDuplicated() throws Exception {
         Cookie[] cookies = mockMvcHelper.login("admin@votify.com.br", "admin123");
         String newEmail = "admin-newwww@votify.com.br";
         UserUpdateEmailRequestDTO requestDTO = new UserUpdateEmailRequestDTO(newEmail);
@@ -231,7 +232,7 @@ public class UserControllerTest extends ControllerTest {
 
     @Test
     @Order(2)
-    public void updateInfoName() throws Exception {
+    void updateInfoName() throws Exception {
         Cookie[] cookies = mockMvcHelper.login("moderator@votify.com.br", "newSecurePass123");
         UserUpdateInfoRequestDTO userUpdateInfoRequestDTO = new UserUpdateInfoRequestDTO("Mod", null);
         ResultActions resultActions = mockMvc.perform(put("/api/users/me/info").cookie(cookies)
@@ -247,7 +248,7 @@ public class UserControllerTest extends ControllerTest {
 
     @Test
     @Order(3)
-    public void updateInfoUserName() throws Exception {
+    void updateInfoUserName() throws Exception {
         Cookie[] cookies = mockMvcHelper.login("moderator@votify.com.br", "newSecurePass123");
         UserUpdateInfoRequestDTO userUpdateInfoRequestDTO = new UserUpdateInfoRequestDTO("", "cool-username");
         ResultActions resultActions = mockMvc.perform(put("/api/users/me/info").cookie(cookies)
@@ -263,14 +264,14 @@ public class UserControllerTest extends ControllerTest {
 
     @Test
     @Order(3)
-    public void deleteSelfNotLogged() throws Exception {
+    void deleteSelfNotLogged() throws Exception {
         ResultActions resultActions = mockMvc.perform(delete("/api/users/me"));
         mockMvcHelper.testUnsuccessfulResponse(resultActions, VotifyErrorCode.COMMON_UNAUTHORIZED);
     }
 
     @Test
     @Order(3)
-    public void deleteSelf() throws Exception {
+    void deleteSelf() throws Exception {
         Cookie[] cookies = mockMvcHelper.login("common@votify.com.br", "password123");
         ResultActions resultActions = mockMvc.perform(delete("/api/users/me")
                 .cookie(cookies));
