@@ -2,9 +2,7 @@ package br.com.votify.core.jobs;
 
 import br.com.votify.core.domain.entities.tokens.EmailConfirmation;
 import br.com.votify.core.domain.entities.users.CommonUser;
-import br.com.votify.core.domain.entities.users.User;
 import br.com.votify.core.service.EmailConfirmationService;
-import br.com.votify.core.service.UserService;
 import br.com.votify.core.utils.EmailCodeGeneratorUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

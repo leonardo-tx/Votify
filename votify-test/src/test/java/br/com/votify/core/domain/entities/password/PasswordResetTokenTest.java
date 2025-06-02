@@ -1,12 +1,9 @@
 package br.com.votify.core.domain.entities.password;
 
 import br.com.votify.core.domain.entities.users.CommonUser;
-import br.com.votify.core.domain.entities.users.User;
 import org.junit.jupiter.api.Test;
 
 import java.util.Date;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 public class PasswordResetTokenTest {
 

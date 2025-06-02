@@ -4,7 +4,6 @@ import br.com.votify.core.domain.entities.polls.Poll;
 import br.com.votify.core.domain.entities.polls.Vote;
 import br.com.votify.core.domain.entities.polls.VoteOption;
 import br.com.votify.core.domain.entities.users.CommonUser;
-import br.com.votify.core.domain.entities.users.User;
 import br.com.votify.core.utils.exceptions.VotifyErrorCode;
 import br.com.votify.core.utils.exceptions.VotifyException;
 import net.jqwik.api.*;

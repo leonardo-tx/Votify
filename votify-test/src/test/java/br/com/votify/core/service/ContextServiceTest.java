@@ -3,7 +3,6 @@ package br.com.votify.core.service;
 import br.com.votify.core.decorators.NeedsUserContext;
 import br.com.votify.core.domain.entities.tokens.AuthTokens;
 import br.com.votify.core.domain.entities.users.CommonUser;
-import br.com.votify.core.domain.entities.users.User;
 import br.com.votify.core.repository.UserRepository;
 import br.com.votify.core.utils.exceptions.VotifyErrorCode;
 import br.com.votify.core.utils.exceptions.VotifyException;
