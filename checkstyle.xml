@@ -1,0 +1,38 @@
+<!DOCTYPE module PUBLIC
+    "-//Puppy Crawl//DTD Check Configuration 1.3//EN"
+    "http://www.puppycrawl.com/dtds/configuration_1_3.dtd">
+<module name="Checker">
+    <property name="charset" value="UTF-8"/>
+
+    <module name="FileTabCharacter">
+        <property name="eachLine" value="false"/>
+    </module>
+
+    <module name="LineLength">
+        <property name="max" value="300"/>
+        <property name="ignorePattern" value="^package.*|^import.*|a href|href|http://|https://|ftp://"/>
+    </module>
+
+    <module name="TreeWalker">
+        <module name="ModifierOrder"/>
+        <module name="EmptyBlock"/>
+        <module name="LeftCurly"/>
+        <module name="RightCurly"/>
+        <module name="RegexpSinglelineJava">
+            <property name="format" value="\\\\s+$"/>
+            <property name="message" value="Line has trailing spaces."/>
+            <property name="ignoreComments" value="true"/>
+        </module>
+        <module name="RegexpSinglelineJava">
+            <property name="format" value="System\\\\.out\\\\.println"/>
+            <property name="message" value="Avoid using System.out.println. Use a logger instead."/>
+        </module>
+        <module name="UnusedImports"/>
+        <module name="RedundantImport"/>
+    </module>
+
+    <module name="RegexpMultiline">
+      <property name="format" value="\\\\n{3,}"/>
+      <property name="message" value="Avoid multiple empty lines."/>
+    </module>
+</module>

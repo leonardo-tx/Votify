@@ -1,21 +1,21 @@
 services:
   test:
     build:
-      context: .
-      dockerfile: Dockerfile.test
+      context: ../
+      dockerfile: docker/Dockerfile.test
     depends_on:
       db-test:
         condition: service_healthy
     volumes:
-      - ./votify-test/target:/build/votify-test/target-copy
+      - ./target:/build/votify-test/target-copy
     environment:
       FRONTEND_BASE_URL: "http://frontend:3000"
       DATABASE_NAME: "db-test"
 
   frontend:
     build:
-      context: .
-      dockerfile: Dockerfile.frontend
+      context: ../
+      dockerfile: docker/Dockerfile.frontend
       args:
         NEXT_PUBLIC_API_URL: "test:8081" 
 
