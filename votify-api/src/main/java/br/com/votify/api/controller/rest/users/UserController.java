@@ -1,10 +1,13 @@
 package br.com.votify.api.controller.rest.users;
 
 import br.com.votify.api.configuration.SecurityConfig;
-import br.com.votify.core.decorators.NeedsUserContext;
-import br.com.votify.core.domain.entities.users.User;
-import br.com.votify.core.service.EmailConfirmationService;
-import br.com.votify.core.service.UserService;
+import br.com.votify.core.model.user.User;
+import br.com.votify.core.model.user.field.Email;
+import br.com.votify.core.model.user.field.Name;
+import br.com.votify.core.model.user.field.Password;
+import br.com.votify.core.model.user.field.UserName;
+import br.com.votify.core.service.user.decorators.NeedsUserContext;
+import br.com.votify.core.service.user.UserService;
 import br.com.votify.core.utils.exceptions.VotifyException;
 import br.com.votify.dto.ApiResponse;
 import br.com.votify.dto.users.UserDetailedViewDTO;
@@ -27,7 +30,6 @@ import java.util.Optional;
 @NeedsUserContext
 public class UserController {
     private final UserService userService;
-    private final EmailConfirmationService emailConfirmationService;
     private final SecurityConfig securityConfig;
 
     @GetMapping("/{id}")
@@ -48,7 +50,7 @@ public class UserController {
     public ResponseEntity<ApiResponse<UserQueryDTO>> getUserByUsername(
         @PathVariable("username") String username
     ) throws VotifyException {
-        User targetUser = userService.getUserByUserName(username);
+        User targetUser = userService.getUserByUserName(new UserName(username));
         UserQueryDTO dto = UserQueryDTO.parse(targetUser, null);
         return ApiResponse.success(dto, HttpStatus.OK).createResponseEntity();
     }
@@ -65,10 +67,15 @@ public class UserController {
     public ResponseEntity<ApiResponse<Object>> deleteSelf(
         HttpServletResponse response
     ) throws VotifyException {
-        userService.deleteUser(userService.getContext().getUserOrThrow());
-
-        Cookie refreshCookie = new Cookie("refresh_token", "");
-        Cookie accessCookie = new Cookie("access_token", "");
+        userService.delete(userService.getContext().getUserOrThrow());
+        Cookie refreshCookie = new Cookie(
+                securityConfig.getUserProperties().getRefreshTokenCookieName(),
+                ""
+        );
+        Cookie accessCookie = new Cookie(
+                securityConfig.getUserProperties().getAccessTokenCookieName(),
+                ""
+        );
 
         refreshCookie.setMaxAge(0);
         accessCookie.setMaxAge(0);
@@ -83,23 +90,22 @@ public class UserController {
     public ResponseEntity<ApiResponse<UserDetailedViewDTO>> updateInfo(
         @RequestBody UserUpdateInfoRequestDTO requestDTO
     ) throws VotifyException {
+        boolean hasNameUpdate = requestDTO.getName() != null;
+        boolean hasUserNameUpdate = requestDTO.getUserName() != null;
         User updatedUser = userService.updateUserInfo(
-            requestDTO.getName(),
-            requestDTO.getUserName()
+                hasNameUpdate ? new Name(requestDTO.getName()) : null,
+                hasUserNameUpdate ? new UserName(requestDTO.getUserName()) : null
         );
-
         UserDetailedViewDTO userDetailedViewDTO = UserDetailedViewDTO.parse(updatedUser);
         return ApiResponse.success(userDetailedViewDTO, HttpStatus.OK).createResponseEntity();
     }
 
     @PutMapping("/me/email")
-    public ResponseEntity<ApiResponse<String>> updateEmail(
+    public ResponseEntity<ApiResponse<Object>> updateEmail(
         @RequestBody UserUpdateEmailRequestDTO requestDTO
     ) throws VotifyException {
-        User updatedUser = userService.updateUserEmail(requestDTO.getEmail());
-        String code = updatedUser.getEmailConfirmation().getEmailConfirmationCode();
-
-        return ApiResponse.success(code, HttpStatus.OK).createResponseEntity();
+        userService.updateUserEmail(new Email(requestDTO.getEmail()));
+        return ApiResponse.success(null, HttpStatus.OK).createResponseEntity();
     }
 
     @PutMapping("/me/password")
@@ -107,10 +113,18 @@ public class UserController {
         @RequestBody UserUpdatePasswordRequestDTO requestDTO,
         HttpServletResponse response
     ) throws VotifyException {
-        userService.updateUserPassword(requestDTO.getOldPassword(), requestDTO.getNewPassword());
-
-        Cookie refreshCookie = new Cookie("refresh_token", "");
-        Cookie accessCookie = new Cookie("access_token", "");
+        userService.updateUserPassword(
+                new Password(requestDTO.getOldPassword()),
+                new Password(requestDTO.getNewPassword())
+        );
+        Cookie refreshCookie = new Cookie(
+                securityConfig.getUserProperties().getRefreshTokenCookieName(),
+                ""
+        );
+        Cookie accessCookie = new Cookie(
+                securityConfig.getUserProperties().getAccessTokenCookieName(),
+                ""
+        );
 
         refreshCookie.setMaxAge(0);
         accessCookie.setMaxAge(0);

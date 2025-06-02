@@ -1,0 +1,80 @@
+package br.com.votify.core.service.user;
+
+import br.com.votify.core.model.user.EmailConfirmation;
+import br.com.votify.core.model.user.User;
+import br.com.votify.core.properties.user.UserProperties;
+import br.com.votify.core.model.user.field.Email;
+import br.com.votify.core.repository.user.EmailConfirmationRepository;
+import br.com.votify.core.repository.user.UserRepository;
+import br.com.votify.core.utils.exceptions.VotifyErrorCode;
+import br.com.votify.core.utils.exceptions.VotifyException;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.Instant;
+import java.util.List;
+import java.util.Optional;
+
+@Service
+@RequiredArgsConstructor
+public class EmailConfirmationService {
+    private final UserRepository userRepository;
+    private final ContextService contextService;
+    private final EmailConfirmationRepository emailConfirmationRepository;
+    private final UserProperties userProperties;
+
+    @Transactional
+    public void confirmEmail(String code, Email currentEmail) throws VotifyException {
+        User user = null;
+        if (currentEmail == null) {
+            user = contextService.getUserOrThrow();
+            currentEmail = user.getEmail();
+        }
+        EmailConfirmation emailConfirmation = emailConfirmationRepository.findByUserEmail(currentEmail)
+                .orElseThrow(() -> new VotifyException(VotifyErrorCode.EMAIL_ALREADY_CONFIRMED));
+
+        if (!emailConfirmation.getCode().matches(code)) {
+            throw new VotifyException(VotifyErrorCode.EMAIL_CONFIRMATION_CODE_INVALID);
+        }
+
+        emailConfirmationRepository.delete(emailConfirmation);
+        if (emailConfirmation.getNewEmail() == null) return;
+        if (user == null) {
+            Optional<User> optionalUser = userRepository.findById(emailConfirmation.getUserId());
+            if (optionalUser.isEmpty()) {
+                throw new VotifyException(VotifyErrorCode.USER_NOT_FOUND);
+            }
+        }
+        user.setEmail(emailConfirmation.getNewEmail());
+        userRepository.save(user);
+    }
+
+    public boolean existsByEmail(Email email) {
+        return emailConfirmationRepository.existsByUserEmail(email);
+    }
+
+    @Transactional
+    public void addEmailConfirmation(User user, Email newEmail) throws VotifyException {
+        Optional<EmailConfirmation> active = emailConfirmationRepository.findByUserEmail(user.getEmail());
+        if (active.isPresent()) {
+            if (!active.get().isExpired()) throw new VotifyException(VotifyErrorCode.PENDING_EMAIL_CONFIRMATION);
+            emailConfirmationRepository.delete(active.get());
+        }
+        EmailConfirmation emailConfirmation = new EmailConfirmation(newEmail, user, userProperties);
+        emailConfirmationRepository.save(emailConfirmation);
+    }
+
+    public List<EmailConfirmation> findExpiredAccounts() {
+        Instant now = Instant.now();
+        return emailConfirmationRepository.findAllExpired(now);
+    }
+
+    public void delete(EmailConfirmation emailConfirmation) {
+        emailConfirmationRepository.delete(emailConfirmation);
+    }
+
+    public void deleteAllByUser(User user) {
+        emailConfirmationRepository.deleteAllByUser(user);
+    }
+}

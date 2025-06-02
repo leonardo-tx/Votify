@@ -1,6 +1,6 @@
 package br.com.votify.dto.polls;
 
-import br.com.votify.core.domain.entities.polls.VoteOption;
+import br.com.votify.core.model.poll.field.VoteOption;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

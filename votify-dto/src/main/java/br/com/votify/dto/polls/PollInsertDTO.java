@@ -1,8 +1,8 @@
 package br.com.votify.dto.polls;
 
-import br.com.votify.core.domain.entities.polls.Poll;
-import br.com.votify.core.domain.entities.polls.VoteOption;
-import br.com.votify.dto.DTOInput;
+import br.com.votify.core.model.poll.PollRegister;
+import br.com.votify.core.model.poll.field.VoteOptionRegister;
+import br.com.votify.core.utils.exceptions.VotifyException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,7 +14,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public final class PollInsertDTO implements DTOInput<Poll> {
+public final class PollInsertDTO {
     private String title;
     private String description;
     private Instant startDate;
@@ -23,28 +23,19 @@ public final class PollInsertDTO implements DTOInput<Poll> {
     private Integer choiceLimitPerUser;
     private List<VoteOptionInsertDTO> voteOptions;
 
-    @Override
-    public Poll convertToEntity() {
-        Poll poll = Poll.builder()
-                .id(null)
-                .title(title)
-                .description(description)
-                .startDate(startDate)
-                .endDate(endDate)
-                .userRegistration(userRegistration)
-                .choiceLimitPerUser(choiceLimitPerUser)
-                .voteOptions(new ArrayList<>())
-                .votes(null)
-                .responsible(null)
-                .build();
-
-        if (voteOptions != null) {
-            for (VoteOptionInsertDTO voteOptionDTO : voteOptions) {
-                VoteOption voteOption = voteOptionDTO.convertToEntity();
-                voteOption.setPoll(poll);
-                poll.getVoteOptions().add(voteOption);
-            }
+    public PollRegister convertToEntity() throws VotifyException {
+        List<VoteOptionRegister> voteOptionRegisters = new ArrayList<>();
+        for (VoteOptionInsertDTO voteOption : voteOptions) {
+            voteOptionRegisters.add(voteOption.convertToEntity());
         }
-        return poll;
+        return new PollRegister(
+                title,
+                description,
+                startDate,
+                endDate,
+                userRegistration,
+                voteOptionRegisters,
+                choiceLimitPerUser
+        );
     }
 }
