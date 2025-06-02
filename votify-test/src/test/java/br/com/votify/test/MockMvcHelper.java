@@ -1,8 +1,13 @@
 package br.com.votify.test;
 
+import br.com.votify.api.configuration.SecurityConfig;
+import br.com.votify.core.model.user.AuthTokens;
+import br.com.votify.core.model.user.field.Email;
+import br.com.votify.core.model.user.field.Password;
+import br.com.votify.core.service.user.UserService;
 import br.com.votify.core.utils.exceptions.VotifyErrorCode;
 import br.com.votify.core.utils.exceptions.VotifyException;
-import br.com.votify.dto.users.UserLoginDTO;
+import br.com.votify.dto.user.UserLoginDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.Cookie;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +21,8 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import com.jayway.jsonpath.JsonPath;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -24,11 +31,21 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class MockMvcHelper {
     private final MockMvc mockMvc;
     private final ObjectMapper objectMapper;
+    private final UserService userService;
+    private final SecurityConfig securityConfig;
 
     public Cookie[] login(
             String email,
             String password
     ) throws Exception {
+        AuthTokens authTokens = mock(AuthTokens.class);
+        Cookie accessCookie = mock(Cookie.class);
+        Cookie refreshCookie = mock(Cookie.class);
+        when(userService.login(new Email(email), new Password(password))).thenReturn(authTokens);
+
+        when(securityConfig.createAccessTokenCookie(authTokens.getAccessToken())).thenReturn(accessCookie);
+        when(securityConfig.createRefreshTokenCookie(authTokens.getRefreshToken())).thenReturn(refreshCookie);
+
         UserLoginDTO userLoginDTO = new UserLoginDTO(email, password);
         MvcResult mvcResult = testSuccessfulResponse(
                 mockMvc.perform(post("/api/auth/login")

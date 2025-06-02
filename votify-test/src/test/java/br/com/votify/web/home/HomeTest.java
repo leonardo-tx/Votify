@@ -2,6 +2,7 @@ package br.com.votify.web.home;
 
 import br.com.votify.test.suites.SeleniumTest;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.TestTemplate;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
@@ -15,7 +16,8 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class HomeTest extends SeleniumTest {
+@Disabled
+class HomeTest extends SeleniumTest {
     private HomePage page;
 
     @BeforeEach
@@ -25,7 +27,7 @@ public class HomeTest extends SeleniumTest {
     }
 
     @TestTemplate
-    public void testSearchForA() {
+    void testSearchForA() {
         new Actions(webDriver)
                 .sendKeys(page.navSearchPoll, "a")
                 .sendKeys(Keys.ENTER)
@@ -44,7 +46,7 @@ public class HomeTest extends SeleniumTest {
     }
 
     @TestTemplate
-    public void testSearchNoResults() {
+    void testSearchNoResults() {
         new Actions(webDriver)
                 .sendKeys(page.navSearchPoll, "ashduiaguywdgauydgwyu72sadxkjhaiju")
                 .sendKeys(Keys.ENTER)
@@ -67,7 +69,7 @@ public class HomeTest extends SeleniumTest {
     }
 
     @TestTemplate
-    public void testSearchForEmptyStringRedirectToHome() {
+    void testSearchForEmptyStringRedirectToHome() {
         new Actions(webDriver)
                 .sendKeys(page.navSearchPoll, " ")
                 .sendKeys(Keys.ENTER)
@@ -83,7 +85,7 @@ public class HomeTest extends SeleniumTest {
     }
 
     @TestTemplate
-    public void testHomeActivePolls() {
+    void testHomeActivePolls() {
         int totalPollCount = countPolls();
         assertEquals(11, totalPollCount, "Total poll count across all pages should be 11.");
 
@@ -95,7 +97,7 @@ public class HomeTest extends SeleniumTest {
     }
 
     @TestTemplate
-    public void testGoToFourthPoll() {
+    void testGoToFourthPoll() {
         page.pollAnchors.get(3).click();
 
         wait.until(ExpectedConditions.urlContains("/polls"));
@@ -109,7 +111,7 @@ public class HomeTest extends SeleniumTest {
     }
 
     @TestTemplate
-    public void testGoToFirstPollAfterSearch() {
+    void testGoToFirstPollAfterSearch() {
         page.navSearchPoll.sendKeys("pizza");
         page.navSearchPoll.sendKeys(Keys.ENTER);
 

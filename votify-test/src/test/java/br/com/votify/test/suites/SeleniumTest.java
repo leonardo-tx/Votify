@@ -1,6 +1,8 @@
 package br.com.votify.test.suites;
 
 import br.com.votify.api.VotifyApiApplication;
+import br.com.votify.api.configuration.SecurityConfig;
+import br.com.votify.core.service.user.UserService;
 import br.com.votify.test.MockMvcHelper;
 import br.com.votify.test.SeleniumHelper;
 import br.com.votify.test.extensions.ScreenshotExtension;
@@ -17,6 +19,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.io.File;
@@ -31,7 +34,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @AutoConfigureMockMvc
 @ExtendWith({ BrowsersProviderExtension.class, ScreenshotExtension.class })
-@Order(3)
 public abstract class SeleniumTest {
     @Value("${frontend.base.url}")
     public String baseUrl;
@@ -39,6 +41,12 @@ public abstract class SeleniumTest {
     protected SeleniumHelper seleniumHelper;
     protected WebDriver webDriver;
     protected WebDriverWait wait;
+
+    @MockitoBean
+    public UserService userService;
+
+    @MockitoBean
+    public SecurityConfig securityConfig;
 
     @Autowired
     private MockMvc mockMvc;
@@ -50,7 +58,12 @@ public abstract class SeleniumTest {
     void setupBeforeEach(WebDriver webDriver) {
         this.webDriver = webDriver;
         this.wait = new WebDriverWait(webDriver, Duration.ofSeconds(10));
-        this.seleniumHelper = new SeleniumHelper(baseUrl, webDriver, wait, new MockMvcHelper(mockMvc, objectMapper));
+        this.seleniumHelper = new SeleniumHelper(
+                baseUrl,
+                webDriver,
+                wait,
+                new MockMvcHelper(mockMvc, objectMapper, userService, securityConfig)
+        );
     }
 
     @AfterEach

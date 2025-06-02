@@ -1,24 +1,28 @@
 package br.com.votify.api.controller.websocket;
 
 import br.com.votify.api.controller.websocket.polls.PollSocketController;
-import br.com.votify.core.domain.entities.polls.Poll;
-import br.com.votify.core.domain.entities.users.CommonUser;
-import br.com.votify.core.domain.events.PollUpdateEvent;
-import br.com.votify.dto.polls.PollDetailedViewDTO;
+import br.com.votify.core.model.poll.Poll;
+import br.com.votify.core.model.poll.VoteOption;
+import br.com.votify.core.model.poll.event.PollUpdateEvent;
+import br.com.votify.core.model.poll.field.Description;
+import br.com.votify.core.model.poll.field.Title;
+import br.com.votify.core.model.poll.field.VoteOptionName;
+import br.com.votify.core.utils.exceptions.VotifyException;
+import br.com.votify.dto.poll.PollDetailedViewDTO;
 import br.com.votify.test.suites.SocketControllerTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
+import java.time.Instant;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
-public class PollSocketControllerTest extends SocketControllerTest {
+class PollSocketControllerTest extends SocketControllerTest {
     @Autowired
     private PollSocketController pollSocketController;
 
@@ -26,16 +30,18 @@ public class PollSocketControllerTest extends SocketControllerTest {
     private SimpMessagingTemplate simpMessagingTemplate;
 
     @Test
-    public void testHandlePollUpdateEvent() {
-        User user = CommonUser.builder()
-                .id(1L)
-                .build();
-        Poll poll = Poll.builder()
-                .id(1L)
-                .voteOptions(List.of())
-                .votes(List.of())
-                .responsible(user)
-                .build();
+    void testHandlePollUpdateEvent() throws VotifyException {
+        Poll poll = Poll.parseUnsafe(
+                1L,
+                new Title("Title"),
+                new Description(""),
+                Instant.now(),
+                Instant.now(),
+                false,
+                List.of(VoteOption.parseUnsafe(new VoteOptionName("Option"), 1, 0, 1L)),
+                1,
+                2L
+        );
         PollUpdateEvent event = new PollUpdateEvent(this, poll);
 
         pollSocketController.handlePollUpdateEvent(event);
