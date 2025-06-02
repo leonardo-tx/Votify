@@ -38,7 +38,7 @@ public class AuthControllerTest extends ControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(userRegisterDTO)));
         mockMvcHelper.testSuccessfulResponse(resultActions, HttpStatus.CREATED)
-                .andExpect(jsonPath("data.id", is(48)))
+                .andExpect(jsonPath("data.id", is(49)))
                 .andExpect(jsonPath("data.userName", is("test")))
                 .andExpect(jsonPath("data.name", is("Teste")))
                 .andExpect(jsonPath("data.email", is("123@gmail.com")))
