@@ -1,9 +1,6 @@
 package br.com.votify.api.configuration;
 
-import br.com.votify.core.domain.entities.cookies.CookieProperties;
-import br.com.votify.core.domain.entities.password.PasswordResetProperties;
-import br.com.votify.core.domain.entities.tokens.EmailConfirmationExpirationProperties;
-import br.com.votify.core.domain.entities.tokens.TokenProperties;
+import br.com.votify.core.properties.user.UserProperties;
 import jakarta.servlet.http.Cookie;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,30 +10,21 @@ import org.springframework.context.annotation.Configuration;
 @Getter
 public class SecurityConfig {
     @Autowired
-    private TokenProperties tokenProperties;
-
-    @Autowired
-    private CookieProperties cookieProperties;
-
-    @Autowired
-    private PasswordResetProperties passwordResetProperties;
-
-    @Autowired
-    private EmailConfirmationExpirationProperties emailConfirmationExpirationProperties;
+    private UserProperties userProperties;
 
     public void configureAccessTokenCookie(Cookie cookie) {
         configureCookie(cookie);
-        cookie.setMaxAge(tokenProperties.getAccessTokenMaxAge());
+        cookie.setMaxAge(userProperties.getAccessTokenExpirationSeconds());
     }
 
     public void configureRefreshTokenCookie(Cookie cookie) {
         configureCookie(cookie);
-        cookie.setMaxAge(tokenProperties.getRefreshTokenMaxAge());
+        cookie.setMaxAge(userProperties.getRefreshTokenExpirationSeconds());
     }
 
     private void configureCookie(Cookie cookie) {
-        cookie.setHttpOnly(cookieProperties.isHttpOnly());
-        cookie.setSecure(cookieProperties.isSecure());
-        cookie.setPath(cookieProperties.getPath());
+        cookie.setHttpOnly(userProperties.isCookieHttpOnly());
+        cookie.setSecure(userProperties.isCookieSecure());
+        cookie.setPath(userProperties.getCookiePath());
     }
 }

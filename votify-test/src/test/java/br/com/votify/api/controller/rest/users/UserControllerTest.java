@@ -1,6 +1,5 @@
 package br.com.votify.api.controller.rest.users;
 
-import br.com.votify.core.domain.entities.users.User;
 import br.com.votify.core.utils.exceptions.VotifyErrorCode;
 import br.com.votify.dto.users.UserUpdateEmailRequestDTO;
 import br.com.votify.dto.users.UserUpdateInfoRequestDTO;
