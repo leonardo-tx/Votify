@@ -1,9 +1,9 @@
-package br.com.votify.core.service;
+package br.com.votify.core.service.user;
 
-import br.com.votify.core.decorators.NeedsUserContext;
-import br.com.votify.core.domain.entities.tokens.AuthTokens;
-import br.com.votify.core.domain.entities.users.CommonUser;
-import br.com.votify.core.repository.UserRepository;
+import br.com.votify.core.service.user.decorators.NeedsUserContext;
+import br.com.votify.core.model.user.AuthTokens;
+import br.com.votify.infra.persistence.user.UserEntity;
+import br.com.votify.core.repository.user.UserRepository;
 import br.com.votify.core.utils.exceptions.VotifyErrorCode;
 import br.com.votify.core.utils.exceptions.VotifyException;
 import jakarta.servlet.http.Cookie;
@@ -174,7 +174,7 @@ public class ContextServiceTest {
         when(userRepository.findById(1L)).thenReturn(Optional.of(new CommonUser()));
 
         ContextService contextService = new ContextService(userRepository, tokenService, request);
-        User user = assertDoesNotThrow(contextService::getUserOrThrow);
+        UserEntity user = assertDoesNotThrow(contextService::getUserOrThrow);
 
         assertNotNull(user);
     }
@@ -213,7 +213,7 @@ public class ContextServiceTest {
 
     @Test
     public void userFromContextIsClone() throws VotifyException, NoSuchMethodException {
-        User testUser = new CommonUser();
+        UserEntity testUser = new CommonUser();
 
         when(request.getAttribute(HandlerMapping.BEST_MATCHING_HANDLER_ATTRIBUTE)).thenReturn(handlerMethod);
         when(handlerMethod.getMethod()).thenReturn(ContextServiceTest.class.getMethod("methodThatNeedsUserContext"));

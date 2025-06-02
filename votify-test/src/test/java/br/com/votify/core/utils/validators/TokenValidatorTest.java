@@ -1,7 +1,6 @@
 package br.com.votify.core.utils.validators;
 
-import br.com.votify.core.domain.entities.tokens.RefreshToken;
-import br.com.votify.core.domain.entities.users.CommonUser;
+import br.com.votify.core.model.user.RefreshToken;
 import br.com.votify.core.utils.exceptions.VotifyErrorCode;
 import br.com.votify.core.utils.exceptions.VotifyException;
 import io.jsonwebtoken.Jwts;

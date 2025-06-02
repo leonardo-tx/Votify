@@ -1,5 +1,6 @@
 package br.com.votify.core.domain.entities.polls;
 
+import br.com.votify.infra.persistence.poll.VoteIdentifier;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;

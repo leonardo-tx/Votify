@@ -1,9 +1,8 @@
-package br.com.votify.core.service;
+package br.com.votify.core.service.user;
 
-import br.com.votify.core.domain.entities.tokens.RefreshToken;
-import br.com.votify.core.domain.entities.tokens.TokenProperties;
-import br.com.votify.core.domain.entities.users.CommonUser;
-import br.com.votify.core.repository.RefreshTokenRepository;
+import br.com.votify.core.model.user.RefreshToken;
+import br.com.votify.infra.persistence.user.UserEntity;
+import br.com.votify.core.repository.user.RefreshTokenRepository;
 import br.com.votify.core.utils.exceptions.VotifyErrorCode;
 import br.com.votify.core.utils.exceptions.VotifyException;
 import org.junit.jupiter.api.*;
@@ -28,7 +27,7 @@ public class TokenServiceTest {
 
     private TokenService tokenService;
 
-    private User user;
+    private UserEntity user;
 
     @BeforeEach
     public void setupBeforeEach() {
@@ -59,7 +58,7 @@ public class TokenServiceTest {
     @Test
     @Order(1)
     public void createAccessToken() {
-        when(refreshTokenRepository.existsById(refreshToken.getId())).thenReturn(true);
+        when(refreshTokenRepository.existsByCode(refreshToken.getId())).thenReturn(true);
 
         String accessToken = assertDoesNotThrow(() -> tokenService.createAccessToken(refreshToken));
         Long userId = assertDoesNotThrow(() -> tokenService.getUserIdFromAccessToken(accessToken));
@@ -71,7 +70,7 @@ public class TokenServiceTest {
     @Test
     @Order(1)
     public void createAccessTokenWithValidRefreshTokenButNonExistentInDatabase() {
-        when(refreshTokenRepository.existsById(refreshToken.getId())).thenReturn(false);
+        when(refreshTokenRepository.existsByCode(refreshToken.getId())).thenReturn(false);
 
         VotifyException exception = assertThrows(
             VotifyException.class,
@@ -85,7 +84,7 @@ public class TokenServiceTest {
     public void increaseRefreshTokenExpiration() {
         String id = refreshToken.getId();
 
-        when(refreshTokenRepository.findById(id)).thenReturn(Optional.of(refreshToken));
+        when(refreshTokenRepository.findByCode(id)).thenReturn(Optional.of(refreshToken));
         when(refreshTokenRepository.save(refreshToken)).thenReturn(refreshToken);
 
         Date oldExpiration = refreshToken.getExpiration();
@@ -101,7 +100,7 @@ public class TokenServiceTest {
     public void increaseRefreshTokenExpirationButNonExistentInDatabase() {
         String id = refreshToken.getId();
 
-        when(refreshTokenRepository.findById(id)).thenReturn(Optional.empty());
+        when(refreshTokenRepository.findByCode(id)).thenReturn(Optional.empty());
 
         VotifyException exception = assertThrows(
             VotifyException.class,

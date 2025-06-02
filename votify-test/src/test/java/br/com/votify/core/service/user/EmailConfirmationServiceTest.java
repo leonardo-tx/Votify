@@ -1,11 +1,8 @@
-package br.com.votify.core.service;
+package br.com.votify.core.service.user;
 
-import br.com.votify.core.domain.entities.tokens.EmailConfirmation;
-import br.com.votify.core.domain.entities.tokens.EmailConfirmationExpirationProperties;
-import br.com.votify.core.domain.entities.users.CommonUser;
-import br.com.votify.core.repository.EmailConfirmationRepository;
-import br.com.votify.core.repository.UserRepository;
-import br.com.votify.core.utils.EmailCodeGeneratorUtils;
+import br.com.votify.infra.persistence.user.UserEntity;
+import br.com.votify.core.repository.user.EmailConfirmationRepository;
+import br.com.votify.core.repository.user.UserRepository;
 import br.com.votify.core.utils.exceptions.VotifyErrorCode;
 import br.com.votify.core.utils.exceptions.VotifyException;
 import org.junit.jupiter.api.BeforeEach;
@@ -44,7 +41,7 @@ public class EmailConfirmationServiceTest {
 
     @BeforeEach
     public void setupBeforeEach() {
-        User user = CommonUser.builder()
+        UserEntity user = CommonUser.builder()
                 .id(1L)
                 .userName("silverhand")
                 .name("Jhonny Silverhand")
@@ -136,7 +133,7 @@ public class EmailConfirmationServiceTest {
 
     @Test
     public void findExpiredAccountsShouldReturnOne() {
-        when(emailConfirmationRepository.findAllExpirated(any(LocalDateTime.class)))
+        when(emailConfirmationRepository.findAllExpired(any(LocalDateTime.class)))
                 .thenReturn(List.of(emailConfirmationFromNewAccount));
 
         List<EmailConfirmation> result = emailConfirmationService.findExpiredAccounts();

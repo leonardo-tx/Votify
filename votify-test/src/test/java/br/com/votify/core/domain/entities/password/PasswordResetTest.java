@@ -1,39 +1,41 @@
 package br.com.votify.core.domain.entities.password;
 
-import br.com.votify.core.domain.entities.users.CommonUser;
+import br.com.votify.core.model.user.PasswordReset;
+import br.com.votify.infra.persistence.user.UserEntity;
 import org.junit.jupiter.api.Test;
 
 import java.util.Date;
 
-public class PasswordResetTokenTest {
+import static org.junit.jupiter.api.Assertions.*;
 
+public class PasswordResetTest {
     @Test
     public void testIsExpired_WhenExpired() {
         Date pastDate = new Date(System.currentTimeMillis() - 1000);
-        User user = new CommonUser();
-        PasswordResetToken token = new PasswordResetToken("CODE", user, pastDate);
+        UserEntity user = new CommonUser();
+        PasswordReset token = new PasswordReset("CODE", user, pastDate);
         assertTrue(token.isExpired());
     }
 
     @Test
     public void testIsExpired_WhenNotExpired() {
         Date futureDate = new Date(System.currentTimeMillis() + 600000);
-        User user = new CommonUser();
-        PasswordResetToken token = new PasswordResetToken("CODE", user, futureDate);
+        UserEntity user = new CommonUser();
+        PasswordReset token = new PasswordReset("CODE", user, futureDate);
         assertFalse(token.isExpired());
     }
 
     @Test
     public void testGettersAndSetters() {
-        User user = new CommonUser();
+        UserEntity user = new CommonUser();
         Date expiryDate = new Date();
-        PasswordResetToken token = new PasswordResetToken("CODE1", user, expiryDate);
+        PasswordReset token = new PasswordReset("CODE1", user, expiryDate);
 
         assertEquals("CODE1", token.getCode());
         assertEquals(user, token.getUser());
         assertEquals(expiryDate, token.getExpiryDate());
 
-        User newUser = new CommonUser();
+        UserEntity newUser = new CommonUser();
         Date newExpiryDate = new Date(expiryDate.getTime() + 10000);
 
         token.setCode("CODE2");

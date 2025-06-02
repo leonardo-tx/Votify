@@ -1,7 +1,7 @@
 package br.com.votify.core.utils.validators;
 
-import br.com.votify.core.domain.entities.polls.Poll;
-import br.com.votify.core.domain.entities.polls.VoteOption;
+import br.com.votify.core.model.poll.Poll;
+import br.com.votify.core.model.poll.field.VoteOption;
 import br.com.votify.core.utils.exceptions.VotifyErrorCode;
 import br.com.votify.core.utils.exceptions.VotifyException;
 import org.junit.jupiter.api.Test;
