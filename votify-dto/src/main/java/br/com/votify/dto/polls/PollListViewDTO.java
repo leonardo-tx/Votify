@@ -1,6 +1,6 @@
 package br.com.votify.dto.polls;
 
-import br.com.votify.core.domain.entities.polls.Poll;
+import br.com.votify.core.model.poll.Poll;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -21,11 +21,11 @@ public class PollListViewDTO {
     public static PollListViewDTO parse(Poll entity) {
         return new PollListViewDTO(
             entity.getId(),
-            entity.getTitle(),
-            entity.getDescription(),
+            entity.getTitle().getValue(),
+            entity.getDescription().getValue(),
             entity.getStartDate(),
             entity.getEndDate(),
-                entity.getResponsible() == null ? null : entity.getResponsible().getId()
+            entity.getResponsibleId()
         );
     }
 } 

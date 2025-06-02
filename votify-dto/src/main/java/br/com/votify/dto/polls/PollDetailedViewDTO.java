@@ -1,7 +1,7 @@
 package br.com.votify.dto.polls;
 
-import br.com.votify.core.domain.entities.polls.Poll;
-import br.com.votify.core.domain.entities.polls.VoteOption;
+import br.com.votify.core.model.poll.Poll;
+import br.com.votify.core.model.poll.field.VoteOption;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -33,13 +33,13 @@ public class PollDetailedViewDTO {
 
         return new PollDetailedViewDTO(
                 entity.getId(),
-                entity.getTitle(),
-                entity.getDescription(),
+                entity.getTitle().getValue(),
+                entity.getDescription().getValue(),
                 entity.getStartDate(),
                 entity.getEndDate(),
                 entity.isUserRegistration(),
                 entity.getChoiceLimitPerUser(),
-                entity.getResponsible() == null ? null : entity.getResponsible().getId(),
+                entity.getResponsibleId(),
                 votedOption,
                 voteOptions
         );

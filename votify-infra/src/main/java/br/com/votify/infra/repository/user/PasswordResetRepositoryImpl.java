@@ -1,0 +1,49 @@
+package br.com.votify.infra.repository.user;
+
+import br.com.votify.core.model.user.PasswordReset;
+import br.com.votify.core.model.user.User;
+import br.com.votify.core.repository.user.PasswordResetRepository;
+import br.com.votify.infra.mapping.user.PasswordResetMapper;
+import br.com.votify.infra.persistence.user.PasswordResetEntity;
+import br.com.votify.infra.persistence.user.UserEntity;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Repository;
+
+import java.time.Instant;
+import java.util.List;
+import java.util.Optional;
+
+@Repository
+@RequiredArgsConstructor
+public class PasswordResetRepositoryImpl implements PasswordResetRepository {
+    private final PasswordResetEntityRepository repository;
+    private final PasswordResetMapper mapper;
+
+    @Override
+    public Optional<PasswordReset> findByCode(String code) {
+        Optional<PasswordResetEntity> entityOptional = repository.findById(code);
+        return mapper.parseToOptionalModel(entityOptional);
+    }
+
+    @Override
+    public Optional<PasswordReset> findByUser(User user) {
+        UserEntity userEntity = UserEntity.builder().id(user.getId()).build();
+        Optional<PasswordResetEntity> entity = repository.findByUser(userEntity);
+
+        return mapper.parseToOptionalModel(entity);
+    }
+
+    @Override
+    public void delete(PasswordReset passwordReset) {
+        PasswordResetEntity entity = mapper.parseToEntity(passwordReset);
+        repository.delete(entity);
+    }
+
+    @Override
+    public PasswordReset save(PasswordReset passwordReset) {
+        PasswordResetEntity entity = mapper.parseToEntity(passwordReset);
+        PasswordResetEntity createdEntity = repository.save(entity);
+
+        return mapper.parseToModel(createdEntity);
+    }
+}
