@@ -1,5 +1,5 @@
 ---- Usuários ----
-INSERT INTO TB_USER (id, userName, name, email, password, USER_TYPE)
+INSERT INTO TB_USER (id, user_name, name, email, password, role)
 VALUES
     -- Senha admin123
     (1, 'admin', 'Administrator', 'admin@votify.com.br', '$2a$10$iZxot5DeNjNJbm6nHgNjgun1s3NGDZitVB3bsezXntbORUQ2lF5Xi', 'ADMIN'),

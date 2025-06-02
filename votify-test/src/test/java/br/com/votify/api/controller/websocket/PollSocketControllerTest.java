@@ -3,7 +3,6 @@ package br.com.votify.api.controller.websocket;
 import br.com.votify.api.controller.websocket.polls.PollSocketController;
 import br.com.votify.core.domain.entities.polls.Poll;
 import br.com.votify.core.domain.entities.users.CommonUser;
-import br.com.votify.core.domain.entities.users.User;
 import br.com.votify.core.domain.events.PollUpdateEvent;
 import br.com.votify.dto.polls.PollDetailedViewDTO;
 import br.com.votify.test.suites.SocketControllerTest;
