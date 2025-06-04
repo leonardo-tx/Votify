@@ -42,6 +42,7 @@ public class PollController {
     }
 
     @PutMapping("/{id}")
+    @NeedsUserContext
     public ResponseEntity<ApiResponse<PollDetailedViewDTO>> editPoll(@RequestBody PollInsertDTO pollInsertDTO,
                                                                      @PathVariable("id") Long id) throws VotifyException {
         Poll updatePoll = pollService.editPoll(pollInsertDTO.convertToEntity(), contextService.getUserOrThrow(), id);
