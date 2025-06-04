@@ -56,7 +56,6 @@ export default function VoteForm({ initialPoll }: Props) {
   poll.voteOptions.forEach(
     (voteOption) => (totalVoteCount += voteOption.count),
   );
-  console.log(totalVoteCount);
 
   const onChange = (optionNumber: number) => {
     if (!isMultiple) {
