@@ -1,6 +1,7 @@
 package br.com.votify.core.service;
 
 import br.com.votify.core.domain.entities.polls.*;
+import br.com.votify.core.domain.events.PollUpdateEvent;
 import br.com.votify.core.repository.VoteRepository;
 import br.com.votify.core.utils.validators.PollValidator;
 import br.com.votify.core.domain.entities.users.User;
@@ -10,6 +11,7 @@ import br.com.votify.core.utils.exceptions.VotifyException;
 import br.com.votify.core.utils.validators.VoteValidator;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -24,6 +26,7 @@ import java.util.Optional;
 public class PollService {
     private final PollRepository pollRepository;
     private final VoteRepository voteRepository;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     public Poll createPoll(Poll poll, User responsible) throws VotifyException {
         Instant now = Instant.now();
@@ -87,7 +90,11 @@ public class PollService {
                 voteOption.incrementCount();
             }
         }
-        return voteRepository.save(vote);
+        pollRepository.save(poll);
+        Vote createdVote = voteRepository.save(vote);
+
+        applicationEventPublisher.publishEvent(new PollUpdateEvent(this, poll));
+        return createdVote;
     }
 
     public Vote getVote(Poll poll, User user) {
@@ -140,12 +147,27 @@ public class PollService {
         if (size < 1 || size > Poll.PAGE_SIZE_LIMIT) {
             throw new VotifyException(VotifyErrorCode.POLL_PAGE_LENGTH_INVALID, 1, Poll.PAGE_SIZE_LIMIT);
         }
-        
+
         if (title == null || title.isBlank()) {
             throw new VotifyException(VotifyErrorCode.POLL_TITLE_SEARCH_EMPTY);
         }
-        
+
         Pageable pageable = PageRequest.of(page, size);
         return pollRepository.findByTitleContainingIgnoreCase(title, Instant.now(), pageable);
+    }
+
+    public void cancelPoll(Poll poll, User user) throws VotifyException {
+        if (!poll.getResponsible().getId().equals(user.getId())) {
+            throw new VotifyException(VotifyErrorCode.POLL_NOT_OWNER);
+        }
+        if (poll.hasEnded()) {
+            throw new VotifyException(VotifyErrorCode.POLL_CANNOT_CANCEL_FINISHED);
+        }
+        if (poll.hasNotStarted()) {
+            pollRepository.delete(poll);
+            return;
+        }
+        poll.setEndDate(Instant.now());
+        pollRepository.save(poll);
     }
 }

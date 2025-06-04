@@ -27,12 +27,12 @@ jobs:
 
       - name: Build and wait tests to finish
         run: |
-          docker-compose -f docker-compose.test.yml up --build --abort-on-container-exit --exit-code-from test
+          docker-compose -f ./docker/docker-compose.test.yml up --build --abort-on-container-exit --exit-code-from test
 
       - name: Generate JaCoCo badge
         uses: cicirello/jacoco-badge-generator@v2.11.0
         with:
-          jacoco-csv-file: votify-test/target/site/jacoco-aggregate/jacoco.csv
+          jacoco-csv-file: docker/target/site/jacoco-aggregate/jacoco.csv
           generate-branches-badge: true
           coverage-badge-filename: jacoco.svg
           branches-badge-filename: branches.svg
