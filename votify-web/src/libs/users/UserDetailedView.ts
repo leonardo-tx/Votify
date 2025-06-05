@@ -1,4 +1,4 @@
-export default interface UserQueryView {
+export default interface UserDetailedView {
   id: number;
   name: string;
   userName: string;

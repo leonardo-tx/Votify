@@ -4,6 +4,7 @@ import br.com.votify.core.domain.entities.tokens.AuthTokens;
 import br.com.votify.core.domain.entities.tokens.EmailConfirmation;
 import br.com.votify.core.domain.entities.tokens.RefreshToken;
 import br.com.votify.core.domain.entities.users.*;
+import br.com.votify.core.repository.PollRepository;
 import br.com.votify.core.repository.UserRepository;
 import br.com.votify.core.utils.exceptions.VotifyErrorCode;
 import br.com.votify.core.utils.exceptions.VotifyException;
@@ -13,6 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.ArrayList;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -35,6 +37,9 @@ public class UserServiceTest {
     @Mock
     private EmailConfirmationService emailConfirmationService;
 
+    @Mock
+    private PollRepository pollRepository;
+
     @InjectMocks
     private UserService userService;
 
@@ -48,6 +53,8 @@ public class UserServiceTest {
                 .name("Jhonny Silverhand")
                 .email("jhonny@nightcity.2077")
                 .password("6Samurai6")
+                .votes(new ArrayList<>())
+                .polls(new ArrayList<>())
                 .build();
     }
 
@@ -180,7 +187,7 @@ public class UserServiceTest {
     @Test
     public void deleteUser() {
         assertDoesNotThrow(() -> userService.deleteUser(user));
-        verify(userRepository).delete(user);
+        verify(userRepository).deleteById(user.getId());
     }
 
     @Test

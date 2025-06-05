@@ -13,7 +13,6 @@ import lombok.NonNull;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerMapping;
@@ -28,7 +27,6 @@ public class ContextService {
     private final TokenService tokenService;
     private final Map<String, String> cookies;
     private final User user;
-    private final UserRepository userRepository;
 
     public ContextService(
         UserRepository userRepository,
@@ -36,7 +34,6 @@ public class ContextService {
         HttpServletRequest request
     ) throws VotifyException {
         this.tokenService = tokenService;
-        this.userRepository = userRepository;
         this.cookies = new HashMap<>();
 
         HandlerMethod handlerMethod = (HandlerMethod)request.getAttribute(
@@ -108,11 +105,5 @@ public class ContextService {
 
     public String getCookieValueOrDefault(String key, String defaultValue) {
         return cookies.getOrDefault(key, defaultValue);
-    }
-
-    @Transactional
-    public void deleteUser() throws VotifyException {
-        User currentUser = getUserOrThrow();
-        userRepository.delete(currentUser);
     }
 }

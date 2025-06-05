@@ -9,9 +9,10 @@ interface Props {
   poll?: PollSimpleView;
   user: UserQueryView | null;
   now: number;
+  showUser: boolean;
 }
 
-export default function PollCard({ poll, user, now }: Props) {
+export default function PollCard({ poll, user, now, showUser }: Props) {
   if (poll === undefined) {
     return <></>;
   }
@@ -25,14 +26,22 @@ export default function PollCard({ poll, user, now }: Props) {
       className="bg-(--card-bg) rounded-md p-5 shadow-md flex flex-col gap-5"
     >
       <div className="flex items-center justify-between">
-        <Link
-          id={`poll-card-user-profile-link-${poll.id}`}
-          href={`/home`}
-          className="flex gap-2 items-center hover:text-(--foreground-hover)"
-        >
-          <IoPersonCircle size={25} />
-          <p className="font-normal text-sm">{user?.name ?? "Desconhecido"}</p>
-        </Link>
+        {showUser &&
+          (user === null ? (
+            <div className="flex gap-2 items-center">
+              <IoPersonCircle size={25} />
+              <p className="font-normal text-sm">Usuário Deletado</p>
+            </div>
+          ) : (
+            <Link
+              id={`poll-card-user-profile-link-${poll.id}`}
+              href={`/profile/${user.userName}`}
+              className="flex gap-2 items-center hover:text-(--foreground-hover) cursor-pointer"
+            >
+              <IoPersonCircle size={25} />
+              <p className="font-normal text-sm">{user.name}</p>
+            </Link>
+          ))}
         <p className="font-normal text-sm">
           {endDate < now
             ? "Terminado "

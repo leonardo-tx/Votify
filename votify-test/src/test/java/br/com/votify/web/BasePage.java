@@ -6,7 +6,7 @@ import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 
 public class BasePage {
-    protected BasePage(WebDriver webDriver) {
+    public BasePage(WebDriver webDriver) {
         PageFactory.initElements(webDriver, this);
     }
 
