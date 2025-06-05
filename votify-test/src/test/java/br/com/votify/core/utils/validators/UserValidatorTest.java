@@ -1,7 +1,6 @@
 package br.com.votify.core.utils.validators;
 
-import br.com.votify.core.domain.entities.users.AdminUser;
-import br.com.votify.core.domain.entities.users.User;
+import br.com.votify.infra.persistence.user.UserEntity;
 import br.com.votify.core.utils.CharacterUtils;
 import br.com.votify.core.utils.exceptions.VotifyErrorCode;
 import br.com.votify.core.utils.exceptions.VotifyException;
@@ -42,7 +41,7 @@ public class UserValidatorTest {
 
     @Test
     public void testValidUser() {
-        User user = AdminUser.builder()
+        UserEntity user = AdminUser.builder()
                 .userName("littledoge")
                 .name("Leonardo Teixeira")
                 .email("123@gmail.com")
@@ -211,8 +210,8 @@ public class UserValidatorTest {
     private Arbitrary<String> validUserNames() {
         return Arbitraries.strings()
             .withChars(validUserNameChars)
-            .ofMinLength(User.USER_NAME_MIN_LENGTH)
-            .ofMaxLength(User.USER_NAME_MAX_LENGTH)
+            .ofMinLength(UserEntity.USER_NAME_MIN_LENGTH)
+            .ofMaxLength(UserEntity.USER_NAME_MAX_LENGTH)
             .filter(userName -> !userName.startsWith("-") && !userName.endsWith("-"));
     }
 
@@ -223,7 +222,7 @@ public class UserValidatorTest {
             .withChars(validUserNameChars)
             .filter(userName ->
                 !userName.startsWith("-") && !userName.endsWith("-") &&
-                (userName.length() < User.USER_NAME_MIN_LENGTH || userName.length() > User.USER_NAME_MAX_LENGTH)
+                (userName.length() < UserEntity.USER_NAME_MIN_LENGTH || userName.length() > UserEntity.USER_NAME_MAX_LENGTH)
             );
     }
 
@@ -232,8 +231,8 @@ public class UserValidatorTest {
     private Arbitrary<String> invalidUserNames() {
         return Arbitraries.strings()
             .withChars(validUserNameChars)
-            .ofMinLength(User.USER_NAME_MIN_LENGTH)
-            .ofMaxLength(User.USER_NAME_MAX_LENGTH)
+            .ofMinLength(UserEntity.USER_NAME_MIN_LENGTH)
+            .ofMaxLength(UserEntity.USER_NAME_MAX_LENGTH)
             .filter(userName -> userName.startsWith("-") || userName.endsWith("-"));
     }
 
@@ -241,8 +240,8 @@ public class UserValidatorTest {
     @SuppressWarnings("unused")
     private Arbitrary<String> userNamesWithInvalidCharacter() {
         return Arbitraries.strings()
-            .ofMinLength(User.USER_NAME_MIN_LENGTH)
-            .ofMaxLength(User.USER_NAME_MAX_LENGTH)
+            .ofMinLength(UserEntity.USER_NAME_MIN_LENGTH)
+            .ofMaxLength(UserEntity.USER_NAME_MAX_LENGTH)
             .filter(userName ->
                 !userName.startsWith("-") && !userName.endsWith("-") &&
                 userName.chars().anyMatch(c -> Arrays.binarySearch(validUserNameChars, (char)c) < 0)
@@ -278,7 +277,7 @@ public class UserValidatorTest {
 
         return Combinators.combine(localPart, domain)
                 .as((x, y) -> x + "@" + y)
-                .filter((email) -> email.length() < User.EMAIL_MIN_LENGTH || email.length() > User.EMAIL_MAX_LENGTH);
+                .filter((email) -> email.length() < UserEntity.EMAIL_MIN_LENGTH || email.length() > UserEntity.EMAIL_MAX_LENGTH);
     }
 
     @Provide
@@ -287,14 +286,14 @@ public class UserValidatorTest {
         return Arbitraries.oneOf(
             Arbitraries.strings()
                 .withChars("abcdefghijklmnopqrstuvwxyz0123456789._%+-")
-                .ofMinLength(User.EMAIL_MIN_LENGTH).ofMaxLength(User.EMAIL_MAX_LENGTH),
+                .ofMinLength(UserEntity.EMAIL_MIN_LENGTH).ofMaxLength(UserEntity.EMAIL_MAX_LENGTH),
             Arbitraries.strings()
                 .withChars("abcdefghijklmnopqrstuvwxyz0123456789._%+-")
-                .ofMinLength(User.EMAIL_MIN_LENGTH).ofMaxLength(User.EMAIL_MAX_LENGTH - 1)
+                .ofMinLength(UserEntity.EMAIL_MIN_LENGTH).ofMaxLength(UserEntity.EMAIL_MAX_LENGTH - 1)
                 .map(localPart -> localPart + "@"),
             Arbitraries.strings()
                 .withChars("!@#$%^&*(){}[]|\\:;'\"<>,?/`~")
-                .ofMinLength(User.EMAIL_MIN_LENGTH).ofMaxLength(User.EMAIL_MAX_LENGTH - 9)
+                .ofMinLength(UserEntity.EMAIL_MIN_LENGTH).ofMaxLength(UserEntity.EMAIL_MAX_LENGTH - 9)
                 .map(invalidChars -> "user@" + invalidChars + ".com")
         );
     }
@@ -304,8 +303,8 @@ public class UserValidatorTest {
     private Arbitrary<String> validNames() {
         return Arbitraries.strings()
             .excludeChars(isoChars)
-            .ofMinLength(User.NAME_MIN_LENGTH)
-            .ofMaxLength(User.NAME_MAX_LENGTH)
+            .ofMinLength(UserEntity.NAME_MIN_LENGTH)
+            .ofMaxLength(UserEntity.NAME_MAX_LENGTH)
             .filter(this::nameHasValidWhitespaces);
     }
 
@@ -314,7 +313,7 @@ public class UserValidatorTest {
     private Arbitrary<String> namesWithInvalidLength() {
         return Arbitraries.strings()
             .excludeChars(isoChars)
-            .ofMinLength(User.NAME_MAX_LENGTH + 1)
+            .ofMinLength(UserEntity.NAME_MAX_LENGTH + 1)
             .filter(this::nameHasValidWhitespaces);
     }
 
@@ -333,8 +332,8 @@ public class UserValidatorTest {
     private Arbitrary<String> validPasswords() {
         return Arbitraries.strings()
             .excludeChars(isoChars)
-            .ofMinLength(User.PASSWORD_MIN_LENGTH)
-            .filter(password -> password.getBytes().length <= User.PASSWORD_MAX_BYTES);
+            .ofMinLength(UserEntity.PASSWORD_MIN_LENGTH)
+            .filter(password -> password.getBytes().length <= UserEntity.PASSWORD_MAX_BYTES);
     }
 
     @Provide
@@ -342,17 +341,17 @@ public class UserValidatorTest {
     private Arbitrary<String> passwordsWithInvalidLength() {
         return Arbitraries.strings()
             .excludeChars(isoChars)
-            .ofMaxLength(User.PASSWORD_MIN_LENGTH - 1)
-            .filter(password -> password.getBytes().length <= User.PASSWORD_MAX_BYTES);
+            .ofMaxLength(UserEntity.PASSWORD_MIN_LENGTH - 1)
+            .filter(password -> password.getBytes().length <= UserEntity.PASSWORD_MAX_BYTES);
     }
 
     @Provide
     @SuppressWarnings("unused")
     private Arbitrary<String> passwordsWithInvalidCharacter() {
         return Arbitraries.strings()
-            .ofMinLength(User.PASSWORD_MIN_LENGTH)
+            .ofMinLength(UserEntity.PASSWORD_MIN_LENGTH)
             .filter(password ->
-                password.getBytes().length <= User.PASSWORD_MAX_BYTES &&
+                password.getBytes().length <= UserEntity.PASSWORD_MAX_BYTES &&
                 password.chars().anyMatch(c -> Arrays.binarySearch(isoChars, (char)c) >= 0)
             );
     }
@@ -362,7 +361,7 @@ public class UserValidatorTest {
     private Arbitrary<String> passwordsWithInvalidBytes() {
         return Arbitraries.strings()
             .excludeChars(isoChars)
-            .filter(password -> password.getBytes().length > User.PASSWORD_MAX_BYTES);
+            .filter(password -> password.getBytes().length > UserEntity.PASSWORD_MAX_BYTES);
     }
 
     private boolean nameHasValidWhitespaces(String name) {

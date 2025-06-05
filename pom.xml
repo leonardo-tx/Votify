@@ -12,6 +12,7 @@
     <modules>
         <module>votify-api</module>
         <module>votify-core</module>
+        <module>votify-infra</module>
         <module>votify-test</module>
         <module>votify-dto</module>
     </modules>
@@ -40,6 +41,7 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <optional>true</optional>
+            <version>1.18.38</version>
         </dependency>
     </dependencies>
     <build>

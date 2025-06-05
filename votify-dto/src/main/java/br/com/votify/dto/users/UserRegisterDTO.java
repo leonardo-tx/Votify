@@ -1,8 +1,7 @@
 package br.com.votify.dto.users;
 
-import br.com.votify.dto.DTOInput;
-import br.com.votify.core.domain.entities.users.CommonUser;
-import br.com.votify.core.domain.entities.users.User;
+import br.com.votify.core.model.user.UserRegister;
+import br.com.votify.core.utils.exceptions.VotifyException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,19 +9,13 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public final class UserRegisterDTO implements DTOInput<User> {
+public final class UserRegisterDTO {
     private String userName;
     private String name;
     private String email;
     private String password;
 
-    @Override
-    public CommonUser convertToEntity() {
-        return CommonUser.builder()
-                .userName(userName)
-                .name(name)
-                .email(email)
-                .password(password)
-                .build();
+    public UserRegister convertToEntity() throws VotifyException {
+        return new UserRegister(userName, name, email, password);
     }
 }

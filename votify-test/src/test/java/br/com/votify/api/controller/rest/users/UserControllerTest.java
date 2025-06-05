@@ -1,6 +1,6 @@
 package br.com.votify.api.controller.rest.users;
 
-import br.com.votify.core.domain.entities.users.User;
+import br.com.votify.infra.persistence.user.UserEntity;
 import br.com.votify.core.utils.exceptions.VotifyErrorCode;
 import br.com.votify.dto.users.UserUpdateEmailRequestDTO;
 import br.com.votify.dto.users.UserUpdateInfoRequestDTO;
@@ -191,8 +191,8 @@ public class UserControllerTest extends ControllerTest {
         mockMvcHelper.testUnsuccessfulResponse(
                 resultActionsBlank,
                 VotifyErrorCode.EMAIL_INVALID_LENGTH,
-                User.EMAIL_MIN_LENGTH,
-                User.EMAIL_MAX_LENGTH
+                UserEntity.EMAIL_MIN_LENGTH,
+                UserEntity.EMAIL_MAX_LENGTH
         );
 
         UserUpdateEmailRequestDTO requestDTONull = new UserUpdateEmailRequestDTO(null);

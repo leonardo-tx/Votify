@@ -1,7 +1,9 @@
 package br.com.votify.dto.polls;
 
-import br.com.votify.core.domain.entities.polls.Vote;
-import br.com.votify.dto.DTOInput;
+import br.com.votify.core.model.poll.Poll;
+import br.com.votify.core.model.poll.VoteRegister;
+import br.com.votify.core.model.user.User;
+import br.com.votify.core.utils.exceptions.VotifyException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -9,11 +11,10 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class VoteInsertDTO implements DTOInput<Vote> {
+public class VoteInsertDTO {
     private int value;
 
-    @Override
-    public Vote convertToEntity() {
-        return new Vote(null, value, null, null);
+    public VoteRegister convertToEntity(User user, Poll poll) throws VotifyException {
+        return new VoteRegister(value, user, poll);
     }
 }
