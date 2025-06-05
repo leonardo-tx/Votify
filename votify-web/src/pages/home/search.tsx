@@ -2,7 +2,7 @@ import PollSimpleView from "@/libs/polls/PollSimpleView";
 import { getUserById, searchPollsByTitle } from "@/libs/api";
 import { GetServerSideProps } from "next";
 import UserQueryView from "@/libs/users/UserQueryView";
-import PollList from "./components/PollList";
+import PollList from "@/components/shared/PollList";
 import { useRouter } from "next/router";
 import Pagination from "./components/Pagination";
 import Head from "next/head";

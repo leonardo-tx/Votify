@@ -277,5 +277,6 @@ public class UserControllerTest extends ControllerTest {
                 .cookie(cookies));
         mockMvcHelper.testSuccessfulResponse(resultActions, HttpStatus.OK)
                 .andExpect(jsonPath("data", is(nullValue())));
+        mockMvcHelper.loginExpectingError("common@votify.com.br", "password123", VotifyErrorCode.LOGIN_UNAUTHORIZED);
     }
 }

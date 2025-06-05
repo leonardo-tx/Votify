@@ -26,21 +26,22 @@ export default function PollCard({ poll, user, now, showUser }: Props) {
       className="bg-(--card-bg) rounded-md p-5 shadow-md flex flex-col gap-5"
     >
       <div className="flex items-center justify-between">
-        {showUser && (
-          <Link
-            id={`poll-card-user-profile-link-${poll.id}`}
-            href={user?.userName ? `/profile/${user.userName}` : "#"}
-            className={`flex gap-2 items-center ${user?.userName ? "hover:text-(--foreground-hover) cursor-pointer" : "cursor-default"}`}
-            onClick={(e) => {
-              if (!user?.userName) e.preventDefault();
-            }}
-          >
-            <IoPersonCircle size={25} />
-            <p className="font-normal text-sm">
-              {user?.name ?? "Usuário Desconhecido"}
-            </p>
-          </Link>
-        )}
+        {showUser &&
+          (user === null ? (
+            <div className="flex gap-2 items-center">
+              <IoPersonCircle size={25} />
+              <p className="font-normal text-sm">Usuário Deletado</p>
+            </div>
+          ) : (
+            <Link
+              id={`poll-card-user-profile-link-${poll.id}`}
+              href={`/profile/${user.userName}`}
+              className="flex gap-2 items-center hover:text-(--foreground-hover) cursor-pointer"
+            >
+              <IoPersonCircle size={25} />
+              <p className="font-normal text-sm">{user.name}</p>
+            </Link>
+          ))}
         <p className="font-normal text-sm">
           {endDate < now
             ? "Terminado "

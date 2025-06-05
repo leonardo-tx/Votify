@@ -2,7 +2,6 @@ package br.com.votify.core.domain.entities.users;
 
 import br.com.votify.core.domain.entities.polls.Poll;
 import br.com.votify.core.domain.entities.polls.Vote;
-import br.com.votify.core.domain.entities.polls.VoteOption;
 import br.com.votify.core.domain.entities.tokens.EmailConfirmation;
 import br.com.votify.core.domain.entities.tokens.RefreshToken;
 import jakarta.persistence.*;
@@ -59,10 +58,11 @@ public abstract class User implements Cloneable {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private List<RefreshToken> refreshTokens;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = false)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private List<Vote> votes;
 
-    @OneToMany(mappedBy = "responsible", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = false)
+    @OneToMany(mappedBy = "responsible", fetch = FetchType.LAZY, orphanRemoval = false)
     private List<Poll> polls;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
@@ -83,25 +83,6 @@ public abstract class User implements Cloneable {
             return (User)super.clone();
         } catch (CloneNotSupportedException e) {
             throw new AssertionError();
-        }
-    }
-
-    @PreRemove
-    public void preRemove() {
-        for (int i = votes.size() - 1; i >= 0; i--) {
-            Vote vote = votes.get(i);
-            Poll poll = vote.getPoll();
-            if (poll.hasEnded()) continue;
-
-            for (VoteOption voteOption : poll.getVoteOptions()) {
-                if (!voteOption.hasBeenVoted(vote)) continue;
-                voteOption.decreaseCount();
-            }
-            votes.remove(i);
-        }
-        for (int i = polls.size() - 1; i >= 0; i--) {
-            if (polls.get(i).hasEnded()) continue;
-            polls.remove(i);
         }
     }
 }

@@ -77,28 +77,21 @@ public abstract class SeleniumTest {
     @Order(-1)
     public void checkHeader() {
         List<WebElement> elements = webDriver.findElements(By.tagName("header"));
-        assertEquals(1, elements.size(), "Deveria haver exatamente um elemento <header>");
+        assertEquals(1, elements.size());
 
         WebElement header = elements.get(0);
 
-        assertEquals(1, header.findElements(By.id("logo-home-anchor")).size(), "Link do logo para home não encontrado ou duplicado");
-
-        boolean isLoggedIn = header.findElements(By.id("login-button")).isEmpty();
-
-        if (isLoggedIn) {
-            System.out.println("INFO: Usuário parece estar logado. Verificando cabeçalho para usuário logado.");
-        } else {
-            assertEquals(1, header.findElements(By.id("login-button")).size(), "Botão de login não encontrado ou duplicado");
-            assertEquals(1, header.findElements(By.id("signup-button")).size(), "Botão de signup não encontrado ou duplicado");
-        }
+        assertEquals(1, header.findElements(By.id("logo-home-anchor")).size());
+        assertEquals(1, header.findElements(By.id("login-button")).size());
+        assertEquals(1, header.findElements(By.id("signup-button")).size());
 
         List<WebElement> navigators = header.findElements(By.tagName("nav"));
-        assertEquals(1, navigators.size(), "Deveria haver exatamente um elemento <nav> no cabeçalho");
+        assertEquals(1, navigators.size());
 
         WebElement nav = navigators.get(0);
 
-        assertEquals(1, nav.findElements(By.id("nav-about-anchor")).size(), "Link de navegação 'Sobre' não encontrado ou duplicado");
-        assertEquals(1, nav.findElements(By.id("nav-search-poll")).size(), "Link de navegação 'Buscar Enquete' não encontrado ou duplicado");
+        assertEquals(1, nav.findElements(By.id("nav-about-anchor")).size());
+        assertEquals(1, nav.findElements(By.id("nav-search-poll")).size());
     }
 
     @TestTemplate

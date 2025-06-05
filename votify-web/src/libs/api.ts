@@ -9,6 +9,7 @@ import { PageResponse } from "./PageResponse";
 import { PollDetailedView } from "./polls/PollDetailedView";
 import VoteInsertDTO from "./polls/VoteInsertDTO";
 import UserUpdateInfoDTO from "./users/UserUpdateInfoDTO";
+import UserUpdatePasswordRequestDTO from "./users/UserUpdatePasswordRequestDTO";
 
 export const api = axios.create({
   baseURL:
@@ -39,6 +40,7 @@ export const getCurrentUser = async (): Promise<
 export const deleteCurrentUser = async (): Promise<ApiResponse<null>> => {
   return await commonRequester(async () => {
     const { data } = await api.delete<ApiResponse<null>>("/users/me");
+    console.log(data);
     return data;
   });
 };
@@ -48,6 +50,18 @@ export const updateUserInfo = async (
 ): Promise<ApiResponse<UserDetailedView | null>> => {
   return await commonRequester(async () => {
     const { data } = await api.put<ApiResponse<null>>("/users/me/info", form);
+    return data;
+  });
+};
+
+export const updateUserPassword = async (
+  form: UserUpdatePasswordRequestDTO,
+): Promise<ApiResponse<null>> => {
+  return await commonRequester(async () => {
+    const { data } = await api.put<ApiResponse<null>>(
+      "/users/me/password",
+      form,
+    );
     return data;
   });
 };

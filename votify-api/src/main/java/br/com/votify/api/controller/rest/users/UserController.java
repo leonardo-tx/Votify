@@ -65,7 +65,7 @@ public class UserController {
     public ResponseEntity<ApiResponse<Object>> deleteSelf(
         HttpServletResponse response
     ) throws VotifyException {
-        userService.getContext().deleteUser();
+        userService.deleteUser(userService.getContext().getUserOrThrow());
 
         Cookie refreshCookie = new Cookie("refresh_token", "");
         Cookie accessCookie = new Cookie("access_token", "");

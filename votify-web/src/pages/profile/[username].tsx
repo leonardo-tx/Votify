@@ -28,15 +28,9 @@ export default function ProfilePage({
           <title>Erro - Votify</title>
         </Head>
         <div className="container mx-auto p-4 text-center">
-          <h1
-            id="profile-error-title"
-            className="text-2xl font-bold text-red-600"
-          >
-            Erro ao carregar perfil
-          </h1>
-          <p id="profile-error-message" className="text-gray-700">
+          <h1 className="text-2xl font-bold" id="profile-error-message">
             {error || "Usuário não encontrado ou ocorreu um problema."}
-          </p>
+          </h1>
         </div>
       </>
     );
