@@ -1,13 +1,16 @@
 package br.com.votify.web.polls;
 
+import br.com.votify.dto.users.UserLoginDTO;
 import br.com.votify.test.suites.SeleniumTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestTemplate;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Cookie;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -15,9 +18,13 @@ public class CreatePollTest extends SeleniumTest {
     private CreatePollPage createPollPage;
 
     @BeforeEach
-    void setupBeforeEach() {
-        webDriver.get("/home");
-        
+    void setupBeforeEach() throws Exception {
+        seleniumHelper.get("/home");
+        List<Cookie> cookies = seleniumHelper.getLoginCookies(
+                new UserLoginDTO("common@votify.com.br", "password123")
+        );
+        cookies.forEach(c -> webDriver.manage().addCookie(c));
+
         // Click create poll button to open modal
         webDriver.findElement(By.xpath("//button[contains(text(), 'Criar Nova Enquete')]")).click();
         createPollPage = new CreatePollPage(webDriver);
