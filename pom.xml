@@ -6,7 +6,7 @@
 
     <groupId>br.com.votify</groupId>
     <artifactId>votify</artifactId>
-    <version>0.1.0</version>
+    <version>1.0.0</version>
     <packaging>pom</packaging>
 
     <modules>
@@ -21,6 +21,7 @@
         <spring.boot.version>3.4.5</spring.boot.version>
         <jacoco.version>0.8.12</jacoco.version>
         <jjwt.version>0.12.6</jjwt.version>
+        <votify.version>1.0.0</votify.version>
     </properties>
 
     <dependencyManagement>
