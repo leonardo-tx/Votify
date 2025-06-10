@@ -14,21 +14,16 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class PollTest extends SeleniumTest {
-    private static List<Cookie> cookies = null;
-
     @BeforeEach
-    void setupBeforeEach() throws Exception {
+    void setupBeforeEach() {
         seleniumHelper.get("/polls/1");
-        if (cookies == null) {
-            cookies = seleniumHelper.getLoginCookies(new UserLoginDTO("common@votify.com.br", "password123"));
-        }
-        for (Cookie cookie : cookies) {
-            webDriver.manage().addCookie(cookie);
-        }
     }
 
     @TestTemplate
-    public void shouldShowNotFoundForInvalidId() {
+    public void shouldShowNotFoundForInvalidId() throws Exception {
+        List<Cookie> commonCookies = seleniumHelper.getLoginCookies(new UserLoginDTO("common@votify.com.br", "password123"));
+        commonCookies.forEach(c -> webDriver.manage().addCookie(c));
+
         seleniumHelper.get("/polls/9999");
         PollPage page = new PollPage(webDriver);
 
@@ -38,7 +33,10 @@ public class PollTest extends SeleniumTest {
     }
 
     @TestTemplate
-    public void testAlreadyVotedPoll() {
+    public void testAlreadyVotedPoll() throws Exception {
+        List<Cookie> commonCookies = seleniumHelper.getLoginCookies(new UserLoginDTO("common@votify.com.br", "password123"));
+        commonCookies.forEach(c -> webDriver.manage().addCookie(c));
+
         seleniumHelper.get("/polls/7");
         PollPage page = new PollPage(webDriver);
         for (int i = 0; i < page.optionInputs.size(); i++) {
@@ -54,7 +52,10 @@ public class PollTest extends SeleniumTest {
     }
 
     @TestTemplate
-    public void testVoteOnMultipleVotePoll() {
+    public void testVoteOnMultipleVotePoll() throws Exception {
+        List<Cookie> commonCookies = seleniumHelper.getLoginCookies(new UserLoginDTO("common@votify.com.br", "password123"));
+        commonCookies.forEach(c -> webDriver.manage().addCookie(c));
+
         List<String> expectedInitialTexts = List.of(
                 "Hollow Knight\n3 (25.00%)",
                 "Hades\n2 (16.67%)",
@@ -98,7 +99,10 @@ public class PollTest extends SeleniumTest {
     }
 
     @TestTemplate
-    public void testVoteOnSingleVotePoll() {
+    public void testVoteOnSingleVotePoll() throws Exception {
+        List<Cookie> commonCookies = seleniumHelper.getLoginCookies(new UserLoginDTO("common@votify.com.br", "password123"));
+        commonCookies.forEach(c -> webDriver.manage().addCookie(c));
+
         List<String> expectedInitialTexts = List.of(
                 "Java\n5 (33.33%)",
                 "Python\n2 (13.33%)",
@@ -147,10 +151,8 @@ public class PollTest extends SeleniumTest {
     @TestTemplate
     public void shouldNotDisplayVotersList_whenRegistrationIsFalse() throws Exception {
         List<Cookie> adminCookies = seleniumHelper.getLoginCookies(new UserLoginDTO("admin@votify.com.br", "admin123"));
-        seleniumHelper.get("/");
-        for (Cookie cookie : adminCookies) {
-            webDriver.manage().addCookie(cookie);
-        }
+        adminCookies.forEach(c -> webDriver.manage().addCookie(c));
+
         seleniumHelper.get("/polls/1");
         PollPage page = new PollPage(webDriver);
         try {
@@ -164,11 +166,8 @@ public class PollTest extends SeleniumTest {
     @TestTemplate
     public void shouldDisplayVotersList_forOwner_whenRegistrationIsEnabled() throws Exception {
         List<Cookie> adminCookies = seleniumHelper.getLoginCookies(new UserLoginDTO("admin@votify.com.br", "admin123"));
-        assertNotNull(adminCookies, "Login como admin falhou.");
-        seleniumHelper.get("/");
-        for (Cookie cookie : adminCookies) {
-            webDriver.manage().addCookie(cookie);
-        }
+        adminCookies.forEach(c -> webDriver.manage().addCookie(c));
+
         seleniumHelper.get("/polls/2");
         PollPage page = new PollPage(webDriver);
         assertTrue(page.votersSectionTitle.isDisplayed(), "Título da seção de votantes não está visível.");

@@ -400,7 +400,7 @@ public class PollControllerTest extends ControllerTest {
     public void testGetVotersWhenAuthorized() throws Exception {
         Cookie[] cookies = mockMvcHelper.login("common@votify.com.br", "password123");
 
-        ResultActions result = mockMvc.perform(get("/polls/{id}/voters", 14)
+        ResultActions result = mockMvc.perform(get("/api/polls/{id}/voters", 14)
                 .cookie(cookies)
                 .param("page", "0")
                 .param("size", "10"));
@@ -416,7 +416,7 @@ public class PollControllerTest extends ControllerTest {
     public void testGetVotersWhenUnauthorized() throws Exception {
         Cookie[] cookies = mockMvcHelper.login("admin@votify.com.br", "admin123");
 
-        ResultActions result = mockMvc.perform(get("/polls/{id}/voters", 14)
+        ResultActions result = mockMvc.perform(get("/api/polls/{id}/voters", 14)
                 .cookie(cookies));
 
         mockMvcHelper.testUnsuccessfulResponse(result, VotifyErrorCode.POLL_VOTERS_UNAUTHORIZED);
