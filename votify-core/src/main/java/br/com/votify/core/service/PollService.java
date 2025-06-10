@@ -99,7 +99,6 @@ public class PollService {
         return pollRepository.findAllByActives(Instant.now(), pageable);
     }
 
-
     /**
      *
      * @param id  ID da poll a buscar
@@ -142,5 +141,18 @@ public class PollService {
         }
         poll.setEndDate(Instant.now());
         pollRepository.save(poll);
+    }
+
+    public Page<User> getVotersByPoll(Poll poll, int page, int size) throws VotifyException {
+        if (page < 0) {
+            throw new VotifyException(VotifyErrorCode.POLL_PAGE_INVALID_PAGE);
+        }
+        if (size < 1 || size > Poll.PAGE_SIZE_LIMIT) {
+            throw new VotifyException(VotifyErrorCode.POLL_PAGE_LENGTH_INVALID, 1, Poll.PAGE_SIZE_LIMIT);
+        }
+
+        Pageable pageable = PageRequest.of(page, size);
+        return voteRepository.findByPollId(poll.getId(), pageable)
+                .map(Vote::getUser);
     }
 }
