@@ -1,14 +1,15 @@
 package br.com.votify.api.controller.rest.polls;
 
-import br.com.votify.core.decorators.NeedsUserContext;
-import br.com.votify.core.domain.entities.polls.Vote;
+import br.com.votify.core.model.poll.VoteRegister;
+import br.com.votify.core.model.user.User;
+import br.com.votify.core.service.user.decorators.NeedsUserContext;
+import br.com.votify.core.model.poll.Vote;
 import br.com.votify.dto.ApiResponse;
 import br.com.votify.dto.PageResponse;
 import br.com.votify.dto.polls.*;
-import br.com.votify.core.domain.entities.users.User;
-import br.com.votify.core.domain.entities.polls.Poll;
-import br.com.votify.core.service.ContextService;
-import br.com.votify.core.service.PollService;
+import br.com.votify.core.model.poll.Poll;
+import br.com.votify.core.service.user.ContextService;
+import br.com.votify.core.service.poll.PollService;
 import br.com.votify.core.utils.exceptions.VotifyException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -35,9 +36,9 @@ public class PollController {
     ) throws VotifyException {
         User user = contextService.getUserOrThrow();
         Poll poll = pollService.getByIdOrThrow(id);
-        Vote vote = voteInsertDTO.convertToEntity();
+        VoteRegister voteRegister = voteInsertDTO.convertToEntity(user, poll);
 
-        Vote createdVote = pollService.vote(vote, poll, user);
+        Vote createdVote = pollService.vote(poll, voteRegister);
         return ApiResponse.success(createdVote.getOption(), HttpStatus.CREATED).createResponseEntity();
     }
 
@@ -117,8 +118,7 @@ public class PollController {
             PollDetailedViewDTO dto = PollDetailedViewDTO.parse(poll, vote.getOption());
             return ApiResponse.success(dto, HttpStatus.OK).createResponseEntity();
         }
-        Vote vote = new Vote();
-        PollDetailedViewDTO dto = PollDetailedViewDTO.parse(poll, vote.getOption());
+        PollDetailedViewDTO dto = PollDetailedViewDTO.parse(poll, 0);
         return ApiResponse.success(dto, HttpStatus.OK).createResponseEntity();
     }
 
