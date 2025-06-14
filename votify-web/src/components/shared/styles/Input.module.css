@@ -20,6 +20,20 @@
     padding-right: calc(var(--spacing) * 10);
 }
 
+.input-div textarea {
+    padding-block: calc(var(--spacing) * 2);
+    padding-inline: calc(var(--spacing) * 2);
+    border-radius: 0.25rem;
+}
+
+.input-div-start-element textarea {
+    padding-left: calc(var(--spacing) * 10);
+}
+
+.input-div-end-element textarea {
+    padding-right: calc(var(--spacing) * 10);
+}
+
 .common {
     width: 100%;
 }
