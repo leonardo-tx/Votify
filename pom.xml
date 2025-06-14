@@ -22,6 +22,13 @@
         <jacoco.version>0.8.12</jacoco.version>
         <jjwt.version>0.12.6</jjwt.version>
         <votify.version>1.0.0</votify.version>
+        <sonar.coverage.jacoco.xmlReportPaths>
+            ${maven.multiModuleProjectDirectory}/votify-test/target/site/jacoco-aggregate/jacoco.xml,
+            ${maven.multiModuleProjectDirectory}/docker/target/site/jacoco-aggregate/jacoco.xml,
+            ${maven.multiModuleProjectDirectory}/jacoco.xml
+        </sonar.coverage.jacoco.xmlReportPaths>
+        <sonar.organization>votify</sonar.organization>
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
     </properties>
 
     <dependencyManagement>
@@ -56,13 +63,6 @@
                             <goal>prepare-agent</goal>
                         </goals>
                     </execution>
-                    <execution>
-                        <id>report-aggregate</id>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>report-aggregate</goal>
-                        </goals>
-                    </execution>
                 </executions>
             </plugin>
             <plugin>
@@ -71,7 +71,6 @@
                 <version>3.3.1</version>
                 <configuration>
                     <configLocation>checkstyle.xml</configLocation>
-                    <encoding>UTF-8</encoding>
                     <consoleOutput>true</consoleOutput>
                     <failsOnError>true</failsOnError>
                     <linkXRef>false</linkXRef>
@@ -86,21 +85,11 @@
                     </execution>
                 </executions>
             </plugin>
-        </plugins>
-    </build>
-    <reporting>
-        <plugins>
             <plugin>
-                <groupId>org.jacoco</groupId>
-                <artifactId>jacoco-maven-plugin</artifactId>
-                <reportSets>
-                    <reportSet>
-                        <reports>
-                            <report>report-aggregate</report>
-                        </reports>
-                    </reportSet>
-                </reportSets>
+                <groupId>org.sonarsource.scanner.maven</groupId>
+                <artifactId>sonar-maven-plugin</artifactId>
+                <version>5.1.0.4751</version>
             </plugin>
         </plugins>
-    </reporting>
+    </build>
 </project>
