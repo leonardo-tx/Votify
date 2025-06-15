@@ -1,14 +1,15 @@
 package br.com.votify.api.controller.rest.polls;
 
-import br.com.votify.core.decorators.NeedsUserContext;
-import br.com.votify.core.domain.entities.polls.Vote;
+import br.com.votify.core.model.poll.VoteRegister;
+import br.com.votify.core.model.user.User;
+import br.com.votify.core.service.user.UserService;
+import br.com.votify.core.service.user.decorators.NeedsUserContext;
+import br.com.votify.core.model.poll.Vote;
 import br.com.votify.dto.ApiResponse;
 import br.com.votify.dto.PageResponse;
 import br.com.votify.dto.polls.*;
-import br.com.votify.core.domain.entities.users.User;
-import br.com.votify.core.domain.entities.polls.Poll;
-import br.com.votify.core.service.ContextService;
-import br.com.votify.core.service.PollService;
+import br.com.votify.core.model.poll.Poll;
+import br.com.votify.core.service.poll.PollService;
 import br.com.votify.core.utils.exceptions.VotifyException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -25,7 +26,7 @@ import java.util.stream.Collectors;
 @RequestMapping("/polls")
 public class PollController {
     private final PollService pollService;
-    private final ContextService contextService;
+    private final UserService userService;
 
     @PostMapping("{id}/vote")
     @NeedsUserContext
@@ -33,11 +34,11 @@ public class PollController {
             @PathVariable("id") Long id,
             @RequestBody VoteInsertDTO voteInsertDTO
     ) throws VotifyException {
-        User user = contextService.getUserOrThrow();
+        User user = userService.getContext().getUserOrThrow();
         Poll poll = pollService.getByIdOrThrow(id);
-        Vote vote = voteInsertDTO.convertToEntity();
+        VoteRegister voteRegister = voteInsertDTO.convertToEntity(user, poll);
 
-        Vote createdVote = pollService.vote(vote, poll, user);
+        Vote createdVote = pollService.vote(poll, voteRegister);
         return ApiResponse.success(createdVote.getOption(), HttpStatus.CREATED).createResponseEntity();
     }
 
@@ -46,7 +47,7 @@ public class PollController {
     public ResponseEntity<ApiResponse<PollDetailedViewDTO>> insertPoll(
             @RequestBody PollInsertDTO pollInsertDTO
     ) throws VotifyException {
-        Poll poll = pollService.createPoll(pollInsertDTO.convertToEntity(), contextService.getUserOrThrow());
+        Poll poll = pollService.createPoll(pollInsertDTO.convertToEntity(), userService.getContext().getUserOrThrow());
         PollDetailedViewDTO pollDto = PollDetailedViewDTO.parse(poll, 0);
 
         return ApiResponse.success(pollDto, HttpStatus.CREATED).createResponseEntity();
@@ -58,7 +59,8 @@ public class PollController {
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "10") int size
     ) throws VotifyException {
-        Page<Poll> pollPage = pollService.findAllByUserId(userId, page, size);
+        User user = userService.getUserById(userId);
+        Page<Poll> pollPage = pollService.findAllByUser(user, page, size);
         List<PollListViewDTO> pollDtos = pollPage.getContent().stream()
                 .map(PollListViewDTO::parse)
                 .collect(Collectors.toList());
@@ -73,15 +75,13 @@ public class PollController {
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "10") int size
     ) throws VotifyException {
-        Optional<User> userOptional = contextService.getUserOptional();
-        Long userId = userOptional.map(User::getId).orElse(null);
-
-        if (userId == null) {
+        Optional<User> userOptional = userService.getContext().getUserOptional();
+        if (userOptional.isEmpty()) {
             PageResponse<PollListViewDTO> pageResponse = new PageResponse<>(List.of(), 0, size, 0, 0, true, true);
             return ApiResponse.success(pageResponse, HttpStatus.OK).createResponseEntity();
         }
 
-        Page<Poll> pollPage = pollService.findAllByUserId(userId, page, size);
+        Page<Poll> pollPage = pollService.findAllByUser(userOptional.get(), page, size);
         List<PollListViewDTO> pollDtos = pollPage.getContent().stream()
                 .map(PollListViewDTO::parse)
                 .collect(Collectors.toList());
@@ -110,15 +110,14 @@ public class PollController {
     public ResponseEntity<ApiResponse<PollDetailedViewDTO>> getPollById(
         @PathVariable("id") Long id
     ) throws VotifyException {
-        Optional<User> userOptional = contextService.getUserOptional();
+        Optional<User> userOptional = userService.getContext().getUserOptional();
         Poll poll = pollService.getByIdOrThrow(id);
         if (userOptional.isPresent()) {
             Vote vote = pollService.getVote(poll, userOptional.get());
             PollDetailedViewDTO dto = PollDetailedViewDTO.parse(poll, vote.getOption());
             return ApiResponse.success(dto, HttpStatus.OK).createResponseEntity();
         }
-        Vote vote = new Vote();
-        PollDetailedViewDTO dto = PollDetailedViewDTO.parse(poll, vote.getOption());
+        PollDetailedViewDTO dto = PollDetailedViewDTO.parse(poll, 0);
         return ApiResponse.success(dto, HttpStatus.OK).createResponseEntity();
     }
 
@@ -139,7 +138,7 @@ public class PollController {
     @DeleteMapping("/{id}/cancel")
     @NeedsUserContext
     public ResponseEntity<ApiResponse<Object>> cancelPoll(@PathVariable("id") Long id) throws VotifyException {
-        User user = contextService.getUserOrThrow();
+        User user = userService.getContext().getUserOrThrow();
         Poll poll = pollService.getByIdOrThrow(id);
         pollService.cancelPoll(poll, user);
 
