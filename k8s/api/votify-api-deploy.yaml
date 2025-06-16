@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: votify-api-deploy
+  namespace: votify
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: votify-api
+  template:
+    metadata:
+      labels:
+        app: votify-api
+    spec:
+      containers:
+        - name: votify-api
+          image: byces/votify-api:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8081
+          envFrom:
+            - configMapRef:
+                # Este ConfigMap precisa ser criado e deve conter a key: DATABASE_NAME
+                name: votify-api-cm
+            - secretRef:
+                # Este Secret precisa ser criado e deve conter a key: REFRESH_TOKEN_SECRET
+                name: votify-api-secret
+          env:
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-secret
+                  key: DB_PASSWORD
+      restartPolicy: Always 
