@@ -2,6 +2,7 @@ name: Votify Pull request Java CI
 
 on:
   pull_request:
+    types: [opened, synchronize, reopened]
     branches:
       - main
     paths:
@@ -23,6 +24,20 @@ jobs:
           sudo apt update
           sudo apt install docker-compose -y
 
-      - name: Build and wait tests to finish
-        run: |
-          docker-compose -f ./docker/docker-compose.test.yml up --build --abort-on-container-exit --exit-code-from test
+      - name: Build test image
+        run: docker-compose -f ./docker/docker-compose.test.yml build
+
+      - name: Run tests and wait to finish
+        run: docker-compose -f ./docker/docker-compose.test.yml up --abort-on-container-exit --exit-code-from test
+
+      - name: Generate Jacoco Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-artifact
+          path: docker/target/site/jacoco-aggregate/jacoco.*
+  sonar:
+    needs: test
+    uses: ./.github/workflows/sonar.yml
+    secrets: inherit
+    with:
+      jacoco-artifact-name: jacoco-artifact
