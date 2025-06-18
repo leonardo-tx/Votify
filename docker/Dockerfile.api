@@ -8,7 +8,7 @@ COPY votify-dto votify-dto
 COPY votify-test votify-test
 COPY pom.xml pom.xml
 
-RUN mvn clean package -DskipTests -pl votify-api -am
+RUN mvn clean package -DskipTests -Dcheckstyle.skip=true -pl votify-api -am
 
 
 FROM eclipse-temurin:17-jre-alpine

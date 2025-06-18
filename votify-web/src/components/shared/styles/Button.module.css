@@ -30,6 +30,14 @@
     background-color: var(--primary-hover);
 }
 
+.red-solid {
+    background-color: var(--red);
+}
+
+.red-solid:hover {
+    background-color: var(--red-hover);
+}
+
 .outline {
     transition:
         border-color 300ms,
@@ -56,6 +64,16 @@
     color: var(--primary-hover);
 }
 
+.red-outline {
+    border-color: var(--red);
+    color: var(--red);
+}
+
+.red-outline:hover {
+    border-color: var(--red-hover);
+    color: var(--red-hover);
+}
+
 .text {
     transition: color 300ms;
     padding-block: calc(var(--spacing) * 1);
@@ -73,6 +91,14 @@
 
 .primary-text:hover {
     color: var(--primary-hover);
+}
+
+.red-text {
+    color: var(--red);
+}
+
+.red-text:hover {
+    color: var(--red-hover);
 }
 
 .button-disabled {

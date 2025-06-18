@@ -211,25 +211,6 @@ public class ContextServiceTest {
         VotifyException exception = assertThrows(VotifyException.class, contextService::refreshTokens);
         assertEquals(VotifyErrorCode.REFRESH_TOKEN_EXPIRED, exception.getErrorCode());
     }
-    
-    @Test
-    public void deleteUser_WhenAuthenticated_ShouldDeleteSuccessfully() throws VotifyException, NoSuchMethodException {
-        User testUser = new CommonUser();
-
-        when(request.getAttribute(HandlerMapping.BEST_MATCHING_HANDLER_ATTRIBUTE)).thenReturn(handlerMethod);
-        when(handlerMethod.getMethod()).thenReturn(ContextServiceTest.class.getMethod("methodThatNeedsUserContext"));
-        when(handlerMethod.getBeanType()).thenAnswer(invocation -> ClassThatNeedsUserContext.class);
-        when(request.getCookies()).thenReturn(new Cookie[] {
-            new Cookie("access_token", "token1")
-        });
-        when(tokenService.getUserIdFromAccessToken(any(String.class))).thenReturn(1L);
-        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
-        
-        ContextService contextService = new ContextService(userRepository, tokenService, request);
-
-        assertDoesNotThrow(contextService::deleteUser);
-        verify(userRepository).delete(any(User.class));
-    }
 
     @Test
     public void userFromContextIsClone() throws VotifyException, NoSuchMethodException {

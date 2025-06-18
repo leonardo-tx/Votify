@@ -1,10 +1,14 @@
 package br.com.votify.core.service;
 
+import br.com.votify.core.domain.entities.polls.Poll;
+import br.com.votify.core.domain.entities.polls.Vote;
+import br.com.votify.core.domain.entities.polls.VoteOption;
 import br.com.votify.core.domain.entities.tokens.AuthTokens;
 import br.com.votify.core.domain.entities.tokens.EmailConfirmation;
 import br.com.votify.core.domain.entities.tokens.RefreshToken;
 import br.com.votify.core.domain.entities.users.CommonUser;
 import br.com.votify.core.domain.entities.users.User;
+import br.com.votify.core.repository.PollRepository;
 import br.com.votify.core.utils.validators.UserValidator;
 import br.com.votify.core.utils.exceptions.VotifyErrorCode;
 import br.com.votify.core.utils.exceptions.VotifyException;
@@ -25,6 +29,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final EmailConfirmationService emailConfirmationService;
     private final TokenService tokenService;
+    private final PollRepository pollRepository;
 
     @Transactional
     public User register(CommonUser user) throws VotifyException {
@@ -80,8 +85,31 @@ public class UserService {
     }
 
     @Transactional
+    public User getUserByUserName(String userName) throws VotifyException {
+        return userRepository.findByUserName(userName)
+                .orElseThrow(() -> new VotifyException(VotifyErrorCode.USER_NOT_FOUND));
+    }
+
+    @Transactional
     public void deleteUser(User user) {
-        userRepository.delete(user);
+        for (Vote vote : user.getVotes()) {
+            Poll poll = vote.getPoll();
+            if (poll.hasEnded()) continue;
+
+            for (VoteOption voteOption : poll.getVoteOptions()) {
+                if (!voteOption.hasBeenVoted(vote)) continue;
+                voteOption.decreaseCount();
+            }
+            pollRepository.save(poll);
+        }
+        for (Poll poll : user.getPolls()) {
+            if (poll.hasEnded()) {
+                poll.setResponsible(null);
+                continue;
+            }
+            pollRepository.delete(poll);
+        }
+        userRepository.deleteById(user.getId());
     }
 
     @Transactional

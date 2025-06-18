@@ -6,7 +6,7 @@
     <parent>
         <groupId>br.com.votify</groupId>
         <artifactId>votify</artifactId>
-        <version>0.1.0</version>
+        <version>1.0.0</version>
     </parent>
 
     <artifactId>votify-test</artifactId>
@@ -15,19 +15,19 @@
         <dependency>
             <groupId>br.com.votify</groupId>
             <artifactId>votify-core</artifactId>
-            <version>0.1.0</version>
+            <version>${votify.version}</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>br.com.votify</groupId>
             <artifactId>votify-api</artifactId>
-            <version>0.1.0</version>
+            <version>${votify.version}</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>br.com.votify</groupId>
             <artifactId>votify-dto</artifactId>
-            <version>0.1.0</version>
+            <version>${votify.version}</version>
             <scope>compile</scope>
         </dependency>
         <dependency>

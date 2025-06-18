@@ -8,9 +8,8 @@ import PollSimpleView from "./polls/PollSimpleView";
 import { PageResponse } from "./PageResponse";
 import { PollDetailedView } from "./polls/PollDetailedView";
 import VoteInsertDTO from "./polls/VoteInsertDTO";
-import PollUpdateDTO from "./polls/PollUpdateDTO";
-import UserSignUpDTO from "@/libs/users/UserSignUpDTO";
-
+import UserUpdateInfoDTO from "./users/UserUpdateInfoDTO";
+import UserUpdatePasswordRequestDTO from "./users/UserUpdatePasswordRequestDTO";
 
 export const api = axios.create({
   baseURL:
@@ -38,6 +37,56 @@ export const getCurrentUser = async (): Promise<
   });
 };
 
+export const deleteCurrentUser = async (): Promise<ApiResponse<null>> => {
+  return await commonRequester(async () => {
+    const { data } = await api.delete<ApiResponse<null>>("/users/me");
+    console.log(data);
+    return data;
+  });
+};
+
+export const updateUserInfo = async (
+  form: UserUpdateInfoDTO,
+): Promise<ApiResponse<UserDetailedView | null>> => {
+  return await commonRequester(async () => {
+    const { data } = await api.put<ApiResponse<null>>("/users/me/info", form);
+    return data;
+  });
+};
+
+export const updateUserPassword = async (
+  form: UserUpdatePasswordRequestDTO,
+): Promise<ApiResponse<null>> => {
+  return await commonRequester(async () => {
+    const { data } = await api.put<ApiResponse<null>>(
+      "/users/me/password",
+      form,
+    );
+    return data;
+  });
+};
+
+export const getUserByUserName = async (
+  userName: string,
+  cookie: string | undefined = undefined,
+): Promise<ApiResponse<UserQueryView | null>> => {
+  return await commonRequester(async () => {
+    if (cookie === undefined) {
+      const { data } = await api.get<ApiResponse<UserDetailedView>>(
+        `/users/username/${userName}`,
+      );
+      return data;
+    }
+    const { data } = await api.get<ApiResponse<UserDetailedView>>(
+      `/users/username/${userName}`,
+      {
+        headers: { cookie: cookie ?? "" },
+      },
+    );
+    return data;
+  });
+};
+
 export const logout = async (): Promise<ApiResponse<null>> => {
   return await commonRequester(async () => {
     const { data } = await api.post<ApiResponse<null>>("/auth/logout");
@@ -56,30 +105,6 @@ export const login = async (
     return data;
   });
 };
-export const signup = async (
-    credentials: UserSignUpDTO,
-): Promise<ApiResponse<UserSignUpDTO | null>> => {
-  return await commonRequester(async () => {
-    const { data } = await api.post<ApiResponse<UserSignUpDTO>>(
-        "/auth/register",
-        credentials,
-    );
-    return data;
-  });
-};
-
-export const updatePoll = async (
-    id: number,
-    pollData: PollUpdateDTO,
-): Promise<ApiResponse<PollSimpleView>> => {
-  return await commonRequester(async () => {
-    const { data } = await api.put<ApiResponse<PollSimpleView>>(
-        `/polls/${id}`,
-        pollData
-    );
-    return data;
-  });
-};
 
 export const getMyPolls = async (
   page: number = 0,
@@ -88,6 +113,19 @@ export const getMyPolls = async (
   return await commonRequester(async () => {
     const { data } = await api.get<ApiResponse<PageResponse<PollSimpleView>>>(
       `/polls/me?page=${page}&size=${size}`,
+    );
+    return data;
+  });
+};
+
+export const getPollsFromUser = async (
+  id: number,
+  page: number = 0,
+  size: number = 10,
+): Promise<ApiResponse<PageResponse<PollSimpleView> | null>> => {
+  return await commonRequester(async () => {
+    const { data } = await api.get<ApiResponse<PageResponse<PollSimpleView>>>(
+      `/polls/user/${id}?page=${page}&size=${size}`,
     );
     return data;
   });

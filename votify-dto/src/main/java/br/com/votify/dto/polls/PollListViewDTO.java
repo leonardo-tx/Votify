@@ -25,7 +25,7 @@ public class PollListViewDTO {
             entity.getDescription(),
             entity.getStartDate(),
             entity.getEndDate(),
-            entity.getResponsible().getId()
+                entity.getResponsible() == null ? null : entity.getResponsible().getId()
         );
     }
 } 

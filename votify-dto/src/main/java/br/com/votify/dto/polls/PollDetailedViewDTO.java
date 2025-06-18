@@ -39,7 +39,7 @@ public class PollDetailedViewDTO {
                 entity.getEndDate(),
                 entity.isUserRegistration(),
                 entity.getChoiceLimitPerUser(),
-                entity.getResponsible().getId(),
+                entity.getResponsible() == null ? null : entity.getResponsible().getId(),
                 votedOption,
                 voteOptions
         );
