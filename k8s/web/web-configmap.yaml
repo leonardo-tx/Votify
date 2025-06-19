@@ -3,4 +3,4 @@ kind: ConfigMap
 metadata:
   name: web-config
 data:
-  VITE_API_URL: http://votify-api:8080
+  NEXT_PUBLIC_API_URL: http://votify-api-svc:8081
