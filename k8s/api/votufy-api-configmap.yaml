@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: api-config
+data:
+  SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/votifydb
+  SPRING_JPA_HIBERNATE_DDL_AUTO: update
+  SPRING_PROFILES_ACTIVE: production
+  SERVER_PORT: "8080"

@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: votify-web
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: votify-web
+  template:
+    metadata:
+      labels:
+        app: votify-web
+    spec:
+      containers:
+      - name: votify-web
+        image: votify/web:latest
+        ports:
+        - containerPort: 3000
+        env:
+        - name: VITE_API_URL
+          valueFrom:
+            configMapKeyRef:
+              name: web-config
+              key: VITE_API_URL
