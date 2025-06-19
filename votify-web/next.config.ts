@@ -53,16 +53,6 @@ const nextConfig: NextConfig = {
   env: {
     NEXT_PUBLIC_API_URL: apiUrl,
   },
-  experimental: {
-    turbo: {
-      rules: {
-        "*.svg": {
-          loaders: ["@svgr/webpack"],
-          as: "*.js",
-        },
-      },
-    },
-  },
 };
 
 module.exports = nextConfig;
