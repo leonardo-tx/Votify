@@ -1,0 +1,17 @@
+# Acesso interno (IP fixo)
+
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-svc-cluster
+  namespace: votify
+spec:
+  selector:
+    app: mysql
+  type: ClusterIP
+  clusterIP: 10.96.0.50
+  ports:
+    - protocol: TCP
+      port: 3306
+      targetPort: 3306
