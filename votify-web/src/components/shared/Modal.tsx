@@ -39,13 +39,16 @@ export default function Modal({ children, isOpen, onClose }: Props) {
     };
   }, [isOpen, onClose]);
 
+  const backgroundClassNames: string[] = [styles["modal-background"]];
+  if (!isOpen) {
+    backgroundClassNames.push(styles["modal-background-closed"]);
+  }
+
   return (
-    isOpen && (
-      <div className={styles["modal-background"]}>
-        <div ref={modalRef} className={styles["modal"]}>
-          {children}
-        </div>
+    <div className={backgroundClassNames.join(" ")}>
+      <div ref={modalRef} className={styles["modal"]}>
+        {children}
       </div>
-    )
+    </div>
   );
 }

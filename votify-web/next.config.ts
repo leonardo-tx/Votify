@@ -2,6 +2,7 @@ import { NextConfig } from "next";
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "localhost:8081";
 const nextConfig: NextConfig = {
+  pageExtensions: ['tsx', 'ts', 'jsx', 'js'],
   async redirects() {
     return [
       {
