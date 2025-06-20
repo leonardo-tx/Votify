@@ -1,0 +1,56 @@
+name: CI - Testes com Relatório e Screenshots
+
+on:
+  push:
+    branches: [main, develop, feat/*]
+  pull_request:
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v3
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Instalar Docker Compose
+        run: |
+          sudo apt-get update
+          sudo apt-get install docker-compose -y
+
+      - name: Build e Executar Testes
+        run: ./mvnw clean verify
+        continue-on-error: true
+
+      - name: Gerar Relatório HTML
+        run: mvn surefire-report:report-only
+        if: always()
+
+      - name: Upload de Screenshots (se falhar)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: selenium-screenshots
+          path: docker/target/screenshots/
+
+      - name: Upload dos Relatórios XML
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports-xml
+          path: |
+            **/target/surefire-reports/
+            **/target/failsafe-reports/
+
+      - name: Upload do Relatório HTML
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: surefire-html-report
+          path: target/site/
