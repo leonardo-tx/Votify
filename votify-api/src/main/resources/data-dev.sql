@@ -226,7 +226,7 @@ VALUES
 
 
 INSERT INTO TB_POLL (id, title, description, user_registration, choice_limit_per_user, start_date, end_date, responsible_id)
-VALUES (8, 'Pizza com abacaxi...', '', FALSE, 1, UTC_TIMESTAMP() - INTERVAL 1 DAY, UTC_TIMESTAMP() + INTERVAL 30 MINUTE, 3);
+VALUES (8, 'Pizza com abacaxi...', '', TRUE, 1, UTC_TIMESTAMP() - INTERVAL 1 DAY, UTC_TIMESTAMP() + INTERVAL 30 MINUTE, 3);
 
 INSERT INTO TB_VOTE_OPTION (poll_id, sequence, name, count)
 VALUES (8, 0, 'NÃO, NEM PENSAR', 0);
