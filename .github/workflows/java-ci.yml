@@ -60,8 +60,13 @@ jobs:
                 git push --force origin HEAD:badges
             fi
           fi
-  sonar:
+  coverage:
     needs: test
+    uses: ./.github/workflows/coverage.yml
+    with:
+      jacoco-artifact-name: jacoco-artifact
+  sonar:
+    needs: coverage
     uses: ./.github/workflows/sonar.yml
     secrets: inherit
     with:

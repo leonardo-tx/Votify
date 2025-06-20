@@ -35,8 +35,13 @@ jobs:
         with:
           name: jacoco-artifact
           path: docker/target/site/jacoco-aggregate/jacoco.*
-  sonar:
+  coverage:
     needs: test
+    uses: ./.github/workflows/coverage.yml
+    with:
+      jacoco-artifact-name: jacoco-artifact
+  sonar:
+    needs: coverage
     uses: ./.github/workflows/sonar.yml
     secrets: inherit
     with:
