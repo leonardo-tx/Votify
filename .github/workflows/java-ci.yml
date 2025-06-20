@@ -31,6 +31,29 @@ jobs:
       - name: Run tests from docker compose test
         run: docker-compose -f ./docker/docker-compose.test.yml up --abort-on-container-exit --exit-code-from test
 
+      - name: Check if code coverage >= 90%
+        run: |
+          sudo apt-get install -y libxml2-utils bc
+          JACOCO_XML="docker/target/site/jacoco-aggregate/jacoco.xml"
+          
+          if [ ! -f "$JACOCO_XML" ]; then
+            echo "Coverage file not found: $JACOCO_XML"
+            exit 1
+          fi
+          
+          COVERED=$(xmllint --xpath "string(//report/counter[@type='INSTRUCTION']/@covered)" $JACOCO_XML)
+          MISSED=$(xmllint --xpath "string(//report/counter[@type='INSTRUCTION']/@missed)" $JACOCO_XML)
+          TOTAL=$(echo "$COVERED + $MISSED" | bc)
+          PERCENT=$(echo "scale=2; ($COVERED / $TOTAL) * 100" | bc)
+          
+          echo "Total instruction coverage: $PERCENT%"
+          
+          PASS=$(echo "$PERCENT >= 90" | bc)
+          if [ "$PASS" -ne 1 ]; then
+            echo "Coverage is below 90%! Failing the workflow."
+            exit 1
+          fi  
+
       - name: Generate Jacoco Artifact
         uses: actions/upload-artifact@v4
         with:
