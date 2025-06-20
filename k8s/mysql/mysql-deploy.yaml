@@ -21,10 +21,13 @@ spec:
         - containerPort: 3306
         env:
         - name: MYSQL_DATABASE
-          value: "votifydb"
+          valueFrom:
+            configMapKeyRef:
+              name: mysql-cm
+              key: MYSQL_DATABASE
         - name: MYSQL_ROOT_PASSWORD
           valueFrom:
             secretKeyRef:
               name: mysql-secret
-              key: DB_PASSWORD
-      restartPolicy: Always 
+              key: MYSQL_ROOT_PASSWORD
+      restartPolicy: Always

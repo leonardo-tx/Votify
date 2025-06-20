@@ -31,5 +31,5 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: mysql-secret
-                  key: DB_PASSWORD
+                  key: MYSQL_ROOT_PASSWORD
       restartPolicy: Always 
