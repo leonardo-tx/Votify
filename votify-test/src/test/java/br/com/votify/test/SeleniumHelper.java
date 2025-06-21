@@ -7,7 +7,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import br.com.votify.dto.users.UserLoginDTO;
+import br.com.votify.dto.user.UserLoginDTO;
 import org.openqa.selenium.*;
 
 import java.time.Instant;

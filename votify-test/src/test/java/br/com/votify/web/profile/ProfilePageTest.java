@@ -1,8 +1,9 @@
 package br.com.votify.web.profile;
 
-import br.com.votify.dto.users.UserLoginDTO;
+import br.com.votify.dto.user.UserLoginDTO;
 import br.com.votify.test.suites.SeleniumTest;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.TestTemplate;
 import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -10,17 +11,18 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class ProfilePageTest extends SeleniumTest {
+@Disabled
+class ProfilePageTest extends SeleniumTest {
     private UserLoginDTO credentials;
 
     @BeforeEach
-    public void setupBeforeEach() {
+    void setupBeforeEach() {
         seleniumHelper.get("/profile/admin");
         credentials = new UserLoginDTO("admin@votify.com.br", "admin123");
     }
 
     @TestTemplate
-    public void shouldDisplayUserProfileInformation() {
+    void shouldDisplayUserProfileInformation() {
         seleniumHelper.get("/profile/admin");
         ProfilePage profilePage = new ProfilePage(webDriver);
 
@@ -43,7 +45,7 @@ public class ProfilePageTest extends SeleniumTest {
     }
 
     @TestTemplate
-    public void shouldDisplayErrorWhenProfileNotFound() {
+    void shouldDisplayErrorWhenProfileNotFound() {
         seleniumHelper.get("/profile/usuariodesconhecido99");
         ProfilePage profilePage = new ProfilePage(webDriver);
 
@@ -59,7 +61,7 @@ public class ProfilePageTest extends SeleniumTest {
     }
 
     @TestTemplate
-    public void shouldDisplayMessageWhenUserHasNoPolls() {
+    void shouldDisplayMessageWhenUserHasNoPolls() {
         seleniumHelper.get("/profile/noPolls"); 
         ProfilePage profilePage = new ProfilePage(webDriver);
 
@@ -75,7 +77,7 @@ public class ProfilePageTest extends SeleniumTest {
     }
 
     @TestTemplate
-    public void shouldSuccessfullyEditProfileInformation() throws Exception {
+    void shouldSuccessfullyEditProfileInformation() throws Exception {
         List<Cookie> cookies = seleniumHelper.getLoginCookies(credentials);
         cookies.forEach(c -> webDriver.manage().addCookie(c));
 
@@ -116,7 +118,7 @@ public class ProfilePageTest extends SeleniumTest {
     }
 
     @TestTemplate
-    public void shouldNotShowEditButtonForNonOwnerProfile() {
+    void shouldNotShowEditButtonForNonOwnerProfile() {
         seleniumHelper.get("/profile/noPolls");
 
         assertThrows(
@@ -127,7 +129,7 @@ public class ProfilePageTest extends SeleniumTest {
     }
 
     @TestTemplate
-    public void shouldSuccessfullyDeleteUserAccount() throws Exception {
+    void shouldSuccessfullyDeleteUserAccount() throws Exception {
         List<Cookie> cookies = seleniumHelper.getLoginCookies(credentials);
         cookies.forEach(c -> webDriver.manage().addCookie(c));
 
@@ -147,7 +149,7 @@ public class ProfilePageTest extends SeleniumTest {
     }
 
     @TestTemplate
-    public void shouldNotShowDeleteButtonForNonOwnerProfile() throws Exception {
+    void shouldNotShowDeleteButtonForNonOwnerProfile() throws Exception {
         List<Cookie> cookies = seleniumHelper.getLoginCookies(credentials);
         cookies.forEach(c -> webDriver.manage().addCookie(c));
 

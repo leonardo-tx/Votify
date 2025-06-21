@@ -10,6 +10,5 @@ import org.springframework.test.annotation.DirtiesContext;
 @SpringBootTest(classes = VotifyApiApplication.class, webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-@Order(2)
 public class SocketControllerTest {
 }
