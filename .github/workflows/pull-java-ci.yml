@@ -13,28 +13,9 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Docker Compose
-        run: |
-          sudo apt update
-          sudo apt install docker-compose -y
-
-      - name: Build test image
-        run: docker-compose -f ./docker/docker-compose.test.yml build
-
-      - name: Run tests and wait to finish
-        run: docker-compose -f ./docker/docker-compose.test.yml up --abort-on-container-exit --exit-code-from test
-
-      - name: Generate Jacoco Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: jacoco-artifact
-          path: docker/target/site/jacoco-aggregate/jacoco.*
+    uses: ./.github/workflows/test.yml
+    with:
+      upload-artifacts: true
   coverage:
     needs: test
     uses: ./.github/workflows/coverage.yml
