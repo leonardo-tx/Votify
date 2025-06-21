@@ -19,7 +19,8 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get install -y libxml2-utils bc
-      - name: Download Jacoco artifact
+
+      - name: Download JaCoCo artifact
         uses: actions/download-artifact@v4
         with:
           name: ${{ inputs.jacoco-artifact-name }}
@@ -30,7 +31,7 @@ jobs:
             echo "Coverage file not found: jacoco.xml"
             exit 1
           fi
-
+          
           COVERED=$(xmllint --xpath "string(//report/counter[@type='INSTRUCTION']/@covered)" jacoco.xml)
           MISSED=$(xmllint --xpath "string(//report/counter[@type='INSTRUCTION']/@missed)" jacoco.xml)
           TOTAL=$(echo "$COVERED + $MISSED" | bc)
