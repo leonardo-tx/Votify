@@ -2,7 +2,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
     <modelVersion>4.0.0</modelVersion>
+
     <parent>
         <groupId>br.com.votify</groupId>
         <artifactId>votify</artifactId>
@@ -11,6 +13,7 @@
 
     <artifactId>votify-test</artifactId>
     <packaging>jar</packaging>
+
     <dependencies>
         <dependency>
             <groupId>br.com.votify</groupId>
@@ -30,6 +33,8 @@
             <version>${votify.version}</version>
             <scope>compile</scope>
         </dependency>
+
+        
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -91,6 +96,21 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-report-plugin</artifactId>
+                <version>3.5.3</version>
+                <executions>
+                    <execution>
+                        <id>generate-reports</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
+
 </project>

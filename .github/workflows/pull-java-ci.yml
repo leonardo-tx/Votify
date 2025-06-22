@@ -1,4 +1,4 @@
-name: Votify Pull request Java CI
+name: Votify Pull Request Java CI
 
 on:
   pull_request:

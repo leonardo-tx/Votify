@@ -33,3 +33,33 @@ jobs:
           name: jacoco-artifact
           path: docker/target/site/jacoco-aggregate/jacoco.*
           retention-days: 1
+
+      - name: Upload Selenium Screenshots (on failure)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: selenium-screenshots
+          path: docker/target/screenshots/
+          retention-days: 1
+
+      - name: Generate Test Summary
+        if: always()
+        run: |
+          echo "## 🧪 Test Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          TOTAL_TESTS=$(find . -type f -name 'TEST-*.xml' | xargs grep -o 'tests="[0-9]*"' | grep -o '[0-9]*' | paste -sd+ - | bc)
+          FAILURES=$(find . -type f -name 'TEST-*.xml' | xargs grep -o 'failures="[0-9]*"' | grep -o '[0-9]*' | paste -sd+ - | bc)
+          ERRORS=$(find . -type f -name 'errors="[0-9]*"' | grep -o '[0-9]*' | paste -sd+ - | bc)
+          SKIPPED=$(find . -type f -name 'skipped="[0-9]*"' | grep -o '[0-9]*' | paste -sd+ - | bc)
+
+          echo "**Total Tests:** $TOTAL_TESTS" >> $GITHUB_STEP_SUMMARY
+          echo "**Failures:** $FAILURES" >> $GITHUB_STEP_SUMMARY
+          echo "**Errors:** $ERRORS" >> $GITHUB_STEP_SUMMARY
+          echo "**Skipped:** $SKIPPED" >> $GITHUB_STEP_SUMMARY
+
+          if [ "$FAILURES" -gt 0 ] || [ "$ERRORS" -gt 0 ]; then
+            echo "### ⚠️ Some tests failed or had errors." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "### ✅ All tests passed successfully." >> $GITHUB_STEP_SUMMARY
+          fi
