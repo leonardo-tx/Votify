@@ -15,7 +15,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class HomeTest extends SeleniumTest {
+class HomeTest extends SeleniumTest {
     private HomePage page;
 
     @BeforeEach
@@ -25,7 +25,52 @@ public class HomeTest extends SeleniumTest {
     }
 
     @TestTemplate
-    public void testSearchForA() {
+    void checkVisibilityOfHeader() {
+        WebElement header = webDriver.findElement(By.tagName("header"));
+        for (int i = 0; i < 20; i++) {
+            new Actions(webDriver).sendKeys(Keys.PAGE_DOWN).perform();
+            assertTrue(seleniumHelper.isInViewport(header));
+        }
+        for (int i = 0; i < 20; i++) {
+            new Actions(webDriver).sendKeys(Keys.PAGE_UP).perform();
+            assertTrue(seleniumHelper.isInViewport(header));
+        }
+    }
+
+    @TestTemplate
+    void checkHeader() {
+        List<WebElement> elements = webDriver.findElements(By.tagName("header"));
+        assertEquals(1, elements.size());
+
+        WebElement header = elements.get(0);
+
+        assertEquals(1, header.findElements(By.id("logo-home-anchor")).size());
+        assertEquals(1, header.findElements(By.id("login-button")).size());
+        assertEquals(1, header.findElements(By.id("signup-button")).size());
+
+        List<WebElement> navigators = header.findElements(By.tagName("nav"));
+        assertEquals(1, navigators.size());
+
+        WebElement nav = navigators.get(0);
+
+        assertEquals(1, nav.findElements(By.id("nav-about-anchor")).size());
+        assertEquals(1, nav.findElements(By.id("nav-search-poll")).size());
+    }
+
+    @TestTemplate
+    void checkFooter() {
+        List<WebElement> elements = webDriver.findElements(By.tagName("footer"));
+        assertEquals(1, elements.size());
+
+        WebElement footer = elements.get(0);
+        assertEquals(1, footer.findElements(By.id("git-repository-anchor")).size());
+
+        WebElement githubRepositoryAnchor = footer.findElement(By.id("git-repository-anchor"));
+        assertEquals("https://github.com/leonardo-tx/Votify", githubRepositoryAnchor.getDomAttribute("href"));
+    }
+
+    @TestTemplate
+    void testSearchForA() {
         new Actions(webDriver)
                 .sendKeys(page.navSearchPoll, "a")
                 .sendKeys(Keys.ENTER)
@@ -34,7 +79,7 @@ public class HomeTest extends SeleniumTest {
         wait.until(ExpectedConditions.titleIs("Pesquisa - Votify"));
 
         int totalPollCount = countPolls();
-        assertEquals(11, totalPollCount, "Total poll count across all pages should be 11.");
+        assertEquals(12, totalPollCount, "Total poll count across all pages should be 12.");
 
         String currentUrl = webDriver.getCurrentUrl();
         assertTrue(
@@ -44,7 +89,7 @@ public class HomeTest extends SeleniumTest {
     }
 
     @TestTemplate
-    public void testSearchNoResults() {
+    void testSearchNoResults() {
         new Actions(webDriver)
                 .sendKeys(page.navSearchPoll, "ashduiaguywdgauydgwyu72sadxkjhaiju")
                 .sendKeys(Keys.ENTER)
@@ -67,7 +112,7 @@ public class HomeTest extends SeleniumTest {
     }
 
     @TestTemplate
-    public void testSearchForEmptyStringRedirectToHome() {
+    void testSearchForEmptyStringRedirectToHome() {
         new Actions(webDriver)
                 .sendKeys(page.navSearchPoll, " ")
                 .sendKeys(Keys.ENTER)
@@ -83,9 +128,9 @@ public class HomeTest extends SeleniumTest {
     }
 
     @TestTemplate
-    public void testHomeActivePolls() {
+    void testHomeActivePolls() {
         int totalPollCount = countPolls();
-        assertEquals(11, totalPollCount, "Total poll count across all pages should be 11.");
+        assertEquals(12, totalPollCount, "Total poll count across all pages should be 12.");
 
         String currentUrl = webDriver.getCurrentUrl();
         assertTrue(
@@ -95,7 +140,7 @@ public class HomeTest extends SeleniumTest {
     }
 
     @TestTemplate
-    public void testGoToFourthPoll() {
+    void testGoToFourthPoll() {
         page.pollAnchors.get(3).click();
 
         wait.until(ExpectedConditions.urlContains("/polls"));
@@ -109,7 +154,7 @@ public class HomeTest extends SeleniumTest {
     }
 
     @TestTemplate
-    public void testGoToFirstPollAfterSearch() {
+    void testGoToFirstPollAfterSearch() {
         page.navSearchPoll.sendKeys("pizza");
         page.navSearchPoll.sendKeys(Keys.ENTER);
 

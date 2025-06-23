@@ -1,6 +1,6 @@
 package br.com.votify.web.polls;
 
-import br.com.votify.dto.users.UserLoginDTO;
+import br.com.votify.dto.user.UserLoginDTO;
 import br.com.votify.test.suites.SeleniumTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestTemplate;
@@ -12,22 +12,20 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class PollTest extends SeleniumTest {
+class PollTest extends SeleniumTest {
     private static List<Cookie> cookies = null;
 
     @BeforeEach
-    void setupBeforeEach() throws Exception {
-        seleniumHelper.get("/polls/1");
+    void setupBeforeEach() {
+        seleniumHelper.get("/home");
         if (cookies == null) {
-            cookies = seleniumHelper.getLoginCookies(new UserLoginDTO("common@votify.com.br", "password123"));
+            cookies = seleniumHelper.loginAndGetCookies(new UserLoginDTO("common@votify.com.br", "password123"));
         }
-        for (Cookie cookie : cookies) {
-            webDriver.manage().addCookie(cookie);
-        }
+        cookies.forEach(c -> webDriver.manage().addCookie(c));
     }
 
     @TestTemplate
-    public void shouldShowNotFoundForInvalidId() {
+    void shouldShowNotFoundForInvalidId() {
         seleniumHelper.get("/polls/9999");
         PollPage page = new PollPage(webDriver);
 
@@ -37,7 +35,7 @@ public class PollTest extends SeleniumTest {
     }
 
     @TestTemplate
-    public void testAlreadyVotedPoll() {
+    void testAlreadyVotedPoll() {
         seleniumHelper.get("/polls/7");
         PollPage page = new PollPage(webDriver);
         for (int i = 0; i < page.optionInputs.size(); i++) {
@@ -53,7 +51,7 @@ public class PollTest extends SeleniumTest {
     }
 
     @TestTemplate
-    public void testVoteOnMultipleVotePoll() {
+    void testVoteOnMultipleVotePoll() {
         List<String> expectedInitialTexts = List.of(
                 "Hollow Knight\n3 (25.00%)",
                 "Hades\n2 (16.67%)",
@@ -75,7 +73,7 @@ public class PollTest extends SeleniumTest {
         for (int i = 0; i < page.optionInputs.size(); i++) {
             WebElement optionInput = page.optionInputs.get(i);
             assertFalse(optionInput.isSelected());
-            String labelText = webDriver.findElement(By.cssSelector("label[for='" + optionInput.getAttribute("id") + "']")).getText();
+            String labelText = webDriver.findElement(By.cssSelector("label[for='" + optionInput.getDomAttribute("id") + "']")).getText();
             assertEquals(expectedInitialTexts.get(i), labelText);
         }
         assertTrue(seleniumHelper.isInViewport(page.voteButton));
@@ -91,13 +89,13 @@ public class PollTest extends SeleniumTest {
 
         for (int i = 0; i < page.optionInputs.size(); i++) {
             WebElement optionInput = page.optionInputs.get(i);
-            String labelText = webDriver.findElement(By.cssSelector("label[for='" + optionInput.getAttribute("id") + "']")).getText();
+            String labelText = webDriver.findElement(By.cssSelector("label[for='" + optionInput.getDomAttribute("id") + "']")).getText();
             assertEquals(expectedFinalTexts.get(i), labelText);
         }
     }
 
     @TestTemplate
-    public void testVoteOnSingleVotePoll() {
+    void testVoteOnSingleVotePoll() {
         List<String> expectedInitialTexts = List.of(
                 "Java\n5 (33.33%)",
                 "Python\n2 (13.33%)",
@@ -117,7 +115,7 @@ public class PollTest extends SeleniumTest {
         for (int i = 0; i < page.optionInputs.size(); i++) {
             WebElement optionInput = page.optionInputs.get(i);
             assertFalse(optionInput.isSelected());
-            String labelText = webDriver.findElement(By.cssSelector("label[for='" + optionInput.getAttribute("id") + "']")).getText();
+            String labelText = webDriver.findElement(By.cssSelector("label[for='" + optionInput.getDomAttribute("id") + "']")).getText();
             assertEquals(expectedInitialTexts.get(i), labelText);
         }
         assertTrue(seleniumHelper.isInViewport(page.voteButton));
@@ -138,7 +136,7 @@ public class PollTest extends SeleniumTest {
 
         for (int i = 0; i < page.optionInputs.size(); i++) {
             WebElement optionInput = page.optionInputs.get(i);
-            String labelText = webDriver.findElement(By.cssSelector("label[for='" + optionInput.getAttribute("id") + "']")).getText();
+            String labelText = webDriver.findElement(By.cssSelector("label[for='" + optionInput.getDomAttribute("id") + "']")).getText();
             assertEquals(expectedFinalTexts.get(i), labelText);
         }
     }

@@ -1,42 +1,61 @@
 package br.com.votify.api.configuration;
 
-import br.com.votify.core.domain.entities.cookies.CookieProperties;
-import br.com.votify.core.domain.entities.password.PasswordResetProperties;
-import br.com.votify.core.domain.entities.tokens.EmailConfirmationExpirationProperties;
-import br.com.votify.core.domain.entities.tokens.TokenProperties;
+import br.com.votify.core.model.user.AccessToken;
+import br.com.votify.core.model.user.RefreshToken;
+import br.com.votify.core.properties.user.UserProperties;
 import jakarta.servlet.http.Cookie;
 import lombok.Getter;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Configuration
 @Getter
+@RequiredArgsConstructor
 public class SecurityConfig {
-    @Autowired
-    private TokenProperties tokenProperties;
+    private final UserProperties userProperties;
 
-    @Autowired
-    private CookieProperties cookieProperties;
-
-    @Autowired
-    private PasswordResetProperties passwordResetProperties;
-
-    @Autowired
-    private EmailConfirmationExpirationProperties emailConfirmationExpirationProperties;
-
-    public void configureAccessTokenCookie(Cookie cookie) {
-        configureCookie(cookie);
-        cookie.setMaxAge(tokenProperties.getAccessTokenMaxAge());
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder(12);
     }
 
-    public void configureRefreshTokenCookie(Cookie cookie) {
-        configureCookie(cookie);
-        cookie.setMaxAge(tokenProperties.getRefreshTokenMaxAge());
+    public Cookie createAccessTokenCookie(AccessToken accessToken) {
+        String code = "";
+        int maxAge = 0;
+
+        if (accessToken != null) {
+            code = accessToken.getCode();
+            maxAge = userProperties.getAccessTokenExpirationSeconds();
+        }
+        Cookie cookie = getDefaultCookie(userProperties.getAccessTokenCookieName(), code);
+        cookie.setMaxAge(maxAge);
+
+        return cookie;
     }
 
-    private void configureCookie(Cookie cookie) {
-        cookie.setHttpOnly(cookieProperties.isHttpOnly());
-        cookie.setSecure(cookieProperties.isSecure());
-        cookie.setPath(cookieProperties.getPath());
+    public Cookie createRefreshTokenCookie(RefreshToken refreshToken) {
+        String code = "";
+        int maxAge = 0;
+
+        if (refreshToken != null) {
+            code = refreshToken.getCode();
+            maxAge = userProperties.getRefreshTokenExpirationSeconds();
+        }
+        Cookie cookie = getDefaultCookie(userProperties.getRefreshTokenCookieName(), code);
+        cookie.setMaxAge(maxAge);
+
+        return cookie;
+    }
+
+    private Cookie getDefaultCookie(String name, String value) {
+        Cookie cookie = new Cookie(name, value);
+        cookie.setHttpOnly(cookie.isHttpOnly());
+        cookie.setSecure(cookie.getSecure());
+        cookie.setPath("/");
+
+        return cookie;
     }
 }

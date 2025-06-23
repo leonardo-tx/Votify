@@ -1,5 +1,9 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Votify API PROD" type="Application" factoryName="Application">
+    <envs>
+      <env name="DB_PASSWORD" value="Admin@123" />
+      <env name="REFRESH_TOKEN_SECRET" value="V3RY_$ECRET_REFRESH_TOKEN_KEYyui943yriy384u5yu385ygu83" />
+    </envs>
     <option name="MAIN_CLASS_NAME" value="br.com.votify.api.VotifyApiApplication" />
     <module name="votify-api" />
     <option name="VM_PARAMETERS" value="-Dspring.profiles.active=prod -Duser.timezone=UTC" />

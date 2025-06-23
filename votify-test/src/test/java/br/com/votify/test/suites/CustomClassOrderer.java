@@ -21,8 +21,11 @@ public class CustomClassOrderer implements ClassOrderer {
         if (SocketControllerTest.class.isAssignableFrom(testClass)) {
             return 2;
         }
-        if (SeleniumTest.class.isAssignableFrom(testClass)) {
+        if (RepositoryTest.class.isAssignableFrom(testClass)) {
             return 3;
+        }
+        if (SeleniumTest.class.isAssignableFrom(testClass)) {
+            return 4;
         }
         return 0;
     }

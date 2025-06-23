@@ -11,7 +11,7 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class LoginTest extends SeleniumTest {
+class LoginTest extends SeleniumTest {
     private LoginPage page;
     private static final String TEST_EMAIL = "admin@votify.com.br";
     private static final String TEST_PASSWORD = "admin123";
@@ -29,7 +29,7 @@ public class LoginTest extends SeleniumTest {
     }
 
     @TestTemplate
-    public void checkLoginFormElements() {
+    void checkLoginFormElements() {
         assertTrue(seleniumHelper.isInViewport(page.emailInput), "Email input should be visible");
         assertTrue(seleniumHelper.isInViewport(page.passwordInput), "Password input should be visible");
         assertTrue(seleniumHelper.isInViewport(page.submitButton), "Submit button should be visible");
@@ -38,24 +38,24 @@ public class LoginTest extends SeleniumTest {
     }
 
     @TestTemplate
-    public void checkLoginFormPlaceholders() {
-        assertEquals("Email", page.emailInput.getAttribute("placeholder"), "Email input placeholder should be 'Email'");
-        assertEquals("Senha", page.passwordInput.getAttribute("placeholder"), "Password input placeholder should be 'Senha'");
+    void checkLoginFormPlaceholders() {
+        assertEquals("Email", page.emailInput.getDomAttribute("placeholder"), "Email input placeholder should be 'Email'");
+        assertEquals("Senha", page.passwordInput.getDomAttribute("placeholder"), "Password input placeholder should be 'Senha'");
     }
 
     @TestTemplate
-    public void checkLoginFormRequiredFields() {
-        assertNotNull(page.emailInput.getAttribute("required"), "Email input should be required");
-        assertNotNull(page.passwordInput.getAttribute("required"), "Password input should be required");
+    void checkLoginFormRequiredFields() {
+        assertNotNull(page.emailInput.getDomAttribute("required"), "Email input should be required");
+        assertNotNull(page.passwordInput.getDomAttribute("required"), "Password input should be required");
     }
 
     @TestTemplate
-    public void checkLoginFormButtonText() {
+    void checkLoginFormButtonText() {
         assertEquals("Entrar", page.submitButton.getText(), "Submit button text should be 'Entrar'");
     }
 
     @TestTemplate
-    public void testSuccessfulLogin() {
+    void testSuccessfulLogin() {
         login(TEST_EMAIL, TEST_PASSWORD);
         wait.until(ExpectedConditions.urlContains("/home"));
 
@@ -66,7 +66,7 @@ public class LoginTest extends SeleniumTest {
     }
 
     @TestTemplate
-    public void testLoginAlreadyLoggedIn() {
+    void testLoginAlreadyLoggedIn() {
         login(TEST_EMAIL, TEST_PASSWORD);
         wait.until(ExpectedConditions.urlContains("/home"));
         seleniumHelper.get("/login");
@@ -79,7 +79,7 @@ public class LoginTest extends SeleniumTest {
     }
 
     @TestTemplate
-    public void testSuccessfulLoginAccessibility() {
+    void testSuccessfulLoginAccessibility() {
         new Actions(webDriver)
                 .sendKeys(page.emailInput, TEST_EMAIL)
                 .sendKeys(Keys.TAB)
@@ -97,7 +97,7 @@ public class LoginTest extends SeleniumTest {
     }
 
     @TestTemplate
-    public void testLoginWithInvalidEmail() {
+    void testLoginWithInvalidEmail() {
         login("invalid@email.com", "12345678");
 
         WebElement errorMessage = wait.until(d -> d.findElement(By.id("login-alert")));
@@ -106,7 +106,7 @@ public class LoginTest extends SeleniumTest {
     }
 
     @TestTemplate
-    public void testLoginWithInvalidPassword() {
+    void testLoginWithInvalidPassword() {
         login("123@gmail.com", "wrongpassword");
 
         WebElement errorMessage = wait.until(d -> d.findElement(By.id("login-alert")));
@@ -115,7 +115,7 @@ public class LoginTest extends SeleniumTest {
     }
 
     @TestTemplate
-    public void testLoginWithEmptyEmail() {
+    void testLoginWithEmptyEmail() {
         login("", "12345678");
         String currentUrl = webDriver.getCurrentUrl();
 
@@ -124,7 +124,7 @@ public class LoginTest extends SeleniumTest {
     }
 
     @TestTemplate
-    public void testLoginWithEmptyPassword() {
+    void testLoginWithEmptyPassword() {
         login("123@gmail.com", "");
         String currentUrl = webDriver.getCurrentUrl();
 
