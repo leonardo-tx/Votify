@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: votify-api-cm
+  namespace: votify
+data:
+  DATABASE_NAME: mysql-svc-node

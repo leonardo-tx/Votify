@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: votify-web-cm
+  namespace: votify
+data:
+  NEXT_PUBLIC_API_URL: votify-api-svc:8081
