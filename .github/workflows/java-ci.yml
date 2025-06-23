@@ -11,24 +11,42 @@ on:
       - '**/*.yml'
 
 jobs:
-  build:
-    uses: ./.github/workflows/build-docker-files.yml
   test:
-    needs: build
     uses: ./.github/workflows/test.yml
     with:
       upload-artifacts: true
+
+  docker-scan-api:
+    needs: test
+    uses: ./.github/workflows/docker-vuln-scan.yml
+    with:
+      image_name: votify-api:latest
+
+  docker-scan-frontend:
+    needs: test
+    uses: ./.github/workflows/docker-vuln-scan.yml
+    with:
+      image_name: votify-frontend:latest
+
+  docker-scan-test:
+    needs: test
+    uses: ./.github/workflows/docker-vuln-scan.yml
+    with:
+      image_name: votify-test:latest
+
   coverage:
     needs: test
     uses: ./.github/workflows/coverage.yml
     with:
       jacoco-artifact-name: jacoco-artifact
+
   sonar:
     needs: coverage
     uses: ./.github/workflows/sonar.yml
     secrets: inherit
     with:
       jacoco-artifact-name: jacoco-artifact
+
   commit-badges:
     needs: sonar
     uses: ./.github/workflows/commit-badges.yml
