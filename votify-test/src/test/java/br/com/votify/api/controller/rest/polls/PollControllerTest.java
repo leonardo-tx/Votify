@@ -37,7 +37,7 @@ public class PollControllerTest extends ControllerTest {
                 "Test Description",
                 null,
                 Instant.now().plus(Duration.ofDays(1)),
-                false,
+                true,
                 1,
                 voteOptionInsertDTOS
         );
@@ -53,7 +53,7 @@ public class PollControllerTest extends ControllerTest {
                 .andExpect(jsonPath("data.description", is("Test Description")))
                 .andExpect(jsonPath("data.startDate", is(notNullValue())))
                 .andExpect(jsonPath("data.endDate", is(notNullValue())))
-                .andExpect(jsonPath("data.userRegistration", is(false)))
+                .andExpect(jsonPath("data.userRegistration", is(true)))
                 .andExpect(jsonPath("data.choiceLimitPerUser", is(1)))
                 .andExpect(jsonPath("data.responsibleId", is(3)))
                 .andExpect(jsonPath("data.votedOption", is(0)))
@@ -393,5 +393,32 @@ public class PollControllerTest extends ControllerTest {
         ResultActions getResult = mockMvc.perform(get("/api/polls/user/{id}", 15)
                 .cookie(cookies));
         mockMvcHelper.testSuccessfulResponse(getResult, HttpStatus.OK);
+    }
+
+    @Test
+    @Order(4)
+    public void testGetVotersWhenAuthorized() throws Exception {
+        Cookie[] cookies = mockMvcHelper.login("common@votify.com.br", "password123");
+
+        ResultActions result = mockMvc.perform(get("/api/polls/{id}/voters", 14)
+                .cookie(cookies)
+                .param("page", "0")
+                .param("size", "10"));
+
+        mockMvcHelper.testSuccessfulResponse(result, HttpStatus.OK)
+                .andExpect(jsonPath("data.pageNumber", is(0)))
+                .andExpect(jsonPath("data.pageSize", is(10)))
+                .andExpect(jsonPath("data.content", notNullValue()));
+    }
+
+    @Test
+    @Order(4)
+    public void testGetVotersWhenUnauthorized() throws Exception {
+        Cookie[] cookies = mockMvcHelper.login("admin@votify.com.br", "admin123");
+
+        ResultActions result = mockMvc.perform(get("/api/polls/{id}/voters", 14)
+                .cookie(cookies));
+
+        mockMvcHelper.testUnsuccessfulResponse(result, VotifyErrorCode.POLL_VOTERS_UNAUTHORIZED);
     }
 }

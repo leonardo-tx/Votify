@@ -10,4 +10,5 @@ export interface PollDetailedView {
   responsibleId: number;
   voteOptions: VoteOptionView[];
   votedOption: number;
+  userRegistration: boolean;
 }

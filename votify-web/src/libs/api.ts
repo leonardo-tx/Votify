@@ -188,6 +188,20 @@ export const vote = async (
   });
 };
 
+export const getPollVoters = async (
+    pollId: number,
+    page: number = 0,
+    size: number = 10,
+): Promise<ApiResponse<PageResponse<UserQueryView> | null>> => {
+  return await commonRequester(async () => {
+    const { data } = await api.get<ApiResponse<PageResponse<UserQueryView>>>(
+        `/polls/${pollId}/voters?page=${page}&size=${size}`,
+    );
+    return data;
+  });
+};
+
+
 const commonRequester = async <T>(
   request: () => Promise<ApiResponse<T | null>>,
 ) => {

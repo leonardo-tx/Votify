@@ -34,4 +34,10 @@ public class PollPage extends BasePage {
 
     @FindBy(id = "no-poll-message")
     public WebElement noPollMessage;
+
+    @FindBy(id="voters-list-ul" )
+    public WebElement votersSectionTitle;
+
+    @FindBy(id= "voters-list-ul")
+    public WebElement votersListUL;
 }
