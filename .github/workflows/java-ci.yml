@@ -11,6 +11,8 @@ on:
       - '**/*.yml'
 
 jobs:
+  build:
+    uses: ./.github/workflows/build-docker-files.yml
   test:
     uses: ./.github/workflows/test.yml
     with:

@@ -12,7 +12,10 @@ on:
       - '**/*.yml'
 
 jobs:
+  build:
+    uses: ./.github/workflows/build-docker-files.yml
   test:
+    needs: build
     uses: ./.github/workflows/test.yml
     with:
       upload-artifacts: true
