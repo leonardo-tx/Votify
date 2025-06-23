@@ -54,6 +54,11 @@ public class Poll {
     @Column(name = "choice_limit_per_user", nullable = false)
     private Integer choiceLimitPerUser;
 
+    @Transient
+    private boolean canceled = false;
+
+
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
         name = "responsible_id",

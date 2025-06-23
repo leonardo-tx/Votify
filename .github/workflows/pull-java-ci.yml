@@ -1,7 +1,8 @@
-name: Votify Pull request Java CI
+name: Votify Pull Request Java CI
 
 on:
   pull_request:
+    types: [opened, synchronize, reopened]
     branches:
       - main
     paths:
@@ -12,17 +13,37 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    uses: ./.github/workflows/test.yml
+    with:
+      upload-artifacts: true
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+  docker-scan-api:
+    needs: test
+    uses: ./.github/workflows/docker-vuln-scan.yml
+    with:
+      image_name: votify-api:latest
 
-      - name: Setup Docker Compose
-        run: |
-          sudo apt update
-          sudo apt install docker-compose -y
+  docker-scan-frontend:
+    needs: test
+    uses: ./.github/workflows/docker-vuln-scan.yml
+    with:
+      image_name: votify-frontend:latest
 
-      - name: Build and wait tests to finish
-        run: |
-          docker-compose -f ./docker/docker-compose.test.yml up --build --abort-on-container-exit --exit-code-from test
+  docker-scan-test:
+    needs: test
+    uses: ./.github/workflows/docker-vuln-scan.yml
+    with:
+      image_name: votify-test:latest
+
+  coverage:
+    needs: test
+    uses: ./.github/workflows/coverage.yml
+    with:
+      jacoco-artifact-name: jacoco-artifact
+
+  sonar:
+    needs: coverage
+    uses: ./.github/workflows/sonar.yml
+    secrets: inherit
+    with:
+      jacoco-artifact-name: jacoco-artifact

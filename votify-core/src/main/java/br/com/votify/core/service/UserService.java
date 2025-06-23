@@ -60,9 +60,9 @@ public class UserService {
         if (user == null || !passwordEncoderService.checkPassword(user, password)) {
             throw new VotifyException(VotifyErrorCode.LOGIN_UNAUTHORIZED);
         }
-        //if (user.getEmailConfirmation() != null && user.getEmailConfirmation().getNewEmail() == null) {
-            //throw new VotifyException(VotifyErrorCode.PENDING_EMAIL_CONFIRMATION);
-        //}
+        if (user.getEmailConfirmation() != null && user.getEmailConfirmation().getNewEmail() == null) {
+            throw new VotifyException(VotifyErrorCode.PENDING_EMAIL_CONFIRMATION);
+        }
         RefreshToken refreshToken = tokenService.createRefreshToken(user);
         String accessToken = tokenService.createAccessToken(refreshToken);
 

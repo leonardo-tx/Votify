@@ -18,14 +18,18 @@ public class PollListViewDTO {
     private Instant endDate;
     private Long responsibleId;
 
+    private boolean canceled;
+
     public static PollListViewDTO parse(Poll entity) {
         return new PollListViewDTO(
-            entity.getId(),
-            entity.getTitle(),
-            entity.getDescription(),
-            entity.getStartDate(),
-            entity.getEndDate(),
-                entity.getResponsible() == null ? null : entity.getResponsible().getId()
+                entity.getId(),
+                entity.getTitle(),
+                entity.getDescription(),
+                entity.getStartDate(),
+                entity.getEndDate(),
+                entity.getResponsible() == null ? null : entity.getResponsible().getId(),
+                entity.isCanceled()
         );
     }
-} 
+}
+

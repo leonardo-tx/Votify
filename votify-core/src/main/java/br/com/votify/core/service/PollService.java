@@ -46,30 +46,40 @@ public class PollService {
         return pollRepository.save(poll);
     }
 
-    public Poll editPoll(Poll poll, User user, Long id) {
-        return pollRepository.findById(id)
-                .map(obj -> {
-                    Instant now = Instant.now();
-                    if(obj.getStartDate().isBefore(now)) {
-                        if (poll.getEndDate().isBefore(now)) {
-                            throw new RuntimeException("A nova data de término deve ser no futuro.");
-                        }
+    public Poll editPoll(Poll poll, User user, Long id) throws VotifyException {
+        Optional<Poll> optionalPoll = pollRepository.findById(id);
 
-                        if (poll.getEndDate().equals(obj.getEndDate())) {
-                            throw new RuntimeException("Não é possível alterar enquete, já esta em andamento.");
-                        }
-                        obj.setEndDate(poll.getEndDate());
-                    } else {
-                        obj.setTitle(poll.getTitle());
-                        obj.setDescription(poll.getDescription());
-                        obj.setStartDate(poll.getStartDate());
-                        obj.setEndDate(poll.getEndDate());
-                        obj.setChoiceLimitPerUser(poll.getChoiceLimitPerUser());
-                        obj.setResponsible(user);
-                    }
-                    return pollRepository.save(obj);
-                })
-                .orElseThrow(() -> new RuntimeException("Enquete não foi localizada."));
+        if (optionalPoll.isEmpty()) {
+            throw new VotifyException(VotifyErrorCode.POLL_NOT_FOUND);
+        }
+
+        Poll obj = optionalPoll.get();
+
+        if (!obj.getResponsible().getId().equals(user.getId())) {
+            throw new VotifyException(VotifyErrorCode.POLL_NOT_OWNED);
+        }
+
+        Instant now = Instant.now();
+
+        if (obj.getStartDate().isBefore(now)) {
+            if (poll.getEndDate().isBefore(now)) {
+                throw new VotifyException(VotifyErrorCode.POLL_END_DATE_INVALID);
+            }
+
+            if (poll.getEndDate().equals(obj.getEndDate())) {
+                throw new VotifyException(VotifyErrorCode.POLL_ALREADY_IN_PROGRESS);
+            }
+
+            obj.setEndDate(poll.getEndDate());
+        } else {
+            obj.setTitle(poll.getTitle());
+            obj.setDescription(poll.getDescription());
+            obj.setStartDate(poll.getStartDate());
+            obj.setEndDate(poll.getEndDate());
+            obj.setChoiceLimitPerUser(poll.getChoiceLimitPerUser());
+        }
+
+        return pollRepository.save(obj);
     }
 
     @Transactional
@@ -103,7 +113,7 @@ public class PollService {
 
         return vote.orElseGet(() -> new Vote(voteIdentifier, 0, poll, user));
     }
-    
+
     public Page<Poll> findAllByUserId(Long userId, int page, int size) throws VotifyException {
         if (page < 0) {
             throw new VotifyException(VotifyErrorCode.POLL_PAGE_INVALID_PAGE);
@@ -128,8 +138,7 @@ public class PollService {
 
 
     /**
-     *
-     * @param id  ID da poll a buscar
+     * @param id ID da poll a buscar
      * @return Poll
      */
     public Poll getByIdOrThrow(Long id) throws VotifyException {
@@ -171,3 +180,4 @@ public class PollService {
         pollRepository.save(poll);
     }
 }
+

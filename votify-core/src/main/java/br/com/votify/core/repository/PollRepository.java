@@ -36,6 +36,9 @@ public interface PollRepository extends JpaRepository<Poll, Long> {
         """)
     Page<Poll> findByTitleContainingIgnoreCase(@Param("title") String title, @Param("now") Instant now, Pageable pageable);
 
+
+
+
     @Query("""
         SELECT p
         FROM Poll p
@@ -44,4 +47,6 @@ public interface PollRepository extends JpaRepository<Poll, Long> {
         ORDER BY p.endDate ASC
         """)
     Page<Poll> findAllByActives(@Param("now") Instant now, Pageable pageable);
+
+
 }
