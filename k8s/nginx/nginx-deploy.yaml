@@ -22,11 +22,13 @@ spec:
           command: ["/bin/sh", "-c"]
           args:
             - >
-              envsubst '$$API_HOST $$API_PORT $$WEB_HOST $$WEB_PORT' < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf &&
+              envsubst '$$API_HOST $$API_PORT $$WEB_HOST $$WEB_PORT' 
+              < /etc/nginx/templates/nginx.conf.template 
+              > /etc/nginx/nginx.conf && 
               nginx -g 'daemon off;'
           volumeMounts:
             - name: nginx-config
-              mountPath: /etc/nginx
+              mountPath: /etc/nginx/templates
               readOnly: true
       volumes:
         - name: nginx-config
