@@ -19,11 +19,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Mostrar versão e SHA
-        run: |
-          echo "VERSION = $VERSION"
-          echo "SHA = ${{ inputs.sha }}"
-
       - name: Setup Docker
         uses: docker/setup-docker-action@v4
 
@@ -36,13 +31,11 @@ jobs:
           context: .
           file: ./docker/Dockerfile.api
           push: false
+          load: true
           tags: |
             ${{ env.API_IMAGE }}:${{ env.VERSION }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-
-      - name: Verificar API image após build
-        run: docker images | grep ${{ env.API_IMAGE }} || echo "API image não encontrada"
 
       - name: Build Web Docker Image (no push)
         uses: docker/build-push-action@v5
@@ -50,16 +43,14 @@ jobs:
           context: .
           file: ./docker/Dockerfile.frontend
           push: false
+          load: true
           tags: |
             ${{ env.WEB_IMAGE }}:${{ env.VERSION }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Verificar Web image após build
-        run: docker images | grep ${{ env.WEB_IMAGE }} || echo "Web image não encontrada"
-
-      - name: Verificar todas as imagens byces/votify
-        run: docker images | grep byces/votify || echo "Nenhuma imagem encontrada com o nome byces/votify"
+      - name: List Docker images
+        run: docker images
 
       - name: Save API image to artifact
         run: docker save ${{ env.API_IMAGE }}:${{ env.VERSION }} -o api-image.tar
