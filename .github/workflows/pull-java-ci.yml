@@ -14,16 +14,34 @@ on:
 jobs:
   build:
     uses: ./.github/workflows/build-docker-files.yml
-  test:
+
+  docker-scan-api:
     needs: build
+    uses: ./.github/workflows/docker-vuln-scan.yml
+    with:
+      image-name: byces/votify-api
+      image-version: ci-${{ github.sha }}
+      artifact-name: api-image
+
+  docker-scan-frontend:
+    needs: build
+    uses: ./.github/workflows/docker-vuln-scan.yml
+    with:
+      image-name: byces/votify-web
+      image-version: ci-${{ github.sha }}
+      artifact-name: web-image
+
+  test:
     uses: ./.github/workflows/test.yml
     with:
       upload-artifacts: true
+
   coverage:
     needs: test
     uses: ./.github/workflows/coverage.yml
     with:
       jacoco-artifact-name: jacoco-artifact
+
   sonar:
     needs: coverage
     uses: ./.github/workflows/sonar.yml
