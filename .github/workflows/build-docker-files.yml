@@ -2,16 +2,12 @@ name: Build Docker Files
 
 on:
   workflow_call:
-    inputs:
-      sha:
-        required: true
-        type: string
 
 jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      VERSION: ci-${{ inputs.sha }}
+      VERSION: ci-${{ github.sha }}
       API_IMAGE: "byces/votify-api"
       WEB_IMAGE: "byces/votify-web"
 
@@ -34,8 +30,6 @@ jobs:
           load: true
           tags: |
             ${{ env.API_IMAGE }}:${{ env.VERSION }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
 
       - name: Build Web Docker Image (no push)
         uses: docker/build-push-action@v5
@@ -46,8 +40,6 @@ jobs:
           load: true
           tags: |
             ${{ env.WEB_IMAGE }}:${{ env.VERSION }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
 
       - name: List Docker images
         run: docker images
@@ -63,9 +55,11 @@ jobs:
         with:
           name: api-image
           path: api-image.tar
+          retention-days: 1
 
       - name: Upload Web image artifact
         uses: actions/upload-artifact@v4
         with:
           name: web-image
           path: web-image.tar
+          retention-days: 1

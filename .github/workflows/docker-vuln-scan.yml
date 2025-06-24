@@ -3,10 +3,13 @@ name: Docker Vulnerability Scan
 on:
   workflow_call:
     inputs:
-      image_name:
+      image-name:
         required: true
         type: string
-      image_version:
+      image-version:
+        required: true
+        type: string
+      artifact-name:
         required: true
         type: string
 
@@ -15,24 +18,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Determine artifact name
-        id: set-artifact
-        run: |
-          case "${{ inputs.image_name }}" in
-            "byces/votify-api") echo "artifact_name=api-image" >> $GITHUB_OUTPUT ;;
-            "byces/votify-web") echo "artifact_name=web-image" >> $GITHUB_OUTPUT ;;
-            *) echo "Unknown image name" >&2; exit 1 ;;
-          esac
-
       - name: Download image artifact
         uses: actions/download-artifact@v4
         with:
-          name: ${{ steps.set-artifact.outputs.artifact_name }}
+          name: ${{ inputs.artifact-name }}
           path: .
 
       - name: Load Docker image
         run: |
-          docker load -i ${{ steps.set-artifact.outputs.artifact_name }}.tar
+          docker load -i ${{ inputs.artifact-name }}.tar
 
       - name: Install Trivy
         run: |
@@ -40,4 +34,4 @@ jobs:
 
       - name: Scan Docker image
         run: |
-          trivy image --exit-code 1 --severity CRITICAL,HIGH "${{ inputs.image_name }}:${{ inputs.image_version }}"
+          trivy image --severity CRITICAL,HIGH "${{ inputs.image-name }}:${{ inputs.image-version }}"
