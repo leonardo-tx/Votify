@@ -12,8 +12,8 @@ import org.springframework.stereotype.Service;
 public class LogEmailSender implements EmailSender {
     @Override
     public void sendEmail(User user, String subject, String message) {
-        log.info("[DEV] E-mail simulado enviado para: {}", user.getEmail().getValue());
-        log.info("[DEV] Assunto: {}", subject);
-        log.info("[DEV] Corpo: {}", message);
+        log.info("[DEV] Email sent to: {}", user.getEmail().getValue());
+        log.info("[DEV] Subject: {}", subject);
+        log.info("[DEV] Body: {}", message);
     }
 }

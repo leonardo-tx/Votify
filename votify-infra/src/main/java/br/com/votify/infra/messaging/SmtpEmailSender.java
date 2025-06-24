@@ -4,7 +4,6 @@ import br.com.votify.core.model.user.User;
 import br.com.votify.core.properties.email.EmailProperties;
 import br.com.votify.core.service.messaging.EmailSender;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
