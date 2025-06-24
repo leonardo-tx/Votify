@@ -16,8 +16,8 @@ services:
     build:
       context: ../
       dockerfile: docker/Dockerfile.frontend
-      args:
-        NEXT_PUBLIC_API_URL: "test:8081" 
+    environment:
+      NEXT_PUBLIC_API_URL: "http://test:8081"
 
   db-test:
     image: mysql:9.3.0

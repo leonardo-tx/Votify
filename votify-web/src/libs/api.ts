@@ -14,7 +14,7 @@ import UserUpdatePasswordRequestDTO from "./users/UserUpdatePasswordRequestDTO";
 export const api = axios.create({
   baseURL:
     typeof window === "undefined"
-      ? `http://${process.env.NEXT_PUBLIC_API_URL}/api`
+      ? `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8081"}/api`
       : `${window.location.origin}/api`,
   withCredentials: true,
 });
