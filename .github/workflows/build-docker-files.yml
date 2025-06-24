@@ -42,3 +42,21 @@ jobs:
             ${{ env.WEB_IMAGE }}:${{ env.VERSION }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Save API image to artifact
+        run: docker save ${{ env.API_IMAGE }}:${{ env.VERSION }} -o api-image.tar
+
+      - name: Save Web image to artifact
+        run: docker save ${{ env.WEB_IMAGE }}:${{ env.VERSION }} -o web-image.tar
+
+      - name: Upload API image artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: api-image
+          path: api-image.tar
+
+      - name: Upload Web image artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: web-image
+          path: web-image.tar
