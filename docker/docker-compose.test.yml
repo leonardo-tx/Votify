@@ -9,7 +9,7 @@ services:
     volumes:
       - ./target:/build/votify-test/target-copy
     environment:
-      FRONTEND_BASE_URL: "http://frontend:3000"
+      FRONTEND_BASE_URL: "http://nginx"
       DATABASE_NAME: "db-test"
 
   frontend:
@@ -17,7 +17,7 @@ services:
       context: ../
       dockerfile: docker/Dockerfile.frontend
     environment:
-      NEXT_PUBLIC_API_URL: "http://test:8081"
+      NEXT_PROXY_URL: "http://nginx"
 
   db-test:
     image: mysql:9.3.0
@@ -54,3 +54,22 @@ services:
       - SE_EVENT_BUS_HOST=selenium-hub
       - SE_EVENT_BUS_PUBLISH_PORT=4442
       - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+
+  nginx:
+    image: nginx:stable
+    environment:
+      API_HOST: test
+      API_PORT: 8081
+      WEB_HOST: frontend
+      WEB_PORT: 3000
+    volumes:
+      - ./nginx/nginx.conf.template:/etc/nginx/nginx.conf.template
+    command:
+      - /bin/sh
+      - -c
+      - |
+        envsubst '$$API_HOST $$API_PORT $$WEB_HOST $$WEB_PORT' < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf
+        nginx -g 'daemon off;'
+    depends_on:
+      - test
+      - frontend

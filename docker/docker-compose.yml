@@ -3,8 +3,6 @@ services:
     build:
       context: ../
       dockerfile: docker/Dockerfile.api
-    ports:
-      - "8081:8081"
     depends_on:
       db-prod:
         condition: service_healthy
@@ -18,10 +16,8 @@ services:
     build:
       context: ../
       dockerfile: docker/Dockerfile.frontend
-    ports:
-      - "3000:3000"
     environment:
-      NEXT_PUBLIC_API_URL: "http://api:8081"
+      NEXT_PROXY_URL: "http://nginx"
 
   db-prod:
     image: mysql:9.3.0
@@ -33,3 +29,24 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
+
+  nginx:
+    image: nginx:stable
+    ports:
+      - "80:80"
+    environment:
+      API_HOST: api
+      API_PORT: 8081
+      WEB_HOST: frontend
+      WEB_PORT: 3000
+    volumes:
+      - ./nginx/nginx.conf.template:/etc/nginx/nginx.conf.template
+    command:
+      - /bin/sh
+      - -c
+      - |
+        envsubst '$$API_HOST $$API_PORT $$WEB_HOST $$WEB_PORT' < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf
+        nginx -g 'daemon off;'
+    depends_on:
+      - api
+      - frontend

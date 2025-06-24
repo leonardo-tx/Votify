@@ -4,4 +4,4 @@ metadata:
   name: votify-web-cm
   namespace: votify
 data:
-  NEXT_PUBLIC_API_URL: votify-api-svc-node:8081
+  NEXT_PROXY_URL: http://nginx-svc-node

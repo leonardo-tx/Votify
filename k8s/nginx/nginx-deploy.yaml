@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deploy
+  namespace: votify
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:stable
+          envFrom:
+            - configMapRef:
+                name: nginx-cm
+          command: ["/bin/sh", "-c"]
+          args:
+            - >
+              envsubst '$$API_HOST $$API_PORT $$WEB_HOST $$WEB_PORT' < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf &&
+              nginx -g 'daemon off;'
+          volumeMounts:
+            - name: nginx-config
+              mountPath: /etc/nginx
+              readOnly: true
+      volumes:
+        - name: nginx-config
+          configMap:
+            name: nginx-cm
