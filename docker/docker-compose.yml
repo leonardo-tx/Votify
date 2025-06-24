@@ -11,6 +11,10 @@ services:
       DATABASE_NAME: "db-prod"
       DB_PASSWORD: ${DB_PASSWORD}
       REFRESH_TOKEN_SECRET: ${REFRESH_TOKEN_SECRET}
+      MAIL_HOST: ${MAIL_HOST}
+      MAIL_PORT: ${MAIL_PORT}
+      MAIL_USERNAME: ${MAIL_USERNAME}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
 
   frontend:
     build:

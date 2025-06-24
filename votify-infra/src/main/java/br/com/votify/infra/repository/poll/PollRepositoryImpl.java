@@ -51,8 +51,6 @@ public class PollRepositoryImpl implements PollRepository {
     @Override
     public Poll save(Poll poll) {
         PollEntity entity = mapper.toEntity(poll);
-        System.out.println("Enquete modelo: " + poll.getChoiceLimitPerUser());
-        System.out.println("Enquete entidade: " + entity.getChoiceLimitPerUser());
         PollEntity createdEntity = repository.save(entity);
 
         return mapper.toModel(createdEntity);
