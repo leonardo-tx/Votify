@@ -13,6 +13,8 @@ on:
 jobs:
   build:
     uses: ./.github/workflows/build-docker-files.yml
+    with:
+      sha: ${{ github.sha }}
 
   docker-scan-api:
     needs: build
