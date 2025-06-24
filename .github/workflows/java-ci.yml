@@ -14,23 +14,25 @@ jobs:
   build:
     uses: ./.github/workflows/build-docker-files.yml
 
-  test:
-    needs: build
-    uses: ./.github/workflows/test.yml
-    with:
-      upload-artifacts: true
-
   docker-scan-api:
     needs: build
     uses: ./.github/workflows/docker-vuln-scan.yml
     with:
-      image_name: byces/votify-api:ci-${{ github.sha }}
+      image_name: byces/votify-api
+      image_version: ci-${{ github.sha }}
 
   docker-scan-frontend:
     needs: build
     uses: ./.github/workflows/docker-vuln-scan.yml
     with:
-      image_name: byces/votify-web:ci-${{ github.sha }}
+      image_name: byces/votify-web
+      image_version: ci-${{ github.sha }}
+
+  test:
+    needs: [docker-scan-api, docker-scan-frontend]
+    uses: ./.github/workflows/test.yml
+    with:
+      upload-artifacts: true
 
   coverage:
     needs: test
