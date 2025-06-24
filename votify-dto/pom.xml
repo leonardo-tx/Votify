@@ -7,7 +7,7 @@
     <parent>
         <groupId>br.com.votify</groupId>
         <artifactId>votify</artifactId>
-        <version>0.1.0</version>
+        <version>1.0.0</version>
     </parent>
 
     <artifactId>votify-dto</artifactId>
@@ -22,7 +22,7 @@
         <dependency>
             <groupId>br.com.votify</groupId>
             <artifactId>votify-core</artifactId>
-            <version>0.1.0</version>
+            <version>${votify.version}</version>
         </dependency>
     </dependencies>
 
@@ -31,19 +31,6 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.jacoco</groupId>
-                <artifactId>jacoco-maven-plugin</artifactId>
-                <version>${jacoco.version}</version>
-                <executions>
-                    <execution>
-                        <id>prepare-agent</id>
-                        <goals>
-                            <goal>prepare-agent</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>

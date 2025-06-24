@@ -1,5 +1,6 @@
 package br.com.votify.test;
 
+import br.com.votify.web.login.LoginPage;
 import lombok.RequiredArgsConstructor;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
@@ -7,7 +8,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import br.com.votify.dto.users.UserLoginDTO;
+import br.com.votify.dto.user.UserLoginDTO;
 import org.openqa.selenium.*;
 
 import java.time.Instant;
@@ -20,7 +21,6 @@ public final class SeleniumHelper {
     private final String baseUrl;
     private final WebDriver webDriver;
     private final WebDriverWait wait;
-    private final MockMvcHelper mockMvcHelper;
 
     public Boolean isInViewport(WebElement element) {
         String script = "var elem = arguments[0], box = elem.getBoundingClientRect(), cx = box.left + box.width / 2, cy = box.top + box.height / 2, e = document.elementFromPoint(cx, cy); for (; e; e = e.parentElement) { if (e === elem) return true; } return false;";
@@ -35,19 +35,26 @@ public final class SeleniumHelper {
         wait.until(ExpectedConditions.presenceOfElementLocated(By.tagName("main")));
     }
 
-    public List<Cookie> getLoginCookies(UserLoginDTO userLoginDTO) throws Exception {
-        jakarta.servlet.http.Cookie[] cookies = mockMvcHelper.login(userLoginDTO.getEmail(), userLoginDTO.getPassword());
-        List<Cookie> cookiesToReturn = new ArrayList<>();
+    public List<Cookie> loginAndGetCookies(UserLoginDTO userLoginDTO) {
+        get("/login");
+        LoginPage page = new LoginPage(webDriver);
+        page.emailInput.sendKeys(userLoginDTO.getEmail());
+        page.passwordInput.sendKeys(userLoginDTO.getPassword());
+        page.submitButton.click();
 
-        for (jakarta.servlet.http.Cookie cookie : cookies) {
+        wait.until(ExpectedConditions.urlContains("/home"));
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.tagName("main")));
+
+        List<Cookie> cookies = new ArrayList<>();
+        for (Cookie cookie : webDriver.manage().getCookies()) {
             Cookie newCookie = new Cookie.Builder(cookie.getName(), cookie.getValue())
                     .path(cookie.getPath())
-                    .expiresOn(Date.from(Instant.now().plusSeconds(cookie.getMaxAge())))
-                    .isSecure(cookie.getSecure())
-                    .isHttpOnly(cookie.isHttpOnly())
+                    .expiresOn(Date.from(Instant.now().plusSeconds(3600)))
+                    .isSecure(false)
+                    .isHttpOnly(false)
                     .build();
-            cookiesToReturn.add(newCookie);
+            cookies.add(newCookie);
         }
-        return cookiesToReturn;
+        return cookies;
     }
 }

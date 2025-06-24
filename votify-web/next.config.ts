@@ -1,6 +1,5 @@
 import { NextConfig } from "next";
 
-const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "localhost:8081";
 const nextConfig: NextConfig = {
   async redirects() {
     return [
@@ -8,14 +7,6 @@ const nextConfig: NextConfig = {
         source: "/",
         destination: "/home",
         permanent: false,
-      },
-    ];
-  },
-  async rewrites() {
-    return [
-      {
-        source: "/api/:path*",
-        destination: `http://${apiUrl}/:path*`,
       },
     ];
   },
@@ -45,19 +36,6 @@ const nextConfig: NextConfig = {
       ],
     });
     return config;
-  },
-  env: {
-    NEXT_PUBLIC_API_URL: apiUrl,
-  },
-  experimental: {
-    turbo: {
-      rules: {
-        "*.svg": {
-          loaders: ["@svgr/webpack"],
-          as: "*.js",
-        },
-      },
-    },
   },
 };
 

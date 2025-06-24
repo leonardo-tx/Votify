@@ -1,0 +1,57 @@
+services:
+  api-dev:
+    build:
+      context: ../
+      dockerfile: docker/Dockerfile.api
+    depends_on:
+      db-dev:
+        condition: service_healthy
+    environment:
+      JAVA_ARGS: "-Dspring.profiles.active=dev -Duser.timezone=UTC"
+      DATABASE_NAME: "db-dev"
+
+  frontend:
+    build:
+      context: ../
+      dockerfile: docker/Dockerfile.frontend
+      args:
+        NODE_ENV: "development"
+    volumes:
+      - ../votify-web:/app
+      - /app/node_modules
+      - /app/.next
+    environment:
+      CHOKIDAR_USEPOLLING: "true"
+      NEXT_PROXY_URL: "http://nginx"
+
+  db-dev:
+    image: mysql:9.3.0
+    environment:
+      MYSQL_DATABASE: votifydb
+      MYSQL_ROOT_PASSWORD: Admin@123
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$$MYSQL_ROOT_PASSWORD"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  nginx:
+    image: nginx:stable
+    ports:
+      - "80:80"
+    environment:
+      API_HOST: api-dev
+      API_PORT: 8081
+      WEB_HOST: frontend
+      WEB_PORT: 3000
+    volumes:
+      - ./nginx/nginx.conf.template:/etc/nginx/nginx.conf.template
+    command:
+      - /bin/sh
+      - -c
+      - |
+        envsubst '$$API_HOST $$API_PORT $$WEB_HOST $$WEB_PORT' < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf
+        nginx -g 'daemon off;'
+    depends_on:
+      - api-dev
+      - frontend

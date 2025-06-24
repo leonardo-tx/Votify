@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: votify-web-deploy
+  namespace: votify
+  labels:
+    app: votify-web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: votify-web
+  template:
+    metadata:
+      labels:
+        app: votify-web
+    spec:
+      containers:
+        - name: votify-web
+          image: byces/votify-web:latest
+          envFrom:
+            - configMapRef:
+                name: votify-web-cm
+      restartPolicy: Always

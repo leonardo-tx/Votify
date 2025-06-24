@@ -1,29 +1,60 @@
 import { currentUserAtom } from "@/libs/users/atoms/currentUserAtom";
 import { useAtomValue } from "jotai";
 import styles from "./styles/VoteForm.module.css";
-import { FormEventHandler, Fragment, useState } from "react";
+import { FormEventHandler, Fragment, useEffect, useState } from "react";
 import Button from "@/components/shared/Button";
-import { useRouter } from "next/navigation";
 import { vote } from "@/libs/api";
 import { PollDetailedView } from "@/libs/polls/PollDetailedView";
+import { socketAtom } from "@/libs/socket/atoms/socketAtom";
+import { StompSubscription } from "@stomp/stompjs";
 
 interface Props {
-  poll: PollDetailedView;
+  initialPoll: PollDetailedView;
 }
 
-export default function VoteForm({ poll }: Props) {
+export default function VoteForm({ initialPoll }: Props) {
   const currentUser = useAtomValue(currentUserAtom);
-  const router = useRouter();
-  const [choices, setChoices] = useState(poll?.myChoices ?? 0);
+  const [poll, setPoll] = useState(initialPoll);
+  const [choices, setChoices] = useState(initialPoll?.votedOption ?? 0);
   const [selectedCount, setSelectedCount] = useState(0);
+  const socket = useAtomValue(socketAtom);
 
-  if (!poll) {
+  useEffect(() => {
+    if (socket === null) {
+      return;
+    }
+
+    let subscription: StompSubscription;
+    const subscribe = () => {
+      subscription = socket.subscribe(
+        `/receiver/polls/${initialPoll.id}`,
+        (message) => {
+          const newPoll: PollDetailedView = JSON.parse(message.body);
+          setPoll((oldPoll) => ({
+            ...newPoll,
+            votedOption: oldPoll.votedOption,
+          }));
+        },
+      );
+    };
+
+    if (socket.connected) {
+      subscribe();
+      return () => subscription.unsubscribe();
+    }
+    socket.onConnect = () => {
+      subscribe();
+    };
+    return () => subscription.unsubscribe();
+  }, [socket, initialPoll]);
+
+  if (!initialPoll) {
     return <></>;
   }
 
   let totalVoteCount = 0;
   poll.voteOptions.forEach(
-    (voteOption) => (totalVoteCount += voteOption.voteCount),
+    (voteOption) => (totalVoteCount += voteOption.count),
   );
 
   const onChange = (optionNumber: number) => {
@@ -44,16 +75,16 @@ export default function VoteForm({ poll }: Props) {
     event.preventDefault();
     const response = await vote(poll.id, { value: choices });
 
-    if (response.success) {
-      router.refresh();
+    if (!response.success) {
+      console.log(response.errorMessage);
       return;
     }
-    console.log(response.errorMessage);
+    setPoll((oldPoll) => ({ ...oldPoll, votedOption: choices }));
   };
 
   const isAuthenticated = currentUser !== null;
   const isMultiple = poll.choiceLimitPerUser > 1;
-  const hasVoted = poll.myChoices !== 0;
+  const hasVoted = poll.votedOption !== 0;
   const nowDate = Date.now();
   const startDate = Date.parse(poll.startDate);
   const endDate = Date.parse(poll.endDate);
@@ -79,11 +110,9 @@ export default function VoteForm({ poll }: Props) {
           >
             <span>{opt.name}</span>
             <span className="text-sm">
-              {opt.voteCount}{" "}
+              {opt.count}{" "}
               {totalVoteCount > 0 &&
-                "(" +
-                  ((opt.voteCount / totalVoteCount) * 100).toFixed(2) +
-                  "%)"}
+                "(" + ((opt.count / totalVoteCount) * 100).toFixed(2) + "%)"}
             </span>
           </label>
         </div>

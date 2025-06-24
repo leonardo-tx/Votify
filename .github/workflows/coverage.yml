@@ -1,0 +1,46 @@
+name: Coverage Verify Action
+
+on:
+  workflow_call:
+    inputs:
+      jacoco-artifact-name:
+        description: The name of the jacoco artifact to be downloaded.
+        required: true
+        type: string
+
+env:
+  MIN_COVERAGE_PERCENT: 90
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Install dependencies
+        run: |
+          sudo apt-get install -y libxml2-utils bc
+
+      - name: Download JaCoCo artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.jacoco-artifact-name }}
+
+      - name: Check if code coverage >= 90%
+        run: |
+          if [ ! -f jacoco.xml ]; then
+            echo "Coverage file not found: jacoco.xml"
+            exit 1
+          fi
+          
+          COVERED=$(xmllint --xpath "string(//report/counter[@type='INSTRUCTION']/@covered)" jacoco.xml)
+          MISSED=$(xmllint --xpath "string(//report/counter[@type='INSTRUCTION']/@missed)" jacoco.xml)
+          TOTAL=$(echo "$COVERED + $MISSED" | bc)
+          PERCENT=$(echo "scale=2; ($COVERED / $TOTAL) * 100" | bc)
+
+          echo "Total instruction coverage: $PERCENT%"
+
+          PASS=$(echo "$PERCENT >= $MIN_COVERAGE_PERCENT" | bc)
+          if [ "$PASS" -ne 1 ]; then
+            echo "Coverage is below 90%! Failing the workflow."
+            exit 1
+          fi

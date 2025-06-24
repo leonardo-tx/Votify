@@ -1,5 +1,5 @@
 ---- Usuários ----
-INSERT INTO TB_USER (id, userName, name, email, password, USER_TYPE)
+INSERT INTO TB_USER (id, user_name, name, email, password, role)
 VALUES
     -- Senha admin123
     (1, 'admin', 'Administrator', 'admin@votify.com.br', '$2a$10$iZxot5DeNjNJbm6nHgNjgun1s3NGDZitVB3bsezXntbORUQ2lF5Xi', 'ADMIN'),
@@ -94,7 +94,9 @@ VALUES
     -- Senha elderBlood22
     (46, 'ciri', 'Ciri Fiona', 'ciri@witchermail.com', '$2a$12$RjfNS43f9sg8KA8HdLDRP.rJEDyT9dSYhvWcQdeOYhojYmcaRi6IG', 'COMMON'),
     -- Senha wolfMentorX
-    (47, 'vesemir', 'Vesemir Wolf', 'vesemir@witchermail.com', '$2a$12$yGVdmY/TRUCUNBNPYYeqNu0KTyxvgTaDMOSzbXiZHhxHD5cNCbPm6', 'COMMON');
+    (47, 'vesemir', 'Vesemir Wolf', 'vesemir@witchermail.com', '$2a$12$yGVdmY/TRUCUNBNPYYeqNu0KTyxvgTaDMOSzbXiZHhxHD5cNCbPm6', 'COMMON'),
+    -- Senha wolfMentorX
+    (48, 'no-polls', 'No Polls', 'noPolls@votify.com.br', '$2a$12$yGVdmY/TRUCUNBNPYYeqNu0KTyxvgTaDMOSzbXiZHhxHD5cNCbPm6', 'COMMON');
 
 
 
@@ -339,6 +341,18 @@ VALUES
     (13, 2, 'Valorant', 0),
     (13, 3, 'Call of Duty', 0),
     (13, 4, 'Dota 2', 0);
+
+
+INSERT INTO TB_POLL (id, title, description, user_registration, choice_limit_per_user, start_date, end_date, responsible_id)
+VALUES (14, 'Vous-même! Venez, mon ami fan d\'Expedition 33!', 'Le meilleur jeu de l\'année! GOTY!!!!! Je voulais savoir, quelle est votre chanson préférée?', FALSE, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP() + INTERVAL 1 DAY, 4);
+
+INSERT INTO TB_VOTE_OPTION (poll_id, sequence, name, count)
+VALUES
+    (14, 0, 'Une vie à t\'aimer', 0),
+    (14, 1, 'Lumière', 0),
+    (14, 2, 'We Lost', 0),
+    (14, 3, 'Monoco', 0),
+    (14, 4, 'Une vie à peindre', 0);
 
 
 

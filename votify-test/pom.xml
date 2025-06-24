@@ -2,34 +2,41 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
     <modelVersion>4.0.0</modelVersion>
+
     <parent>
         <groupId>br.com.votify</groupId>
         <artifactId>votify</artifactId>
-        <version>0.1.0</version>
+        <version>1.0.0</version>
     </parent>
 
     <artifactId>votify-test</artifactId>
     <packaging>jar</packaging>
+
     <dependencies>
         <dependency>
             <groupId>br.com.votify</groupId>
             <artifactId>votify-core</artifactId>
-            <version>0.1.0</version>
-            <scope>compile</scope>
+            <version>${votify.version}</version>
         </dependency>
         <dependency>
             <groupId>br.com.votify</groupId>
             <artifactId>votify-api</artifactId>
-            <version>0.1.0</version>
-            <scope>compile</scope>
+            <version>${votify.version}</version>
         </dependency>
         <dependency>
             <groupId>br.com.votify</groupId>
             <artifactId>votify-dto</artifactId>
-            <version>0.1.0</version>
-            <scope>compile</scope>
+            <version>${votify.version}</version>
         </dependency>
+        <dependency>
+            <groupId>br.com.votify</groupId>
+            <artifactId>votify-infra</artifactId>
+            <version>${votify.version}</version>
+        </dependency>
+
+        
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -60,6 +67,12 @@
             <version>7.7.3</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.jayway.jsonpath</groupId>
+            <artifactId>json-path</artifactId>
+            <version>2.9.0</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -77,13 +90,21 @@
                 <version>${jacoco.version}</version>
                 <executions>
                     <execution>
-                        <id>prepare-agent</id>
+                        <id>report-aggregate</id>
+                        <phase>verify</phase>
                         <goals>
-                            <goal>prepare-agent</goal>
+                            <goal>report-aggregate</goal>
                         </goals>
                     </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-report-plugin</artifactId>
+                <version>3.5.3</version>
+                <executions>
                     <execution>
-                        <id>report</id>
+                        <id>generate-reports</id>
                         <phase>verify</phase>
                         <goals>
                             <goal>report</goal>
@@ -93,4 +114,5 @@
             </plugin>
         </plugins>
     </build>
+
 </project>
