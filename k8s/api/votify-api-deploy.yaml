@@ -17,8 +17,6 @@ spec:
         - name: votify-api
           image: byces/votify-api:latest
           imagePullPolicy: Always
-          ports:
-            - containerPort: 8081
           envFrom:
             - configMapRef:
                 # Este ConfigMap precisa ser criado e deve conter a key: DATABASE_NAME

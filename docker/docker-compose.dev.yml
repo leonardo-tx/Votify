@@ -16,6 +16,8 @@ services:
     build:
       context: ../
       dockerfile: docker/Dockerfile.frontend
+      args:
+        NODE_ENV: "development"
     ports:
       - "3000:3000"
     volumes:
@@ -24,8 +26,7 @@ services:
       - /app/.next
     environment:
       CHOKIDAR_USEPOLLING: "true"
-      NODE_ENV: "development"
-      NEXT_PUBLIC_API_URL: "api-dev:8081"
+      NEXT_PUBLIC_API_URL: "http://api-dev:8081"
 
   db-dev:
     image: mysql:9.3.0

@@ -18,10 +18,10 @@ services:
     build:
       context: ../
       dockerfile: docker/Dockerfile.frontend
-      args:
-        NEXT_PUBLIC_API_URL: "api:8081"
     ports:
       - "3000:3000"
+    environment:
+      NEXT_PUBLIC_API_URL: "http://api:8081"
 
   db-prod:
     image: mysql:9.3.0
