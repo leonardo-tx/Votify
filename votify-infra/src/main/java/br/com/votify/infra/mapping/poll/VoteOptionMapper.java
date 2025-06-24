@@ -6,6 +6,7 @@ import br.com.votify.infra.mapping.Mapper;
 import br.com.votify.infra.persistence.poll.PollEntity;
 import br.com.votify.infra.persistence.poll.VoteOptionEntity;
 import br.com.votify.infra.persistence.poll.VoteOptionIdentifier;
+import jakarta.transaction.NotSupportedException;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -21,7 +22,11 @@ public final class VoteOptionMapper implements Mapper<VoteOption, VoteOptionEnti
     }
 
     @Override
-    public VoteOptionEntity toEntity(VoteOption voteOption) {
+    public VoteOptionEntity toEntity(VoteOption voteOption) throws NotSupportedException {
+        throw new NotSupportedException("The default method toEntity is not supported.");
+    }
+
+    public VoteOptionEntity toEntity(VoteOption voteOption, PollEntity pollEntity) {
         VoteOptionIdentifier voteOptionIdentifier = VoteOptionIdentifier.builder()
                 .pollId(voteOption.getPollId())
                 .sequence(voteOption.getSequence())
@@ -30,7 +35,7 @@ public final class VoteOptionMapper implements Mapper<VoteOption, VoteOptionEnti
                 .id(voteOptionIdentifier)
                 .count(voteOption.getCount())
                 .name(voteOption.getName().getValue())
-                .poll(PollEntity.builder().id(voteOption.getPollId()).build())
+                .poll(pollEntity)
                 .build();
     }
 }

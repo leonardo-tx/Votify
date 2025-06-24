@@ -8,6 +8,7 @@ import br.com.votify.core.utils.exceptions.VotifyException;
 import br.com.votify.infra.persistence.poll.PollEntity;
 import br.com.votify.infra.persistence.poll.VoteOptionEntity;
 import br.com.votify.infra.persistence.user.UserEntity;
+import jakarta.transaction.NotSupportedException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -17,8 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.Instant;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -107,7 +107,7 @@ class PollMapperTest {
         when(poll.getChoiceLimitPerUser()).thenReturn(1);
         when(poll.getResponsibleId()).thenReturn(1L);
 
-        when(voteOptionMapper.toEntity(any(VoteOption.class))).thenReturn(mock(VoteOptionEntity.class));
+        when(voteOptionMapper.toEntity(any(VoteOption.class), any(PollEntity.class))).thenReturn(mock(VoteOptionEntity.class));
 
         PollEntity pollEntity = pollMapper.toEntity(poll);
         assertEquals(poll.getId(), pollEntity.getId());
@@ -136,7 +136,7 @@ class PollMapperTest {
         when(poll.getChoiceLimitPerUser()).thenReturn(1);
         when(poll.getResponsibleId()).thenReturn(null);
 
-        when(voteOptionMapper.toEntity(any(VoteOption.class))).thenReturn(mock(VoteOptionEntity.class));
+        when(voteOptionMapper.toEntity(any(VoteOption.class), any(PollEntity.class))).thenReturn(mock(VoteOptionEntity.class));
 
         PollEntity pollEntity = pollMapper.toEntity(poll);
         assertEquals(poll.getId(), pollEntity.getId());
