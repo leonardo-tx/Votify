@@ -31,7 +31,7 @@ jobs:
       image_version: ci-${{ github.sha }}
 
   test:
-    needs: [docker-scan-api, docker-scan-frontend]
+    needs: build   
     uses: ./.github/workflows/test.yml
     with:
       upload-artifacts: true
