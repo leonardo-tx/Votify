@@ -47,8 +47,8 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: List Docker images
-        run: docker images
+      - name: Verificar imagens criadas
+        run: docker images | grep byces/votify
 
       - name: Save API image to artifact
         run: docker save ${{ env.API_IMAGE }}:${{ env.VERSION }} -o api-image.tar
