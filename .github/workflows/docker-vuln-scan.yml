@@ -6,28 +6,45 @@ on:
       image_name:
         required: true
         type: string
-        description: 'Name of the Docker image to be scanned'
+      image_version:
+        required: true
+        type: string
 
 jobs:
   scan:
-    name: Scan Docker Image ${{ inputs.image_name }}
     runs-on: ubuntu-latest
 
     steps:
-      - name: Install dependencies
+      - name: Determine artifact name
+        id: set-artifact
         run: |
-          sudo apt-get update
-          sudo apt-get install -y wget
+          if [[ "${{ inputs.image_name }}" == "byces/votify-api" ]]; then
+            echo "artifact_name=api-image" >> $GITHUB_OUTPUT
+          elif [[ "${{ inputs.image_name }}" == "byces/votify-web" ]]; then
+            echo "artifact_name=web-image" >> $GITHUB_OUTPUT
+          else
+            echo "Unknown image name"
+            exit 1
+          fi
+
+      - name: Download image artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: ${{ steps.set-artifact.outputs.artifact_name }}
+          path: .
+
+      - name: Load Docker image
+        run: |
+          if [[ "${{ steps.set-artifact.outputs.artifact_name }}" == "api-image" ]]; then
+            docker load -i api-image.tar
+          else
+            docker load -i web-image.tar
+          fi
 
       - name: Install Trivy
         run: |
           curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
 
-      - name: Scan image with Trivy
+      - name: Scan Docker image
         run: |
-          echo "🔍 Scanning image: ${{ inputs.image_name }}"
-          trivy image \
-            --exit-code 1 \
-            --severity CRITICAL,HIGH \
-            --ignore-unfixed \
-            ${{ inputs.image_name }}
+          trivy image --exit-code 1 --severity CRITICAL,HIGH ${{ inputs.image_name }}:${{ inputs.image_version }}
