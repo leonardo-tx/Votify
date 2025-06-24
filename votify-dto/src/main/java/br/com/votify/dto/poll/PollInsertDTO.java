@@ -20,7 +20,7 @@ public final class PollInsertDTO {
     private Instant startDate;
     private Instant endDate;
     private boolean userRegistration;
-    private Integer choiceLimitPerUser;
+    private int choiceLimitPerUser;
     private List<VoteOptionInsertDTO> voteOptions;
 
     public PollRegister convertToEntity() throws VotifyException {

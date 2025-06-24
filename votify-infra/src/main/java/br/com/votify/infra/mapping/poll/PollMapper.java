@@ -31,14 +31,13 @@ public final class PollMapper implements Mapper<Poll, PollEntity> {
 
     @Override
     public PollEntity toEntity(Poll poll) {
-        return PollEntity.builder()
+        PollEntity pollEntity = PollEntity.builder()
                 .id(poll.getId())
                 .title(poll.getTitle().getValue())
                 .description(poll.getDescription().getValue())
                 .startDate(poll.getStartDate())
                 .endDate(poll.getEndDate())
                 .userRegistration(poll.isUserRegistration())
-                .voteOptions(poll.getVoteOptions().stream().map(voteOptionMapper::toEntity).toList())
                 .choiceLimitPerUser(poll.getChoiceLimitPerUser())
                 .responsible(
                         poll.getResponsibleId() != null
@@ -46,5 +45,9 @@ public final class PollMapper implements Mapper<Poll, PollEntity> {
                                 : null
                 )
                 .build();
+        pollEntity.setVoteOptions(poll.getVoteOptions().stream()
+                .map(voteOption -> voteOptionMapper.toEntity(voteOption, pollEntity)).toList()
+        );
+        return pollEntity;
     }
 }
