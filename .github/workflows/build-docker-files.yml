@@ -2,12 +2,16 @@ name: Build Docker Files
 
 on:
   workflow_call:
+    inputs:
+      sha:
+        required: true
+        type: string
 
 jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      VERSION: ci-${{ github.sha }}
+      VERSION: ci-${{ inputs.sha }}
       API_IMAGE: "byces/votify-api"
       WEB_IMAGE: "byces/votify-web"
 
@@ -42,6 +46,9 @@ jobs:
             ${{ env.WEB_IMAGE }}:${{ env.VERSION }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: List Docker images
+        run: docker images
 
       - name: Save API image to artifact
         run: docker save ${{ env.API_IMAGE }}:${{ env.VERSION }} -o api-image.tar
