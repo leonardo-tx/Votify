@@ -50,13 +50,13 @@ jobs:
         run: docker save ${{ env.WEB_IMAGE }}:${{ env.VERSION }} -o web-image.tar
 
       - name: Upload API image artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: api-image
           path: api-image.tar
 
       - name: Upload Web image artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: web-image
           path: web-image.tar
