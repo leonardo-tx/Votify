@@ -7,14 +7,18 @@ import VotifyErrorCode from "./VotifyErrorCode";
 import PollSimpleView from "./polls/PollSimpleView";
 import { PageResponse } from "./PageResponse";
 import UserPasswordResetRequestDto from "@/libs/users/UserPasswordResetRequestDto";
-import UserPasswordResetResponseDto from "@/libs/users/UserPasswordResetResponseDto";
 import UserPasswordResetConfirmDTO from "@/libs/users/UserPasswordResetConfirmDTO";
 import { PollDetailedView } from "./polls/PollDetailedView";
 import VoteInsertDTO from "./polls/VoteInsertDTO";
 import EmailConfirmationRequestDTO from "./users/EmailConfirmationRequestDTO";
+import UserUpdateInfoDTO from "./users/UserUpdateInfoDTO";
+import UserUpdatePasswordRequestDTO from "./users/UserUpdatePasswordRequestDTO";
 
 export const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
+  baseURL:
+    typeof window === "undefined"
+      ? `${process.env.NEXT_PROXY_URL ?? "http://localhost:8081"}/api`
+      : `${window.location.origin}/api`,
   withCredentials: true,
 });
 
@@ -36,6 +40,56 @@ export const getCurrentUser = async (): Promise<
   });
 };
 
+export const deleteCurrentUser = async (): Promise<ApiResponse<null>> => {
+  return await commonRequester(async () => {
+    const { data } = await api.delete<ApiResponse<null>>("/users/me");
+    console.log(data);
+    return data;
+  });
+};
+
+export const updateUserInfo = async (
+  form: UserUpdateInfoDTO,
+): Promise<ApiResponse<UserDetailedView | null>> => {
+  return await commonRequester(async () => {
+    const { data } = await api.put<ApiResponse<null>>("/users/me/info", form);
+    return data;
+  });
+};
+
+export const updateUserPassword = async (
+  form: UserUpdatePasswordRequestDTO,
+): Promise<ApiResponse<null>> => {
+  return await commonRequester(async () => {
+    const { data } = await api.put<ApiResponse<null>>(
+      "/users/me/password",
+      form,
+    );
+    return data;
+  });
+};
+
+export const getUserByUserName = async (
+  userName: string,
+  cookie: string | undefined = undefined,
+): Promise<ApiResponse<UserQueryView | null>> => {
+  return await commonRequester(async () => {
+    if (cookie === undefined) {
+      const { data } = await api.get<ApiResponse<UserDetailedView>>(
+        `/users/username/${userName}`,
+      );
+      return data;
+    }
+    const { data } = await api.get<ApiResponse<UserDetailedView>>(
+      `/users/username/${userName}`,
+      {
+        headers: { cookie: cookie ?? "" },
+      },
+    );
+    return data;
+  });
+};
+
 export const logout = async (): Promise<ApiResponse<null>> => {
   return await commonRequester(async () => {
     const { data } = await api.post<ApiResponse<null>>("/auth/logout");
@@ -45,9 +99,9 @@ export const logout = async (): Promise<ApiResponse<null>> => {
 
 export const login = async (
   credentials: UserLoginDTO,
-): Promise<ApiResponse<UserLoginDTO | null>> => {
+): Promise<ApiResponse<null>> => {
   return await commonRequester(async () => {
-    const { data } = await api.post<ApiResponse<UserLoginDTO>>(
+    const { data } = await api.post<ApiResponse<null>>(
       "/auth/login",
       credentials,
     );
@@ -56,42 +110,40 @@ export const login = async (
 };
 
 export const forgotPassword = async (
-    request: UserPasswordResetRequestDto,
-): Promise<ApiResponse<UserPasswordResetResponseDto | null>> => {
+  request: UserPasswordResetRequestDto,
+): Promise<ApiResponse<null>> => {
   return await commonRequester(async () => {
-    const { data } = await api.post<ApiResponse<UserPasswordResetResponseDto>>(
-        "/auth/forgot-password",
-        request,
+    const { data } = await api.post<ApiResponse<null>>(
+      "/auth/forgot-password",
+      request,
     );
     return data;
   });
 };
 
 export const resetPassword = async (
-    request: UserPasswordResetConfirmDTO,
-): Promise<ApiResponse<UserPasswordResetConfirmDTO | null>> => {
+  request: UserPasswordResetConfirmDTO,
+): Promise<ApiResponse<null>> => {
   return await commonRequester(async () => {
     const { data } = await api.post<ApiResponse<null>>(
-        "/auth/reset-password",
-        request,
+      "/auth/reset-password",
+      request,
     );
     return data;
   });
 };
 
 export const confirmEmail = async (
-    request: EmailConfirmationRequestDTO,
-  ): Promise<ApiResponse<null>> => {
-    return await commonRequester(async () => {
+  request: EmailConfirmationRequestDTO,
+): Promise<ApiResponse<null>> => {
+  return await commonRequester(async () => {
     const { data } = await api.post<ApiResponse<null>>(
-      `/auth/confirm-email`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(request)
-    });
+      `/auth/confirm-email`,
+      request,
+    );
     return data;
   });
-}
+};
 
 export const getMyPolls = async (
   page: number = 0,
@@ -100,6 +152,19 @@ export const getMyPolls = async (
   return await commonRequester(async () => {
     const { data } = await api.get<ApiResponse<PageResponse<PollSimpleView>>>(
       `/polls/me?page=${page}&size=${size}`,
+    );
+    return data;
+  });
+};
+
+export const getPollsFromUser = async (
+  id: number,
+  page: number = 0,
+  size: number = 10,
+): Promise<ApiResponse<PageResponse<PollSimpleView> | null>> => {
+  return await commonRequester(async () => {
+    const { data } = await api.get<ApiResponse<PageResponse<PollSimpleView>>>(
+      `/polls/user/${id}?page=${page}&size=${size}`,
     );
     return data;
   });
@@ -120,10 +185,18 @@ export const searchPollsByTitle = async (
 
 export const getPollById = async (
   id: number,
+  cookie: string | undefined = undefined,
 ): Promise<ApiResponse<PollDetailedView | null>> => {
   return await commonRequester(async () => {
+    if (cookie === undefined) {
+      const { data } = await api.get<ApiResponse<PollDetailedView>>(
+        `/polls/${id}`,
+      );
+      return data;
+    }
     const { data } = await api.get<ApiResponse<PollDetailedView>>(
       `/polls/${id}`,
+      { headers: { cookie: cookie ?? "" } },
     );
     return data;
   });

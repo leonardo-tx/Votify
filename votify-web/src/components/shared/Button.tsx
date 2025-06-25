@@ -23,7 +23,7 @@ type NextLinkProps = {
 
 type Props = {
   variant?: "solid" | "outline" | "text";
-  scheme?: "primary";
+  scheme?: "primary" | "red";
   className?: string;
   children?: ReactNode;
 } & (ButtonProps | AnchorProps | NextLinkProps);

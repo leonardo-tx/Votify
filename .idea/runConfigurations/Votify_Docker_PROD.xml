@@ -1,0 +1,41 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Votify Docker PROD" type="docker-deploy" factoryName="docker-compose.yml" server-name="Docker">
+    <deployment type="docker-compose.yml">
+      <settings>
+        <option name="envFilePath" value="" />
+        <option name="envVars">
+          <list>
+            <DockerEnvVarImpl>
+              <option name="name" value="DB_PASSWORD" />
+              <option name="value" value="Admin@123" />
+            </DockerEnvVarImpl>
+            <DockerEnvVarImpl>
+              <option name="name" value="REFRESH_TOKEN_SECRET" />
+              <option name="value" value="V3RY_$ECRET_REFRESH_TOKEN_KEYyui943yriy384u5yu385ygu83" />
+            </DockerEnvVarImpl>
+            <DockerEnvVarImpl>
+              <option name="name" value="MAIL_HOST" />
+              <option name="value" value="smtp.gmail.com" />
+            </DockerEnvVarImpl>
+            <DockerEnvVarImpl>
+              <option name="name" value="MAIL_USERNAME" />
+              <option name="value" value="mailvotify@gmail.com" />
+            </DockerEnvVarImpl>
+            <DockerEnvVarImpl>
+              <option name="name" value="MAIL_PASSWORD" />
+              <option name="value" value="colocar_a_senha_do_app" />
+            </DockerEnvVarImpl>
+            <DockerEnvVarImpl>
+              <option name="name" value="MAIL_PORT" />
+              <option name="value" value="587" />
+            </DockerEnvVarImpl>
+          </list>
+        </option>
+        <option name="commandLineOptions" value="--build" />
+        <option name="sourceFilePath" value="docker/docker-compose.yml" />
+        <option name="upDetach" value="false" />
+      </settings>
+    </deployment>
+    <method v="2" />
+  </configuration>
+</component>

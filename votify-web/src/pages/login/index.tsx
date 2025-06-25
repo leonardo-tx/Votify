@@ -1,13 +1,13 @@
-import {FormEvent, useState} from "react";
-import {useRouter} from "next/router";
+import { FormEvent, useState } from "react";
+import { useRouter } from "next/router";
 import Button from "@/components/shared/Button";
 import Input from "@/components/shared/Input";
-import {IoLockClosedOutline, IoMailOutline} from "react-icons/io5";
-import {getCurrentUser, login} from "@/libs/api";
+import { IoLockClosedOutline, IoMailOutline } from "react-icons/io5";
+import { getCurrentUser, login } from "@/libs/api";
 import UserLoginDTO from "@/libs/users/UserLoginDTO";
 import VotifyErrorCode from "@/libs/VotifyErrorCode";
-import {useSetAtom} from "jotai";
-import {currentUserAtom} from "@/libs/users/atoms/currentUserAtom";
+import { useSetAtom } from "jotai";
+import { currentUserAtom } from "@/libs/users/atoms/currentUserAtom";
 import Head from "next/head";
 
 export default function LoginPage() {
@@ -95,7 +95,7 @@ export default function LoginPage() {
               variant="text"
               scheme="primary"
               id="forgot-password-link"
-              href="/auth/forgot-password"
+              href="/forgot-password"
               className="text-sm text-blue-600 hover:text-blue-700"
             >
               Esqueceu a senha?

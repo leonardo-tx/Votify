@@ -1,7 +1,8 @@
-name: Votify Pull request Java CI
+name: Votify Pull Request Java CI
 
 on:
   pull_request:
+    types: [opened, synchronize, reopened]
     branches:
       - main
     paths:
@@ -11,38 +12,39 @@ on:
       - '**/*.yml'
 
 jobs:
+  build:
+    uses: ./.github/workflows/build-docker-files.yml
+
+  docker-scan-api:
+    needs: build
+    uses: ./.github/workflows/docker-vuln-scan.yml
+    with:
+      image-name: byces/votify-api
+      image-version: ci-${{ github.sha }}
+      artifact-name: api-image
+
+  docker-scan-frontend:
+    needs: build
+    uses: ./.github/workflows/docker-vuln-scan.yml
+    with:
+      image-name: byces/votify-web
+      image-version: ci-${{ github.sha }}
+      artifact-name: web-image
+
   test:
-    runs-on: ubuntu-latest
+    uses: ./.github/workflows/test.yml
+    with:
+      upload-artifacts: true
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+  coverage:
+    needs: test
+    uses: ./.github/workflows/coverage.yml
+    with:
+      jacoco-artifact-name: jacoco-artifact
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Setup JDK 17
-        uses: actions/setup-java@v4
-        with:
-          java-version: '17'
-          distribution: 'adopt'
-
-      - name: Install web dependencies
-        run: npm install
-        working-directory: ./votify-web
-
-      - name: Build web application
-        run: npm run build
-        working-directory: ./votify-web
-
-      - name: Run web application in background
-        run: npm run start &
-        working-directory: ./votify-web
-
-      - name: Build and install all modules
-        run: mvn clean compile
-
-      - name: Run tests with Maven
-        run: mvn clean test
+  sonar:
+    needs: coverage
+    uses: ./.github/workflows/sonar.yml
+    secrets: inherit
+    with:
+      jacoco-artifact-name: jacoco-artifact

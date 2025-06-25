@@ -7,7 +7,7 @@
     <parent>
         <groupId>br.com.votify</groupId>
         <artifactId>votify</artifactId>
-        <version>0.1.0</version>
+        <version>1.0.0</version>
     </parent>
 
     <artifactId>votify-api</artifactId>
@@ -20,15 +20,24 @@
             <version>${spring.boot.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-websocket</artifactId>
+            <version>${spring.boot.version}</version>
+        </dependency>
+        <dependency>
             <groupId>br.com.votify</groupId>
             <artifactId>votify-core</artifactId>
-            <version>0.1.0</version>
+            <version>${votify.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>br.com.votify</groupId>
+            <artifactId>votify-infra</artifactId>
+            <version>${votify.version}</version>
         </dependency>
         <dependency>
             <groupId>br.com.votify</groupId>
             <artifactId>votify-dto</artifactId>
-            <version>0.1.0</version>
-            <scope>compile</scope>
+            <version>${votify.version}</version>
         </dependency>
     </dependencies>
 
@@ -37,17 +46,15 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.jacoco</groupId>
-                <artifactId>jacoco-maven-plugin</artifactId>
-                <version>${jacoco.version}</version>
+                <version>${spring.boot.version}</version>
                 <executions>
                     <execution>
-                        <id>prepare-agent</id>
                         <goals>
-                            <goal>prepare-agent</goal>
+                            <goal>repackage</goal>
                         </goals>
+                        <configuration>
+                            <classifier>exec</classifier>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>

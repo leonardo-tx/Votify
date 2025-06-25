@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: votify-api-svc-cluster
+  namespace: votify
+spec:
+  clusterIP: 10.96.0.20  
+  selector:
+    app: votify-api
+  type: ClusterIP
+  ports:
+    - protocol: TCP
+      port: 8081
+      targetPort: 8081 

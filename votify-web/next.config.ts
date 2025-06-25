@@ -37,19 +37,6 @@ const nextConfig: NextConfig = {
     });
     return config;
   },
-  env: {
-    NEXT_PUBLIC_API_BASE_URL: "http://localhost:8081",
-  },
-  experimental: {
-    turbo: {
-      rules: {
-        "*.svg": {
-          loaders: ["@svgr/webpack"],
-          as: "*.js",
-        },
-      },
-    },
-  },
 };
 
 module.exports = nextConfig;

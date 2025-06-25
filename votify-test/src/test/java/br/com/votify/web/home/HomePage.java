@@ -5,6 +5,8 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 
+import java.util.List;
+
 public class HomePage extends BasePage {
     protected HomePage(WebDriver webDriver) {
         super(webDriver);
@@ -12,6 +14,9 @@ public class HomePage extends BasePage {
 
     @FindBy(id = "poll-list")
     public WebElement pollList;
+
+    @FindBy(css = "[id^='poll-card-link-']")
+    public List<WebElement> pollAnchors;
 
     @FindBy(id = "next-page")
     public WebElement buttonNextPage;

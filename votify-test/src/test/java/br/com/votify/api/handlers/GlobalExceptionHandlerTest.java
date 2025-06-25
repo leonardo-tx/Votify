@@ -5,11 +5,11 @@ import static org.junit.jupiter.api.Assertions.*;
 import br.com.votify.core.utils.exceptions.VotifyErrorCode;
 import br.com.votify.core.utils.exceptions.VotifyException;
 import br.com.votify.dto.ApiResponse;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -23,21 +23,16 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.lang.reflect.Method;
 
-public class GlobalExceptionHandlerTest {
-
+@ExtendWith(MockitoExtension.class)
+class GlobalExceptionHandlerTest {
     @InjectMocks
     private GlobalExceptionHandler globalExceptionHandler;
 
     @Mock
     private WebRequest webRequest;
 
-    @BeforeEach
-    public void setUp() {
-        MockitoAnnotations.openMocks(this);
-    }
-
     @Test
-    public void testGlobalExceptionHandler() {
+    void testGlobalExceptionHandler() {
         Exception exception = new Exception("Test exception");
         ResponseEntity<ApiResponse<Object>> response = globalExceptionHandler.globalExceptionHandler(exception, webRequest);
 
@@ -47,7 +42,7 @@ public class GlobalExceptionHandlerTest {
     }
 
     @Test
-    public void testGlobalVotifyExceptionHandler() {
+    void testGlobalVotifyExceptionHandler() {
         VotifyException exception = new VotifyException(VotifyErrorCode.BAD_REQUEST);
         ResponseEntity<ApiResponse<Object>> response = globalExceptionHandler.globalVotifyExceptionHandler(exception, webRequest);
 
@@ -57,7 +52,7 @@ public class GlobalExceptionHandlerTest {
     }
 
     @Test
-    public void testGlobalHttpMessageNotReadableExceptionHandler() {
+    void testGlobalHttpMessageNotReadableExceptionHandler() {
         HttpMessageNotReadableException exception = new HttpMessageNotReadableException("Bad request");
         ResponseEntity<ApiResponse<Object>> response = globalExceptionHandler.globalHttpMessageNotReadableExceptionHandler(exception, webRequest);
 
@@ -67,7 +62,7 @@ public class GlobalExceptionHandlerTest {
     }
 
     @Test
-    public void testGlobalNoResourceFoundExceptionHandler() {
+    void testGlobalNoResourceFoundExceptionHandler() {
         NoResourceFoundException exception = new NoResourceFoundException(HttpMethod.GET, "/users");
         ResponseEntity<ApiResponse<Object>> response = globalExceptionHandler.globalNoResourceFoundExceptionHandler(exception, webRequest);
 
@@ -77,7 +72,7 @@ public class GlobalExceptionHandlerTest {
     }
 
     @Test
-    public void testGlobalHttpRequestMethodNotSupportedExceptionHandler() {
+    void testGlobalHttpRequestMethodNotSupportedExceptionHandler() {
         HttpRequestMethodNotSupportedException exception = new HttpRequestMethodNotSupportedException("Method not allowed");
         ResponseEntity<ApiResponse<Object>> response = globalExceptionHandler.globalHttpRequestMethodNotSupportedExceptionHandler(exception, webRequest);
 
@@ -87,7 +82,7 @@ public class GlobalExceptionHandlerTest {
     }
 
     @Test
-    public void testGlobalBeanCreationExceptionHandlerWithVotifyException() {
+    void testGlobalBeanCreationExceptionHandlerWithVotifyException() {
         VotifyException rootCause = new VotifyException(VotifyErrorCode.BAD_REQUEST);
         BeanCreationException exception = new BeanCreationException("Bean creation failed", rootCause);
 
@@ -99,7 +94,7 @@ public class GlobalExceptionHandlerTest {
     }
 
     @Test
-    public void testGlobalBeanCreationExceptionHandlerWithOtherException() {
+    void testGlobalBeanCreationExceptionHandlerWithOtherException() {
         Exception rootCause = new Exception("Internal error");
         BeanCreationException exception = new BeanCreationException("Bean creation failed", rootCause);
 
@@ -111,7 +106,7 @@ public class GlobalExceptionHandlerTest {
     }
 
     @Test
-    public void testGlobalMethodArgumentTypeMismatchExceptionHandler() throws NoSuchMethodException {
+    void testGlobalMethodArgumentTypeMismatchExceptionHandler() throws NoSuchMethodException {
         Object value = "invalidValue";
         Class<?> requiredType = Integer.class;
         String name = "parameterName";
