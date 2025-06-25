@@ -45,10 +45,14 @@ public class PollEntity {
     @Column(name = "choice_limit_per_user", nullable = false)
     private Integer choiceLimitPerUser;
 
+    @Transient
+    private boolean canceled = false;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
             name = "responsible_id",
             foreignKey = @ForeignKey(name = "fk_responsible_poll")
     )
     private UserEntity responsible;
+
 }

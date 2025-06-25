@@ -24,6 +24,8 @@ const navItems: NavItem[] = [
   { id: "nav-about-anchor", text: "Sobre nós", href: "/home" },
 ];
 
+
+
 export default function Header() {
   const router = useRouter();
   const [currentUser, setCurrentUser] = useAtom(currentUserAtom);

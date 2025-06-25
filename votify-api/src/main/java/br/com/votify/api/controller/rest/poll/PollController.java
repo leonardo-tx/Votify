@@ -1,5 +1,6 @@
 package br.com.votify.api.controller.rest.poll;
 
+import br.com.votify.core.model.poll.PollRegister;
 import br.com.votify.core.model.poll.VoteRegister;
 import br.com.votify.core.model.user.User;
 import br.com.votify.core.service.user.UserService;
@@ -44,10 +45,18 @@ public class PollController {
 
     @PutMapping("/{id}")
     @NeedsUserContext
-    public ResponseEntity<ApiResponse<PollDetailedViewDTO>> editPoll(@RequestBody PollInsertDTO pollInsertDTO,
-                                                                     @PathVariable("id") Long id) throws VotifyException {
-        Poll updatePoll = pollService.editPoll(pollInsertDTO.convertToEntity(), contextService.getUserOrThrow(), id);
-        PollDetailedViewDTO pollDto = PollDetailedViewDTO.parse(updatePoll, 0);
+    public ResponseEntity<ApiResponse<PollDetailedViewDTO>> editPoll(
+            @RequestBody PollInsertDTO pollInsertDTO,
+            @PathVariable("id") Long id) throws VotifyException {
+
+        User user = userService.getContext().getUserOrThrow();
+        PollRegister pollRegister = pollInsertDTO.convertToEntity();
+
+        Poll pollToUpdate = new Poll(pollRegister, user);
+
+        Poll updatedPoll = pollService.editPoll(pollToUpdate, user, id);
+        PollDetailedViewDTO pollDto = PollDetailedViewDTO.parse(updatedPoll, 0);
+
         return ApiResponse.success(pollDto, HttpStatus.OK).createResponseEntity();
     }
 

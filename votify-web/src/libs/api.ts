@@ -20,7 +20,7 @@ import UserUpdateEmailRequestDTO from "./users/UserUpdateEmailRequestDTO";
 export const api = axios.create({
   baseURL:
       typeof window === "undefined"
-          ? `${process.env.NEXT_PROXY_URL ?? `http://${process.env.NEXT_PUBLIC_API_URL}`}/api`
+          ? `${process.env.NEXT_PROXY_URL ?? "http://localhost:8081"}/api`
           : `${window.location.origin}/api`,
   withCredentials: true,
 });
@@ -186,7 +186,7 @@ export const updatePoll = async (
 
 export const cancelPoll = async (id: number): Promise<ApiResponse<any>> => {
   const apiResponse = await api.delete<ApiResponse<any>>(`/polls/${id}/cancel`);
-  console.log(apiResponse)
+  console.log(apiResponse);
   return apiResponse.data;
 };
 
@@ -272,7 +272,6 @@ export const vote = async (
   });
 };
 
-// Utilitários de requisição com tratamento de erros e token
 const commonRequester = async <T>(
     request: () => Promise<ApiResponse<T | null>>,
 ) => {

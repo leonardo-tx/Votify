@@ -1,9 +1,6 @@
 package br.com.votify.core.service.poll;
 
-import br.com.votify.core.model.poll.Poll;
-import br.com.votify.core.model.poll.PollRegister;
-import br.com.votify.core.model.poll.Vote;
-import br.com.votify.core.model.poll.VoteRegister;
+import br.com.votify.core.model.poll.*;
 import br.com.votify.core.model.poll.event.PollUpdateEvent;
 import br.com.votify.core.model.user.User;
 import br.com.votify.core.repository.poll.VoteRepository;
@@ -36,6 +33,57 @@ public class PollService {
         return pollRepository.save(poll);
     }
 
+    public Poll editPoll(Poll poll, User user, Long id) throws VotifyException {
+        Optional<Poll> optionalPoll = pollRepository.findById(id);
+
+        if (optionalPoll.isEmpty()) {
+            throw new VotifyException(VotifyErrorCode.POLL_NOT_FOUND);
+        }
+
+        Poll obj = optionalPoll.get();
+
+        if (!obj.getResponsibleId().equals(user.getId())) {
+            throw new VotifyException(VotifyErrorCode.POLL_NOT_OWNED);
+        }
+
+        Instant now = Instant.now();
+
+        if (obj.getStartDate().isBefore(now)) {
+            if (poll.getEndDate().isBefore(now)) {
+                throw new VotifyException(VotifyErrorCode.POLL_END_DATE_INVALID);
+            }
+
+            if (poll.getEndDate().equals(obj.getEndDate())) {
+                throw new VotifyException(VotifyErrorCode.POLL_ALREADY_IN_PROGRESS);
+            }
+            obj = Poll.parseUnsafe(
+                    obj.getId(),
+                    obj.getTitle(),
+                    obj.getDescription(),
+                    obj.getStartDate(),
+                    poll.getEndDate(),
+                    obj.isUserRegistration(),
+                    obj.getVoteOptions(),
+                    obj.getChoiceLimitPerUser(),
+                    obj.getResponsibleId()
+            );
+        } else {
+            obj = Poll.parseUnsafe(
+                    obj.getId(),
+                    poll.getTitle(),
+                    poll.getDescription(),
+                    poll.getStartDate(),
+                    poll.getEndDate(),
+                    obj.isUserRegistration(),
+                    obj.getVoteOptions(),
+                    poll.getChoiceLimitPerUser(),
+                    obj.getResponsibleId()
+            );
+        }
+
+        return pollRepository.save(obj);
+    }
+
     @Transactional
     public Vote vote(Poll poll, VoteRegister voteRegister) throws VotifyException {
         Vote vote = poll.vote(voteRegister);
@@ -53,7 +101,7 @@ public class PollService {
         Optional<Vote> vote = voteRepository.findByPollAndUser(poll, user);
         return vote.orElseGet(() -> Vote.parseUnsafe(0, poll.getId(), user.getId()));
     }
-    
+
     public Page<Poll> findAllByUser(User user, int page, int size) throws VotifyException {
         validatePageAndSize(page, size);
 
@@ -89,14 +137,15 @@ public class PollService {
         if (!poll.getResponsibleId().equals(user.getId())) {
             throw new VotifyException(VotifyErrorCode.POLL_NOT_OWNER);
         }
+
         boolean hasNotStarted = poll.hasNotStarted();
         poll.cancel();
 
         if (hasNotStarted) {
             pollRepository.delete(poll);
-            return;
+        } else {
+            pollRepository.save(poll);
         }
-        pollRepository.save(poll);
     }
 
     @Transactional
@@ -134,9 +183,9 @@ public class PollService {
             if (poll.hasEnded()) {
                 poll.removeResponsible();
                 pollRepository.save(poll);
-                continue;
+            } else {
+                pollRepository.delete(poll);
             }
-            pollRepository.delete(poll);
         }
     }
 }
