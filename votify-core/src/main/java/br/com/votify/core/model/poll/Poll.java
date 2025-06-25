@@ -11,17 +11,18 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 @Getter
 public final class Poll {
     private final Long id;
-    private final Title title;
-    private final Description description;
+    private Title title;
+    private Description description;
     private Instant startDate;
     private Instant endDate;
-    private final boolean userRegistration;
+    private boolean userRegistration;
     private final List<VoteOption> voteOptions;
-    private final int choiceLimitPerUser;
+    private int choiceLimitPerUser;
     private Long responsibleId;
 
     public Poll(PollRegister pollRegister, User responsible) throws VotifyException {
@@ -99,6 +100,45 @@ public final class Poll {
             }
         }
         return vote;
+    }
+
+    public void setEndDate(Instant endDate) throws VotifyException {
+        if (hasEnded()) {
+            throw new VotifyException(VotifyErrorCode.POLL_CANNOT_EDIT_FINISHED);
+        }
+        Instant now = Instant.now();
+        if (endDate.isBefore(startDate) || startDate.isBefore(now)) {
+            throw new VotifyException(VotifyErrorCode.POLL_DATE_INVALID);
+        }
+        this.endDate = endDate;
+    }
+
+    public void editNotStartedPoll(PollRegister pollRegister, User responsible) throws VotifyException {
+        if (pollRegister == null) {
+            throw new IllegalArgumentException("The poll register must not be null.");
+        }
+        if (responsible == null || responsible.getId() == null) {
+            throw new IllegalArgumentException("The responsible or it's id must not be null.");
+        }
+        if (!Objects.equals(responsibleId, responsible.getId())) {
+            throw new VotifyException(VotifyErrorCode.POLL_NOT_OWNER);
+        }
+        if (!hasNotStarted()) {
+            throw new VotifyException(VotifyErrorCode.POLL_ALREADY_IN_PROGRESS);
+        }
+        this.title = pollRegister.getTitle();
+        this.description = pollRegister.getDescription();
+        this.startDate = pollRegister.getStartDate();
+        this.endDate = pollRegister.getEndDate();
+        this.userRegistration = pollRegister.isUserRegistration();
+        this.choiceLimitPerUser = pollRegister.getChoiceLimitPerUser();
+
+        this.voteOptions.clear();
+        for (int i = 0; i < pollRegister.getVoteOptionsSize(); i++) {
+            VoteOptionRegister voteOptionRegister = pollRegister.getVoteOptions().get(i);
+            VoteOption voteOption = new VoteOption(voteOptionRegister, this, i);
+            this.voteOptions.add(voteOption);
+        }
     }
 
     public void removeVote(Vote vote) {

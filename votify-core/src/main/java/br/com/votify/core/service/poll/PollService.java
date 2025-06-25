@@ -33,55 +33,22 @@ public class PollService {
         return pollRepository.save(poll);
     }
 
-    public Poll editPoll(Poll poll, User user, Long id) throws VotifyException {
+    public Poll editPoll(Long id, PollRegister pollRegister, User responsible) throws VotifyException {
         Optional<Poll> optionalPoll = pollRepository.findById(id);
-
         if (optionalPoll.isEmpty()) {
             throw new VotifyException(VotifyErrorCode.POLL_NOT_FOUND);
         }
 
-        Poll obj = optionalPoll.get();
-
-        if (!obj.getResponsibleId().equals(user.getId())) {
-            throw new VotifyException(VotifyErrorCode.POLL_NOT_OWNED);
+        Poll poll = optionalPoll.get();
+        if (!poll.getResponsibleId().equals(responsible.getId())) {
+            throw new VotifyException(VotifyErrorCode.POLL_NOT_OWNER);
         }
-
-        Instant now = Instant.now();
-
-        if (obj.getStartDate().isBefore(now)) {
-            if (poll.getEndDate().isBefore(now)) {
-                throw new VotifyException(VotifyErrorCode.POLL_END_DATE_INVALID);
-            }
-
-            if (poll.getEndDate().equals(obj.getEndDate())) {
-                throw new VotifyException(VotifyErrorCode.POLL_ALREADY_IN_PROGRESS);
-            }
-            obj = Poll.parseUnsafe(
-                    obj.getId(),
-                    obj.getTitle(),
-                    obj.getDescription(),
-                    obj.getStartDate(),
-                    poll.getEndDate(),
-                    obj.isUserRegistration(),
-                    obj.getVoteOptions(),
-                    obj.getChoiceLimitPerUser(),
-                    obj.getResponsibleId()
-            );
+        if (poll.hasNotStarted()) {
+            poll.editNotStartedPoll(pollRegister, responsible);
         } else {
-            obj = Poll.parseUnsafe(
-                    obj.getId(),
-                    poll.getTitle(),
-                    poll.getDescription(),
-                    poll.getStartDate(),
-                    poll.getEndDate(),
-                    obj.isUserRegistration(),
-                    obj.getVoteOptions(),
-                    poll.getChoiceLimitPerUser(),
-                    obj.getResponsibleId()
-            );
+            poll.setEndDate(pollRegister.getEndDate());
         }
-
-        return pollRepository.save(obj);
+        return pollRepository.save(poll);
     }
 
     @Transactional
@@ -137,15 +104,14 @@ public class PollService {
         if (!poll.getResponsibleId().equals(user.getId())) {
             throw new VotifyException(VotifyErrorCode.POLL_NOT_OWNER);
         }
-
         boolean hasNotStarted = poll.hasNotStarted();
         poll.cancel();
 
         if (hasNotStarted) {
             pollRepository.delete(poll);
-        } else {
-            pollRepository.save(poll);
+            return;
         }
+        pollRepository.save(poll);
     }
 
     @Transactional
@@ -183,9 +149,9 @@ public class PollService {
             if (poll.hasEnded()) {
                 poll.removeResponsible();
                 pollRepository.save(poll);
-            } else {
-                pollRepository.delete(poll);
+                continue;
             }
+            pollRepository.delete(poll);
         }
     }
 }

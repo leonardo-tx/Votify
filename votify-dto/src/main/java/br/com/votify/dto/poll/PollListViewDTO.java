@@ -17,20 +17,15 @@ public class PollListViewDTO {
     private Instant startDate;
     private Instant endDate;
     private Long responsibleId;
-    private boolean canceled;
 
     public static PollListViewDTO parse(Poll entity) {
-        boolean canceled = false;
-
-
         return new PollListViewDTO(
                 entity.getId(),
                 entity.getTitle().getValue(),
                 entity.getDescription().getValue(),
                 entity.getStartDate(),
                 entity.getEndDate(),
-                entity.getResponsibleId(),
-                canceled
+                entity.getResponsibleId()
         );
     }
 }

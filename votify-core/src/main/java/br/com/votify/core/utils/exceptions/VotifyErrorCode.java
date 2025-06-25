@@ -37,8 +37,6 @@ public enum VotifyErrorCode {
     BAD_REQUEST("bad.request", HttpStatus.BAD_REQUEST),
     METHOD_NOT_ALLOWED("method.not.allowed", HttpStatus.METHOD_NOT_ALLOWED),
     ENDPOINT_NOT_FOUND("endpoint.not.found", HttpStatus.NOT_FOUND),
-
-
     POLL_TITLE_INVALID_LENGTH("poll.title.invalid.length", HttpStatus.BAD_REQUEST),
     POLL_TITLE_EMPTY("poll.title.empty", HttpStatus.BAD_REQUEST),
     POLL_DESCRIPTION_EMPTY("poll.description.empty", HttpStatus.BAD_REQUEST),
@@ -51,7 +49,7 @@ public enum VotifyErrorCode {
     POLL_PAGE_INVALID_PAGE("poll.page.invalid.page", HttpStatus.BAD_REQUEST),
     POLL_PAGE_LENGTH_INVALID("poll.page.length.invalid", HttpStatus.BAD_REQUEST),
     POLL_VOTED_ALREADY("poll.voted.already", HttpStatus.BAD_REQUEST),
-    POLL_NOT_FOUND("poll.not.found", HttpStatus.NOT_FOUND),
+    POLL_NOT_FOUND("poll.not.found", HttpStatus.BAD_REQUEST),
     POLL_VOTE_EMPTY("poll.vote.empty", HttpStatus.BAD_REQUEST),
     POLL_VOTE_INVALID("poll.vote.invalid", HttpStatus.BAD_REQUEST),
     POLL_VOTE_OUT_OF_DATE_INTERVAL("poll.vote.out.of.date.interval", HttpStatus.BAD_REQUEST),
@@ -59,18 +57,12 @@ public enum VotifyErrorCode {
     VOTE_OPTION_NAME_INVALID_LENGTH("vote.option.name.invalid.length", HttpStatus.BAD_REQUEST),
     PASSWORD_RESET_CODE_INVALID("password.reset.code.invalid", HttpStatus.BAD_REQUEST),
     PASSWORD_RESET_REQUEST_EXISTS("password.reset.request.exists", HttpStatus.BAD_REQUEST),
-    PASSWORD_RESET_EMAIL_NOT_FOUND("password.reset.email.not.found", HttpStatus.BAD_REQUEST),
     POLL_TITLE_SEARCH_EMPTY("poll.title.search.empty", HttpStatus.BAD_REQUEST),
     INVALID_OLD_PASSWORD("invalid.old.password", HttpStatus.BAD_REQUEST),
-
-    POLL_CANCEL_UNAUTHORIZED("poll.cancel.unauthorized", HttpStatus.FORBIDDEN),
     POLL_NOT_OWNER("poll.not.owner", HttpStatus.FORBIDDEN),
-    POLL_NOT_OWNED("poll.not.owned", HttpStatus.FORBIDDEN),
-    POLL_END_DATE_INVALID("poll.end.date.invalid", HttpStatus.BAD_REQUEST),
     POLL_ALREADY_IN_PROGRESS("poll.already.in.progress", HttpStatus.BAD_REQUEST),
+    POLL_CANNOT_EDIT_FINISHED("poll.cannot.edit.finished", HttpStatus.BAD_REQUEST),
     POLL_CANNOT_CANCEL_FINISHED("poll.cannot.cancel.finished", HttpStatus.BAD_REQUEST);
-
-
 
     private final String messageKey;
     private final HttpStatusCode httpStatusCode;

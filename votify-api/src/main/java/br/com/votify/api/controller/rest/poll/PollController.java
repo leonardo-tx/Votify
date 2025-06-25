@@ -52,9 +52,7 @@ public class PollController {
         User user = userService.getContext().getUserOrThrow();
         PollRegister pollRegister = pollInsertDTO.convertToEntity();
 
-        Poll pollToUpdate = new Poll(pollRegister, user);
-
-        Poll updatedPoll = pollService.editPoll(pollToUpdate, user, id);
+        Poll updatedPoll = pollService.editPoll(id, pollRegister, user);
         PollDetailedViewDTO pollDto = PollDetailedViewDTO.parse(updatedPoll, 0);
 
         return ApiResponse.success(pollDto, HttpStatus.OK).createResponseEntity();
