@@ -334,4 +334,64 @@ class PollServiceTest {
         verify(pollRepository, never()).save(poll);
         verify(poll, never()).cancel();
     }
+
+    @Test
+    void deletePollInfoFromUserWithNoPollOrVote() {
+        User activeUser = mock(User.class);
+
+        when(voteRepository.findAllFromUser(activeUser)).thenReturn(List.of());
+        when(pollRepository.findAllByResponsible(activeUser)).thenReturn(List.of());
+
+        pollService.deletePollInfoFromUser(activeUser);
+
+        verifyNoMoreInteractions(voteRepository);
+        verifyNoMoreInteractions(pollRepository);
+    }
+
+    @Test
+    void deletePollInfoFromUserWithVotes() {
+        User activeUser = mock(User.class);
+        Poll expiredPoll = mock(Poll.class);
+        Poll activePoll = mock(Poll.class);
+        Vote voteFromExpiredPoll = mock(Vote.class);
+        Vote voteFromActivePoll = mock(Vote.class);
+
+        when(expiredPoll.hasEnded()).thenReturn(true);
+        when(activePoll.hasEnded()).thenReturn(false);
+        when(voteFromExpiredPoll.getPollId()).thenReturn(1L);
+        when(voteFromActivePoll.getPollId()).thenReturn(2L);
+
+        when(voteRepository.findAllFromUser(activeUser)).thenReturn(List.of(voteFromActivePoll, voteFromExpiredPoll));
+        when(pollRepository.findAllByResponsible(activeUser)).thenReturn(List.of());
+        when(pollRepository.findById(1L)).thenReturn(Optional.of(expiredPoll));
+        when(pollRepository.findById(2L)).thenReturn(Optional.of(activePoll));
+
+        pollService.deletePollInfoFromUser(activeUser);
+
+        verify(activePoll).removeVote(voteFromActivePoll);
+        verify(expiredPoll, never()).removeVote(voteFromExpiredPoll);
+        verify(voteRepository).deleteAllByUser(activeUser);
+        verify(pollRepository).save(activePoll);
+    }
+
+    @Test
+    void deletePollInfoFromUserWithPolls() {
+        User activeUser = mock(User.class);
+        Poll expiredPoll = mock(Poll.class);
+        Poll activePoll = mock(Poll.class);
+
+        when(expiredPoll.hasEnded()).thenReturn(true);
+        when(activePoll.hasEnded()).thenReturn(false);
+
+        when(voteRepository.findAllFromUser(activeUser)).thenReturn(List.of());
+        when(pollRepository.findAllByResponsible(activeUser)).thenReturn(
+                List.of(expiredPoll, activePoll)
+        );
+
+        pollService.deletePollInfoFromUser(activeUser);
+
+        verifyNoMoreInteractions(voteRepository);
+        verify(pollRepository).delete(activePoll);
+        verify(pollRepository, never()).delete(expiredPoll);
+    }
 }

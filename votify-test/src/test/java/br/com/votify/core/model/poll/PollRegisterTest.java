@@ -24,6 +24,20 @@ class PollRegisterTest {
     }
 
     @Test
+    void constructor_shouldThrowWhenVoteOptionsIsNull() {
+        VotifyException exception = assertThrows(VotifyException.class, () -> new PollRegister(
+                "Title",
+                "Description",
+                Instant.now().plusSeconds(2),
+                futureDate,
+                false,
+                null,
+                1
+        ));
+        assertEquals(VotifyErrorCode.POLL_VOTE_OPTIONS_EMPTY, exception.getErrorCode());
+    }
+
+    @Test
     void constructor_shouldSetDefaultStartDateToNowWhenNull() throws VotifyException {
         PollRegister poll = new PollRegister(
                 "Title",

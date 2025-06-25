@@ -1,11 +1,15 @@
 package br.com.votify.infra.mapping.user;
 
 import br.com.votify.core.model.user.RefreshToken;
+import br.com.votify.core.model.user.User;
 import br.com.votify.infra.persistence.user.RefreshTokenEntity;
 import br.com.votify.infra.persistence.user.UserEntity;
+import br.com.votify.infra.repository.user.UserEntityRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Instant;

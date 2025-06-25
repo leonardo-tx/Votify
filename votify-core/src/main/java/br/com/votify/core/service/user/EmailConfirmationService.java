@@ -5,7 +5,6 @@ import br.com.votify.core.model.user.User;
 import br.com.votify.core.properties.user.UserProperties;
 import br.com.votify.core.model.user.field.Email;
 import br.com.votify.core.repository.user.EmailConfirmationRepository;
-import br.com.votify.core.repository.user.UserRepository;
 import br.com.votify.core.service.messaging.EmailSender;
 import br.com.votify.core.utils.exceptions.VotifyErrorCode;
 import br.com.votify.core.utils.exceptions.VotifyException;
@@ -23,33 +22,22 @@ import java.util.ResourceBundle;
 public class EmailConfirmationService {
     private static final ResourceBundle messages = ResourceBundle.getBundle("messages");
 
-    private final UserRepository userRepository;
-    private final ContextService contextService;
     private final EmailConfirmationRepository emailConfirmationRepository;
     private final UserProperties userProperties;
     private final EmailSender emailSender;
 
     @Transactional
-    public void confirmEmail(String code, Email currentEmail) throws VotifyException {
-        User user = null;
+    public EmailConfirmation confirmEmail(String code, Email currentEmail) throws VotifyException {
         if (currentEmail == null) {
-            user = contextService.getUserOrThrow();
-            currentEmail = user.getEmail();
+            throw new IllegalArgumentException("The current email must not be empty.");
         }
         EmailConfirmation emailConfirmation = emailConfirmationRepository.findByUserEmail(currentEmail)
                 .orElseThrow(() -> new VotifyException(VotifyErrorCode.EMAIL_ALREADY_CONFIRMED));
         if (emailConfirmation.isExpired() || !emailConfirmation.getCode().matches(code)) {
             throw new VotifyException(VotifyErrorCode.EMAIL_CONFIRMATION_CODE_INVALID);
         }
-
         emailConfirmationRepository.delete(emailConfirmation);
-        if (emailConfirmation.getNewEmail() == null) return;
-        if (user == null) {
-            user = userRepository.findById(emailConfirmation.getUserId())
-                    .orElseThrow(() -> new VotifyException(VotifyErrorCode.USER_NOT_FOUND));
-        }
-        user.setEmail(emailConfirmation.getNewEmail());
-        userRepository.save(user);
+        return emailConfirmation;
     }
 
     public boolean existsByEmail(Email email) {
@@ -73,7 +61,8 @@ public class EmailConfirmationService {
         String body = String.format(
                 messages.getString(bodyKey),
                 user.getName().getValue(),
-                savedEmailConfirmation.getCode().getValue(),
+                user.getEmail().getValue(),
+                savedEmailConfirmation.getCode().encodeToUrlCode(),
                 userProperties.getEmailConfirmationExpirationMinutes()
         );
         emailSender.sendEmail(user, subject, body);
@@ -87,5 +76,9 @@ public class EmailConfirmationService {
 
     public void delete(EmailConfirmation emailConfirmation) {
         emailConfirmationRepository.delete(emailConfirmation);
+    }
+
+    public void deleteFromUser(User user) {
+        emailConfirmationRepository.deleteFromUser(user);
     }
 }

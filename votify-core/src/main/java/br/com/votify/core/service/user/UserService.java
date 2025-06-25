@@ -1,15 +1,12 @@
 package br.com.votify.core.service.user;
 
-import br.com.votify.core.model.poll.Poll;
-import br.com.votify.core.model.poll.Vote;
 import br.com.votify.core.model.user.*;
 import br.com.votify.core.model.user.field.Email;
 import br.com.votify.core.model.user.field.Name;
 import br.com.votify.core.model.user.field.Password;
 import br.com.votify.core.model.user.field.UserName;
 import br.com.votify.core.properties.user.UserProperties;
-import br.com.votify.core.repository.poll.PollRepository;
-import br.com.votify.core.repository.poll.VoteRepository;
+import br.com.votify.core.service.poll.PollService;
 import br.com.votify.core.utils.exceptions.VotifyErrorCode;
 import br.com.votify.core.utils.exceptions.VotifyException;
 import br.com.votify.core.repository.user.UserRepository;
@@ -18,7 +15,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -28,9 +24,9 @@ public class UserService {
     private final ContextService context;
     private final PasswordEncoderService passwordEncoderService;
     private final UserRepository userRepository;
-    private final VoteRepository voteRepository;
-    private final PollRepository pollRepository;
+    private final PollService pollService;
     private final EmailConfirmationService emailConfirmationService;
+    private final PasswordResetService passwordResetService;
     private final TokenService tokenService;
     private final UserProperties userProperties;
 
@@ -74,6 +70,19 @@ public class UserService {
         return new AuthTokens(accessToken, refreshToken);
     }
 
+    @Transactional
+    public void resetPassword(String code, Password newPassword) throws VotifyException {
+        PasswordReset passwordReset = passwordResetService.resetPassword(code);
+        Optional<User> optionalUser = userRepository.findById(passwordReset.getUserId());
+        if (optionalUser.isEmpty()) {
+            throw new VotifyException(VotifyErrorCode.USER_NOT_FOUND);
+        }
+        User user = optionalUser.get();
+        user.setPassword(passwordEncoderService, newPassword);
+
+        userRepository.save(user);
+    }
+
     public void logout() {
         String refreshToken = context.getCookieValueOrDefault(
                 userProperties.getRefreshTokenCookieName(),
@@ -85,12 +94,28 @@ public class UserService {
     }
 
     @Transactional
+    public void confirmEmail(String code, Email currentEmail) throws VotifyException {
+        User user = null;
+        if (currentEmail == null) {
+            user = context.getUserOrThrow();
+            currentEmail = user.getEmail();
+        }
+        EmailConfirmation emailConfirmation = emailConfirmationService.confirmEmail(code, currentEmail);
+        if (emailConfirmation.getNewEmail() == null) return;
+        if (user == null) {
+            user = userRepository.findById(emailConfirmation.getUserId())
+                    .orElseThrow(() -> new VotifyException(VotifyErrorCode.USER_NOT_FOUND));
+        }
+        user.setEmail(emailConfirmation.getNewEmail());
+        userRepository.save(user);
+    }
+
+    @Transactional
     public void delete(User user) {
         tokenService.revokeAllRefreshTokens(user);
-
-        deleteUserInvalidVotes(user);
-        deleteUserNotEndedPolls(user);
-
+        pollService.deletePollInfoFromUser(user);
+        passwordResetService.deleteFromUser(user);
+        emailConfirmationService.deleteFromUser(user);
         userRepository.delete(user);
     }
 
@@ -137,11 +162,8 @@ public class UserService {
     }
 
     public User getUserById(long id) throws VotifyException {
-        Optional<User> optionalUser = userRepository.findById(id);
-        if (optionalUser.isEmpty()) {
-            throw new VotifyException(VotifyErrorCode.USER_NOT_FOUND);
-        }
-        return optionalUser.get();
+        return userRepository.findById(id)
+                .orElseThrow(() -> new VotifyException(VotifyErrorCode.USER_NOT_FOUND));
     }
 
     public User getUserByUserName(UserName userName) throws VotifyException {
@@ -149,29 +171,8 @@ public class UserService {
                 .orElseThrow(() -> new VotifyException(VotifyErrorCode.USER_NOT_FOUND));
     }
 
-    private void deleteUserInvalidVotes(User user) {
-        List<Vote> votes = voteRepository.findAllFromUser(user);
-        for (Vote vote : votes) {
-            Poll poll = pollRepository.findById(vote.getPollId()).orElseThrow();
-            if (poll.hasEnded()) continue;
-
-            poll.removeVote(vote);
-            pollRepository.save(poll);
-        }
-        if (!votes.isEmpty()) {
-            voteRepository.deleteAllByUser(user);
-        }
-    }
-
-    private void deleteUserNotEndedPolls(User user) {
-        List<Poll> polls = pollRepository.findAllByResponsible(user);
-        for (Poll poll : polls) {
-            if (poll.hasEnded()) {
-                poll.removeResponsible();
-                pollRepository.save(poll);
-                continue;
-            }
-            pollRepository.delete(poll);
-        }
+    public User getUserByEmail(Email email) throws VotifyException {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new VotifyException(VotifyErrorCode.USER_NOT_FOUND));
     }
 }

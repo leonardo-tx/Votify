@@ -7,7 +7,6 @@ import br.com.votify.core.model.user.field.Email;
 import br.com.votify.core.model.user.field.Password;
 import br.com.votify.core.service.user.decorators.NeedsUserContext;
 import br.com.votify.core.model.user.AuthTokens;
-import br.com.votify.core.service.user.EmailConfirmationService;
 import br.com.votify.core.service.user.PasswordResetService;
 import br.com.votify.core.service.user.UserService;
 import br.com.votify.core.utils.exceptions.VotifyException;
@@ -29,7 +28,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
     private final UserService userService;
     private final PasswordResetService passwordResetService;
-    private final EmailConfirmationService emailConfirmationService;
     private final SecurityConfig securityConfig;
 
     @PostMapping("/register")
@@ -93,7 +91,8 @@ public class AuthController {
     public ResponseEntity<ApiResponse<Object>> requestPasswordReset(
             @RequestBody PasswordResetRequestDTO requestDTO) throws VotifyException {
         Email email = new Email(requestDTO.getEmail());
-        passwordResetService.createPasswordResetRequest(email);
+        User user = userService.getUserByEmail(email);
+        passwordResetService.createPasswordResetRequest(user);
 
         return ApiResponse.success(null, HttpStatus.OK).createResponseEntity();
     }
@@ -102,7 +101,7 @@ public class AuthController {
     public ResponseEntity<ApiResponse<Object>> resetPassword(
             @RequestBody PasswordResetConfirmDTO confirmDTO
     ) throws VotifyException {
-        passwordResetService.resetPassword(
+        userService.resetPassword(
                 confirmDTO.getCode(),
                 new Password(confirmDTO.getNewPassword())
         );
@@ -112,13 +111,22 @@ public class AuthController {
     @PostMapping("/confirm-email")
     @NeedsUserContext
     public ResponseEntity<ApiResponse<Object>> confirmEmail(
-            @RequestBody EmailConfirmationRequestDTO emailConfirmationRequestDto
+            @RequestBody EmailConfirmationRequestDTO emailConfirmationRequestDto,
+            HttpServletResponse response
     ) throws VotifyException {
         boolean hasEmail = emailConfirmationRequestDto.getEmail() != null;
-        emailConfirmationService.confirmEmail(
+        userService.confirmEmail(
                 emailConfirmationRequestDto.getCode(),
                 hasEmail ? new Email(emailConfirmationRequestDto.getEmail()) : null
         );
+        userService.logout();
+
+        Cookie refreshCookie = securityConfig.createRefreshTokenCookie(null);
+        Cookie accessCookie = securityConfig.createAccessTokenCookie(null);
+
+        response.addCookie(refreshCookie);
+        response.addCookie(accessCookie);
+
         return ApiResponse.success(null, HttpStatus.OK).createResponseEntity();
     }
 }

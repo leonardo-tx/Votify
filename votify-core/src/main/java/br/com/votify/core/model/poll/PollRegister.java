@@ -41,6 +41,9 @@ public class PollRegister {
         if (endDate.isBefore(startDate) || startDate.isBefore(now)) {
             throw new VotifyException(VotifyErrorCode.POLL_DATE_INVALID);
         }
+        if (voteOptions == null) {
+            throw new VotifyException(VotifyErrorCode.POLL_VOTE_OPTIONS_EMPTY);
+        }
         if (voteOptions.size() < MIN_VOTE_OPTIONS || voteOptions.size() > MAX_VOTE_OPTIONS) {
             throw new VotifyException(
                     VotifyErrorCode.POLL_VOTE_OPTIONS_INVALID_LENGTH,

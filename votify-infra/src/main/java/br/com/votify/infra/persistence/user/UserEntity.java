@@ -54,9 +54,9 @@ public class UserEntity {
     @OneToMany(mappedBy = "responsible", fetch = FetchType.LAZY)
     private List<PollEntity> polls;
 
-    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY, orphanRemoval = true)
     private EmailConfirmationEntity emailConfirmation;
 
-    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY, orphanRemoval = true)
     private PasswordResetEntity passwordReset;
 }

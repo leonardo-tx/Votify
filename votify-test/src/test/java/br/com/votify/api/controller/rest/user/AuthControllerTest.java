@@ -6,7 +6,6 @@ import br.com.votify.core.model.user.field.Name;
 import br.com.votify.core.model.user.field.Password;
 import br.com.votify.core.model.user.field.UserName;
 import br.com.votify.core.service.user.ContextService;
-import br.com.votify.core.service.user.EmailConfirmationService;
 import br.com.votify.core.service.user.PasswordResetService;
 import br.com.votify.core.service.user.UserService;
 import br.com.votify.core.utils.exceptions.VotifyErrorCode;
@@ -35,9 +34,6 @@ class AuthControllerTest extends ControllerTest {
 
     @MockitoBean
     private PasswordResetService passwordResetService;
-
-    @MockitoBean
-    private EmailConfirmationService emailConfirmationService;
 
     @BeforeEach
     void setupBeforeEach() {
@@ -98,7 +94,7 @@ class AuthControllerTest extends ControllerTest {
         mockMvcHelper.testSuccessfulResponse(resultActions, HttpStatus.OK)
                 .andExpect(jsonPath("data", is(nullValue())));
 
-        verify(emailConfirmationService).confirmEmail(eq("confirmation_code"), eq(new Email("123@gmail.com")));
+        verify(userService).confirmEmail(eq("confirmation_code"), eq(new Email("123@gmail.com")));
     }
 
     @Test
@@ -179,19 +175,26 @@ class AuthControllerTest extends ControllerTest {
 
     @Test
     void forgotPassword() throws Exception {
+        User user = mock(User.class);
         PasswordResetRequestDTO passwordResetRequestDTO = new PasswordResetRequestDTO("123@gmail.com");
+
+        when(userService.getUserByEmail(eq(new Email("123@gmail.com")))).thenReturn(user);
+
         ResultActions resultActions = mockMvc.perform(post("/api/auth/forgot-password")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(passwordResetRequestDTO)));
-
         mockMvcHelper.testSuccessfulResponse(resultActions, HttpStatus.OK)
                 .andExpect(jsonPath("data", is(nullValue())));
-        verify(passwordResetService).createPasswordResetRequest(eq(new Email("123@gmail.com")));
+
+        verify(passwordResetService).createPasswordResetRequest(user);
     }
 
     @Test
     void forgotPasswordDuplicated() throws Exception {
-        when(passwordResetService.createPasswordResetRequest(new Email("123@gmail.com")))
+        User user = mock(User.class);
+
+        when(userService.getUserByEmail(eq(new Email("123@gmail.com")))).thenReturn(user);
+        when(passwordResetService.createPasswordResetRequest(user))
                 .thenThrow(new VotifyException(VotifyErrorCode.PASSWORD_RESET_REQUEST_EXISTS));
 
         PasswordResetRequestDTO passwordResetRequestDTO = new PasswordResetRequestDTO("123@gmail.com");
@@ -212,13 +215,13 @@ class AuthControllerTest extends ControllerTest {
                 .content(objectMapper.writeValueAsString(passwordResetConfirmDTO)));
         mockMvcHelper.testSuccessfulResponse(resultActions, HttpStatus.OK)
                 .andExpect(jsonPath("data", is(nullValue())));
-        verify(passwordResetService).resetPassword(eq("password_code"), eq(new Password("87654321")));
+        verify(userService).resetPassword(eq("password_code"), eq(new Password("87654321")));
     }
 
     @Test
     void confirmChangedEmailNotAuthenticated() throws Exception {
         doThrow(new VotifyException(VotifyErrorCode.COMMON_UNAUTHORIZED))
-                .when(emailConfirmationService)
+                .when(userService)
                 .confirmEmail("email_confirmation_code", null);
         EmailConfirmationRequestDTO emailConfirmationRequestDto = new EmailConfirmationRequestDTO(
                 null,
@@ -240,6 +243,6 @@ class AuthControllerTest extends ControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(emailConfirmationRequestDto)));
         mockMvcHelper.testSuccessfulResponse(resultActions, HttpStatus.OK);
-        verify(emailConfirmationService).confirmEmail("email_confirmation_code", null);
+        verify(userService).confirmEmail("email_confirmation_code", null);
     }
 }

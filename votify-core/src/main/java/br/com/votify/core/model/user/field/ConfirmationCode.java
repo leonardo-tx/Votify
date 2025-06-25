@@ -3,6 +3,8 @@ package br.com.votify.core.model.user.field;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.Objects;
 
@@ -35,5 +37,9 @@ public final class ConfirmationCode {
 
     public boolean matches(String code) {
         return Objects.equals(value, code);
+    }
+
+    public String encodeToUrlCode() {
+        return URLEncoder.encode(value, StandardCharsets.UTF_8);
     }
 }

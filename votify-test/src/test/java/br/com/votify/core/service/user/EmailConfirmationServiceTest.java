@@ -7,7 +7,6 @@ import br.com.votify.core.model.user.field.Email;
 import br.com.votify.core.model.user.field.Name;
 import br.com.votify.core.properties.user.UserProperties;
 import br.com.votify.core.repository.user.EmailConfirmationRepository;
-import br.com.votify.core.repository.user.UserRepository;
 import br.com.votify.core.service.messaging.EmailSender;
 import br.com.votify.core.utils.exceptions.VotifyErrorCode;
 import br.com.votify.core.utils.exceptions.VotifyException;
@@ -30,12 +29,6 @@ class EmailConfirmationServiceTest {
     private static final ResourceBundle messages = ResourceBundle.getBundle("messages");
 
     @Mock
-    private UserRepository userRepository;
-
-    @Mock
-    private ContextService contextService;
-
-    @Mock
     private EmailConfirmationRepository emailConfirmationRepository;
 
     @Mock
@@ -56,6 +49,15 @@ class EmailConfirmationServiceTest {
     }
 
     @Test
+    void confirmEmailWithNullEmailShouldThrowException() {
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> emailConfirmationService.confirmEmail("code", null)
+        );
+        assertEquals("The current email must not be empty.", exception.getMessage());
+    }
+
+    @Test
     void confirmEmailInvalidCodeShouldThrowException() throws VotifyException {
         Email email = new Email("test@example.com");
         EmailConfirmation emailConfirmationFromNewAccount = mock(EmailConfirmation.class);
@@ -71,8 +73,7 @@ class EmailConfirmationServiceTest {
                 )
         );
         assertEquals(VotifyErrorCode.EMAIL_CONFIRMATION_CODE_INVALID, exception.getErrorCode());
-        verifyNoInteractions(userRepository);
-        verifyNoInteractions(contextService);
+        verifyNoMoreInteractions(emailConfirmationRepository);
     }
 
     @Test
@@ -91,8 +92,7 @@ class EmailConfirmationServiceTest {
                 )
         );
         assertEquals(VotifyErrorCode.EMAIL_CONFIRMATION_CODE_INVALID, exception.getErrorCode());
-        verifyNoInteractions(userRepository);
-        verifyNoInteractions(contextService);
+        verifyNoMoreInteractions(emailConfirmationRepository);
     }
 
     @Test
@@ -109,53 +109,37 @@ class EmailConfirmationServiceTest {
                 email
         ));
         verify(emailConfirmationRepository).delete(emailConfirmationFromNewAccount);
-        verifyNoInteractions(userRepository);
-        verifyNoInteractions(contextService);
     }
 
     @Test
     void confirmEmailFromExistingUser() throws VotifyException {
-        Email newEmail = new Email("jhonny@new.nightcity.2077");
-        Email oldEmail = new Email("jhonny@nightcity.2077");
+        Email email = new Email("test@example.com");
         EmailConfirmation emailConfirmationFromExistingAccount = mock(EmailConfirmation.class);
-        User existingAccount = mock(User.class);
         ConfirmationCode confirmationCode = new ConfirmationCode();
 
-        when(existingAccount.getEmail()).thenReturn(oldEmail);
-        when(emailConfirmationFromExistingAccount.getNewEmail()).thenReturn(newEmail);
         when(emailConfirmationFromExistingAccount.getCode()).thenReturn(confirmationCode);
         when(emailConfirmationRepository.findByUserEmail(any(Email.class))).thenReturn(Optional.of(emailConfirmationFromExistingAccount));
-        when(contextService.getUserOrThrow()).thenReturn(existingAccount);
-        when(userRepository.save(existingAccount)).thenReturn(existingAccount);
 
         assertDoesNotThrow(() -> emailConfirmationService.confirmEmail(
                 confirmationCode.getValue(),
-                null
+                email
         ));
-        verify(existingAccount).setEmail(newEmail);
         verify(emailConfirmationRepository).delete(emailConfirmationFromExistingAccount);
     }
 
     @Test
     void confirmEmailFromExistingUserWithEmailFindsUser() throws VotifyException {
-        Email newEmail = new Email("jhonny@new.nightcity.2077");
         Email oldEmail = new Email("jhonny@nightcity.2077");
         EmailConfirmation emailConfirmationFromExistingAccount = mock(EmailConfirmation.class);
-        User existingAccount = mock(User.class);
         ConfirmationCode confirmationCode = new ConfirmationCode();
 
-        when(emailConfirmationFromExistingAccount.getNewEmail()).thenReturn(newEmail);
         when(emailConfirmationFromExistingAccount.getCode()).thenReturn(confirmationCode);
-        when(emailConfirmationFromExistingAccount.getUserId()).thenReturn(1L);
         when(emailConfirmationRepository.findByUserEmail(any(Email.class))).thenReturn(Optional.of(emailConfirmationFromExistingAccount));
-        when(userRepository.findById(1L)).thenReturn(Optional.of(existingAccount));
-        when(userRepository.save(existingAccount)).thenReturn(existingAccount);
 
         assertDoesNotThrow(() -> emailConfirmationService.confirmEmail(
                 confirmationCode.getValue(),
                 oldEmail
         ));
-        verify(existingAccount).setEmail(newEmail);
         verify(emailConfirmationRepository).delete(emailConfirmationFromExistingAccount);
     }
 
@@ -188,6 +172,7 @@ class EmailConfirmationServiceTest {
         User newAccount = mock(User.class);
         when(newAccount.getId()).thenReturn(3L);
         when(newAccount.getName()).thenReturn(new Name("Name"));
+        when(newAccount.getEmail()).thenReturn(new Email("mail@gmail.com"));
 
         when(userProperties.getEmailConfirmationExpirationMinutes()).thenReturn(1);
         when(emailConfirmationRepository.save(any(EmailConfirmation.class)))
@@ -206,7 +191,8 @@ class EmailConfirmationServiceTest {
         String body = String.format(
                 messages.getString("message.email.confirmation.new.account.body"),
                 newAccount.getName().getValue(),
-                emailConfirmation.getCode().getValue(),
+                newAccount.getEmail().getValue(),
+                emailConfirmation.getCode().encodeToUrlCode(),
                 userProperties.getEmailConfirmationExpirationMinutes()
         );
         verify(emailSender).sendEmail(newAccount, subject, body);
@@ -241,7 +227,8 @@ class EmailConfirmationServiceTest {
         String body = String.format(
                 messages.getString("message.email.confirmation.new.account.body"),
                 newAccount.getName().getValue(),
-                emailConfirmation.getCode().getValue(),
+                newAccount.getEmail().getValue(),
+                emailConfirmation.getCode().encodeToUrlCode(),
                 userProperties.getEmailConfirmationExpirationMinutes()
         );
         verify(emailSender).sendEmail(newAccount, subject, body);
@@ -269,6 +256,7 @@ class EmailConfirmationServiceTest {
         User existingAccount = mock(User.class);
         when(existingAccount.getId()).thenReturn(2L);
         when(existingAccount.getName()).thenReturn(new Name("Jhonny Silverhand"));
+        when(existingAccount.getEmail()).thenReturn(new Email("jhonny@nightcity.2077"));
 
         when(userProperties.getEmailConfirmationExpirationMinutes()).thenReturn(1);
         when(emailConfirmationRepository.save(any(EmailConfirmation.class)))
@@ -287,9 +275,19 @@ class EmailConfirmationServiceTest {
         String body = String.format(
                 messages.getString("message.email.confirmation.existing.account.body"),
                 existingAccount.getName().getValue(),
-                emailConfirmation.getCode().getValue(),
+                existingAccount.getEmail().getValue(),
+                emailConfirmation.getCode().encodeToUrlCode(),
                 userProperties.getEmailConfirmationExpirationMinutes()
         );
         verify(emailSender).sendEmail(existingAccount, subject, body);
+    }
+
+    @Test
+    void deleteFromUser() {
+        User user = mock(User.class);
+
+        emailConfirmationService.deleteFromUser(user);
+
+        verify(emailConfirmationRepository).deleteFromUser(user);
     }
 }

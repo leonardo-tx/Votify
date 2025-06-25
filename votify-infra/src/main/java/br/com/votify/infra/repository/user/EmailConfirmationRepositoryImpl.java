@@ -1,6 +1,7 @@
 package br.com.votify.infra.repository.user;
 
 import br.com.votify.core.model.user.EmailConfirmation;
+import br.com.votify.core.model.user.User;
 import br.com.votify.core.model.user.field.Email;
 import br.com.votify.core.repository.user.EmailConfirmationRepository;
 import br.com.votify.infra.mapping.user.EmailConfirmationMapper;
@@ -40,6 +41,11 @@ public class EmailConfirmationRepositoryImpl implements EmailConfirmationReposit
     @Override
     public void delete(EmailConfirmation emailConfirmation) {
         repository.deleteById(emailConfirmation.getCode().getValue());
+    }
+
+    @Override
+    public void deleteFromUser(User user) {
+        repository.deleteByUserId(user.getId());
     }
 
     @Override

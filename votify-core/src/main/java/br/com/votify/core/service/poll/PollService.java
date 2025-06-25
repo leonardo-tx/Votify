@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -98,12 +99,44 @@ public class PollService {
         pollRepository.save(poll);
     }
 
+    @Transactional
+    public void deletePollInfoFromUser(User user) {
+        deleteUserInvalidVotes(user);
+        deleteUserNotEndedPolls(user);
+    }
+
     private void validatePageAndSize(int page, int size) throws VotifyException {
         if (page < 0) {
             throw new VotifyException(VotifyErrorCode.POLL_PAGE_INVALID_PAGE);
         }
         if (size < 1 || size > PAGE_SIZE_LIMIT) {
             throw new VotifyException(VotifyErrorCode.POLL_PAGE_LENGTH_INVALID, 1, PAGE_SIZE_LIMIT);
+        }
+    }
+
+    private void deleteUserInvalidVotes(User user) {
+        List<Vote> votes = voteRepository.findAllFromUser(user);
+        for (Vote vote : votes) {
+            Poll poll = pollRepository.findById(vote.getPollId()).orElseThrow();
+            if (poll.hasEnded()) continue;
+
+            poll.removeVote(vote);
+            pollRepository.save(poll);
+        }
+        if (!votes.isEmpty()) {
+            voteRepository.deleteAllByUser(user);
+        }
+    }
+
+    private void deleteUserNotEndedPolls(User user) {
+        List<Poll> polls = pollRepository.findAllByResponsible(user);
+        for (Poll poll : polls) {
+            if (poll.hasEnded()) {
+                poll.removeResponsible();
+                pollRepository.save(poll);
+                continue;
+            }
+            pollRepository.delete(poll);
         }
     }
 }

@@ -1,13 +1,10 @@
 package br.com.votify.core.service.user;
 
-import br.com.votify.core.model.poll.Poll;
-import br.com.votify.core.model.poll.Vote;
 import br.com.votify.core.model.user.*;
 import br.com.votify.core.model.user.field.*;
 import br.com.votify.core.properties.user.UserProperties;
-import br.com.votify.core.repository.poll.PollRepository;
-import br.com.votify.core.repository.poll.VoteRepository;
 import br.com.votify.core.repository.user.UserRepository;
+import br.com.votify.core.service.poll.PollService;
 import br.com.votify.core.utils.exceptions.VotifyErrorCode;
 import br.com.votify.core.utils.exceptions.VotifyException;
 import org.junit.jupiter.api.*;
@@ -17,7 +14,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Instant;
-import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -41,10 +37,10 @@ class UserServiceTest {
     private EmailConfirmationService emailConfirmationService;
 
     @Mock
-    private PollRepository pollRepository;
+    private PollService pollService;
 
     @Mock
-    private VoteRepository voteRepository;
+    private PasswordResetService passwordResetService;
 
     @Mock
     private UserProperties userProperties;
@@ -200,66 +196,16 @@ class UserServiceTest {
     }
 
     @Test
-    void deleteUserWithNoPollOrVote() {
+    void deleteUser() {
         User activeUser = mock(User.class);
 
-        when(voteRepository.findAllFromUser(activeUser)).thenReturn(List.of());
-        when(pollRepository.findAllByResponsible(activeUser)).thenReturn(List.of());
+        userService.delete(activeUser);
 
-        assertDoesNotThrow(() -> userService.delete(activeUser));
-        verify(userRepository).delete(activeUser);
         verify(tokenService).revokeAllRefreshTokens(activeUser);
-        verifyNoMoreInteractions(voteRepository);
-        verifyNoMoreInteractions(pollRepository);
-    }
-
-    @Test
-    void deleteUserWithVotes() {
-        User activeUser = mock(User.class);
-        Poll expiredPoll = mock(Poll.class);
-        Poll activePoll = mock(Poll.class);
-        Vote voteFromExpiredPoll = mock(Vote.class);
-        Vote voteFromActivePoll = mock(Vote.class);
-
-        when(expiredPoll.hasEnded()).thenReturn(true);
-        when(activePoll.hasEnded()).thenReturn(false);
-        when(voteFromExpiredPoll.getPollId()).thenReturn(1L);
-        when(voteFromActivePoll.getPollId()).thenReturn(2L);
-
-        when(voteRepository.findAllFromUser(activeUser)).thenReturn(List.of(voteFromActivePoll, voteFromExpiredPoll));
-        when(pollRepository.findAllByResponsible(activeUser)).thenReturn(List.of());
-        when(pollRepository.findById(1L)).thenReturn(Optional.of(expiredPoll));
-        when(pollRepository.findById(2L)).thenReturn(Optional.of(activePoll));
-
-        assertDoesNotThrow(() -> userService.delete(activeUser));
+        verify(pollService).deletePollInfoFromUser(activeUser);
+        verify(passwordResetService).deleteFromUser(activeUser);
+        verify(emailConfirmationService).deleteFromUser(activeUser);
         verify(userRepository).delete(activeUser);
-        verify(tokenService).revokeAllRefreshTokens(activeUser);
-        verify(activePoll).removeVote(voteFromActivePoll);
-        verify(expiredPoll, never()).removeVote(voteFromExpiredPoll);
-        verify(voteRepository).deleteAllByUser(activeUser);
-        verify(pollRepository).save(activePoll);
-    }
-
-    @Test
-    void deleteUserWithPolls() {
-        User activeUser = mock(User.class);
-        Poll expiredPoll = mock(Poll.class);
-        Poll activePoll = mock(Poll.class);
-
-        when(expiredPoll.hasEnded()).thenReturn(true);
-        when(activePoll.hasEnded()).thenReturn(false);
-
-        when(voteRepository.findAllFromUser(activeUser)).thenReturn(List.of());
-        when(pollRepository.findAllByResponsible(activeUser)).thenReturn(
-                List.of(expiredPoll, activePoll)
-        );
-
-        assertDoesNotThrow(() -> userService.delete(activeUser));
-        verify(userRepository).delete(activeUser);
-        verify(tokenService).revokeAllRefreshTokens(activeUser);
-        verifyNoMoreInteractions(voteRepository);
-        verify(pollRepository).delete(activePoll);
-        verify(pollRepository, never()).delete(expiredPoll);
     }
 
     @Test
@@ -514,5 +460,181 @@ class UserServiceTest {
 
         verify(userRepository, never()).existsByEmail(any(Email.class));
         verify(userRepository, never()).save(any(User.class));
+    }
+
+    @Test
+    void resetPassword_UserNotFound() throws VotifyException {
+        String testCode = "TESTCODE";
+        PasswordReset passwordReset = mock(PasswordReset.class);
+
+        when(passwordReset.getUserId()).thenReturn(3L);
+        when(passwordResetService.resetPassword(testCode)).thenReturn(passwordReset);
+        when(userRepository.findById(3L)).thenReturn(Optional.empty());
+
+        VotifyException exception = assertThrows(
+                VotifyException.class,
+                () -> userService.resetPassword(testCode, new Password("12345678"))
+        );
+        assertEquals(VotifyErrorCode.USER_NOT_FOUND, exception.getErrorCode());
+    }
+
+    @Test
+    void resetPassword_Valid() throws VotifyException {
+        User user = mock(User.class);
+        Password password = new Password("12345678");
+
+        String testCode = "TESTCODE";
+        PasswordReset passwordReset = mock(PasswordReset.class);
+
+        when(passwordReset.getUserId()).thenReturn(3L);
+        when(passwordResetService.resetPassword(testCode)).thenReturn(passwordReset);
+        when(userRepository.findById(3L)).thenReturn(Optional.of(user));
+
+        assertDoesNotThrow(() -> userService.resetPassword(testCode, password));
+        verify(user).setPassword(passwordEncoderService, password);
+    }
+
+    @Test
+    void getUserByEmail_Found() throws VotifyException {
+        User user = mock(User.class);
+        Email email = new Email("mail@mail.com");
+
+        when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
+
+        User returnedUser = assertDoesNotThrow(() -> userService.getUserByEmail(email));
+        assertEquals(user, returnedUser);
+    }
+
+    @Test
+    void getUserByEmail_NotFound() throws VotifyException {
+        Email email = new Email("mail@mail.com");
+
+        when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
+
+        VotifyException exception = assertThrows(
+                VotifyException.class,
+                () -> userService.getUserByEmail(email)
+        );
+        assertEquals(VotifyErrorCode.USER_NOT_FOUND, exception.getErrorCode());
+    }
+
+    @Test
+    void testConfirmEmail_WithCurrentEmailNull_ShouldGetUserFromContext() throws VotifyException {
+        String code = "123456";
+        User mockUser = mock(User.class);
+        Email mockEmail = mock(Email.class);
+        EmailConfirmation mockConfirmation = mock(EmailConfirmation.class);
+
+        when(contextService.getUserOrThrow()).thenReturn(mockUser);
+        when(mockUser.getEmail()).thenReturn(mockEmail);
+        when(emailConfirmationService.confirmEmail(code, mockEmail)).thenReturn(mockConfirmation);
+        when(mockConfirmation.getNewEmail()).thenReturn(null);
+
+        userService.confirmEmail(code, null);
+
+        verify(contextService).getUserOrThrow();
+        verify(mockUser).getEmail();
+        verify(emailConfirmationService).confirmEmail(code, mockEmail);
+        verifyNoInteractions(userRepository, passwordResetService);
+    }
+
+    @Test
+    void testConfirmEmail_WithNewEmailNull_ShouldDoNothing() throws VotifyException {
+        String code = "123456";
+        Email mockEmail = mock(Email.class);
+        EmailConfirmation mockConfirmation = mock(EmailConfirmation.class);
+
+        when(emailConfirmationService.confirmEmail(code, mockEmail)).thenReturn(mockConfirmation);
+        when(mockConfirmation.getNewEmail()).thenReturn(null);
+
+        userService.confirmEmail(code, mockEmail);
+
+        verify(emailConfirmationService).confirmEmail(code, mockEmail);
+        verifyNoInteractions(contextService, userRepository, passwordResetService);
+    }
+
+    @Test
+    void testConfirmEmail_WithNewEmail_ShouldUpdateUserEmail() throws VotifyException {
+        String code = "123456";
+        Email mockEmail = mock(Email.class);
+        Email newEmail = new Email("new@example.com");
+        EmailConfirmation mockConfirmation = mock(EmailConfirmation.class);
+        User mockUser = mock(User.class);
+
+        when(emailConfirmationService.confirmEmail(code, mockEmail)).thenReturn(mockConfirmation);
+        when(mockConfirmation.getNewEmail()).thenReturn(newEmail);
+        when(mockConfirmation.getUserId()).thenReturn(1L);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(mockUser));
+
+        userService.confirmEmail(code, mockEmail);
+
+        verify(emailConfirmationService).confirmEmail(code, mockEmail);
+        verify(userRepository).findById(1L);
+        verify(mockUser).setEmail(newEmail);
+        verify(userRepository).save(mockUser);
+    }
+
+    @Test
+    void testConfirmEmail_WithNewEmailAndUserNotFound_ShouldThrowException() throws VotifyException {
+        String code = "123456";
+        Email mockEmail = mock(Email.class);
+        Email newEmail = new Email("new@example.com");
+        EmailConfirmation mockConfirmation = mock(EmailConfirmation.class);
+
+        when(emailConfirmationService.confirmEmail(code, mockEmail)).thenReturn(mockConfirmation);
+        when(mockConfirmation.getNewEmail()).thenReturn(newEmail);
+        when(mockConfirmation.getUserId()).thenReturn(1L);
+        when(userRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThrows(VotifyException.class, () -> {
+            userService.confirmEmail(code, mockEmail);
+        });
+
+        verify(emailConfirmationService).confirmEmail(code, mockEmail);
+        verify(userRepository).findById(1L);
+        verifyNoInteractions(passwordResetService);
+    }
+
+    @Test
+    void testConfirmEmail_WithCurrentEmailAndUserWithNewEmail_ShouldUpdateEmailWithoutContextLookup() throws VotifyException {
+        String code = "123456";
+        Email mockEmail = mock(Email.class);
+        Email newEmail = new Email("new@example.com");
+        EmailConfirmation mockConfirmation = mock(EmailConfirmation.class);
+        User mockUser = mock(User.class);
+
+        when(mockConfirmation.getNewEmail()).thenReturn(newEmail);
+        when(emailConfirmationService.confirmEmail(code, mockEmail)).thenReturn(mockConfirmation);
+        when(mockConfirmation.getUserId()).thenReturn(6L);
+        when(userRepository.findById(6L)).thenReturn(Optional.of(mockUser));
+        when(mockConfirmation.getNewEmail()).thenReturn(newEmail);
+
+        userService.confirmEmail(code, mockEmail);
+
+        verify(emailConfirmationService).confirmEmail(code, mockEmail);
+        verifyNoInteractions(contextService);
+        verify(mockUser).setEmail(newEmail);
+        verify(userRepository).save(mockUser);
+    }
+
+    @Test
+    void testConfirmEmail_WithCurrentEmailAndUserWithNewEmail_ShouldUpdateEmailWithContextLookup() throws VotifyException {
+        String code = "123456";
+        Email mockEmail = mock(Email.class);
+        Email newEmail = new Email("new@example.com");
+        EmailConfirmation mockConfirmation = mock(EmailConfirmation.class);
+        User mockUser = mock(User.class);
+
+        when(mockUser.getEmail()).thenReturn(mockEmail);
+        when(contextService.getUserOrThrow()).thenReturn(mockUser);
+        when(mockConfirmation.getNewEmail()).thenReturn(newEmail);
+        when(emailConfirmationService.confirmEmail(code, mockEmail)).thenReturn(mockConfirmation);
+        when(mockConfirmation.getNewEmail()).thenReturn(newEmail);
+
+        userService.confirmEmail(code, null);
+
+        verify(emailConfirmationService).confirmEmail(code, mockEmail);
+        verify(mockUser).setEmail(newEmail);
+        verify(userRepository).save(mockUser);
     }
 }

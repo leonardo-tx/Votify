@@ -6,9 +6,12 @@ import br.com.votify.core.model.user.field.Email;
 import br.com.votify.core.utils.exceptions.VotifyException;
 import br.com.votify.infra.persistence.user.EmailConfirmationEntity;
 import br.com.votify.infra.persistence.user.UserEntity;
+import br.com.votify.infra.repository.user.UserEntityRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Instant;
@@ -21,7 +24,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class EmailConfirmationMapperTest {
     private EmailConfirmationMapper emailConfirmationMapper;
-    
+
     @BeforeEach
     void setupBeforeEach() {
         emailConfirmationMapper = new EmailConfirmationMapper();

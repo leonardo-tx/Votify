@@ -9,5 +9,6 @@ public interface PasswordResetRepository {
     Optional<PasswordReset> findByCode(String code);
     Optional<PasswordReset> findByUser(User user);
     void delete(PasswordReset passwordReset);
+    void deleteFromUser(User user);
     PasswordReset save(PasswordReset passwordReset);
 }
