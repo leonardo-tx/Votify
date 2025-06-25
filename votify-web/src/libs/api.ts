@@ -6,15 +6,21 @@ import UserDetailedView from "./users/UserDetailedView";
 import VotifyErrorCode from "./VotifyErrorCode";
 import PollSimpleView from "./polls/PollSimpleView";
 import { PageResponse } from "./PageResponse";
+import UserPasswordResetRequestDto from "@/libs/users/UserPasswordResetRequestDto";
+import UserPasswordResetConfirmDTO from "@/libs/users/UserPasswordResetConfirmDTO";
 import { PollDetailedView } from "./polls/PollDetailedView";
 import VoteInsertDTO from "./polls/VoteInsertDTO";
 import PollUpdateDTO from "./polls/PollUpdateDTO";
 import UserSignUpDTO from "@/libs/users/UserSignUpDTO";
+import EmailConfirmationRequestDTO from "./users/EmailConfirmationRequestDTO";
+import UserUpdateInfoDTO from "./users/UserUpdateInfoDTO";
+import UserUpdatePasswordRequestDTO from "./users/UserUpdatePasswordRequestDTO";
+import UserUpdateEmailRequestDTO from "./users/UserUpdateEmailRequestDTO";
 
 export const api = axios.create({
   baseURL:
       typeof window === "undefined"
-          ? `http://${process.env.NEXT_PUBLIC_API_URL}/api`
+          ? `${process.env.NEXT_PROXY_URL ?? `http://${process.env.NEXT_PUBLIC_API_URL}`}/api`
           : `${window.location.origin}/api`,
   withCredentials: true,
 });
@@ -45,16 +51,28 @@ export const deleteCurrentUser = async (): Promise<ApiResponse<null>> => {
 };
 
 export const updateUserInfo = async (
-    form: any, // substitua pelo DTO correto se tiver
+    form: UserUpdateInfoDTO,
 ): Promise<ApiResponse<UserDetailedView | null>> => {
   return await commonRequester(async () => {
-    const { data } = await api.put<ApiResponse<null>>("/users/me/info", form);
+    const { data } = await api.put<ApiResponse<UserDetailedView | null>>(
+        "/users/me/info",
+        form,
+    );
+    return data;
+  });
+};
+
+export const updateUserEmail = async (
+    form: UserUpdateEmailRequestDTO,
+): Promise<ApiResponse<null>> => {
+  return await commonRequester(async () => {
+    const { data } = await api.put<ApiResponse<null>>("/users/me/email", form);
     return data;
   });
 };
 
 export const updateUserPassword = async (
-    form: any, // substitua pelo DTO correto se tiver
+    form: UserUpdatePasswordRequestDTO,
 ): Promise<ApiResponse<null>> => {
   return await commonRequester(async () => {
     const { data } = await api.put<ApiResponse<null>>(
@@ -117,6 +135,42 @@ export const signup = async (
   });
 };
 
+export const forgotPassword = async (
+    request: UserPasswordResetRequestDto,
+): Promise<ApiResponse<null>> => {
+  return await commonRequester(async () => {
+    const { data } = await api.post<ApiResponse<null>>(
+        "/auth/forgot-password",
+        request,
+    );
+    return data;
+  });
+};
+
+export const resetPassword = async (
+    request: UserPasswordResetConfirmDTO,
+): Promise<ApiResponse<null>> => {
+  return await commonRequester(async () => {
+    const { data } = await api.post<ApiResponse<null>>(
+        "/auth/reset-password",
+        request,
+    );
+    return data;
+  });
+};
+
+export const confirmEmail = async (
+    request: EmailConfirmationRequestDTO,
+): Promise<ApiResponse<null>> => {
+  return await commonRequester(async () => {
+    const { data } = await api.post<ApiResponse<null>>(
+        `/auth/confirm-email`,
+        request,
+    );
+    return data;
+  });
+};
+
 export const updatePoll = async (
     id: number,
     pollData: PollUpdateDTO,
@@ -133,9 +187,8 @@ export const updatePoll = async (
 export const cancelPoll = async (id: number): Promise<ApiResponse<any>> => {
   const apiResponse = await api.delete<ApiResponse<any>>(`/polls/${id}/cancel`);
   console.log(apiResponse)
-  return apiResponse.data
+  return apiResponse.data;
 };
-
 
 export const getMyPolls = async (
     page: number = 0,
@@ -219,6 +272,7 @@ export const vote = async (
   });
 };
 
+// Utilitários de requisição com tratamento de erros e token
 const commonRequester = async <T>(
     request: () => Promise<ApiResponse<T | null>>,
 ) => {

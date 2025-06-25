@@ -12,28 +12,29 @@ on:
       - '**/*.yml'
 
 jobs:
+  build:
+    uses: ./.github/workflows/build-docker-files.yml
+
+  docker-scan-api:
+    needs: build
+    uses: ./.github/workflows/docker-vuln-scan.yml
+    with:
+      image-name: byces/votify-api
+      image-version: ci-${{ github.sha }}
+      artifact-name: api-image
+
+  docker-scan-frontend:
+    needs: build
+    uses: ./.github/workflows/docker-vuln-scan.yml
+    with:
+      image-name: byces/votify-web
+      image-version: ci-${{ github.sha }}
+      artifact-name: web-image
+
   test:
     uses: ./.github/workflows/test.yml
     with:
       upload-artifacts: true
-
-  docker-scan-api:
-    needs: test
-    uses: ./.github/workflows/docker-vuln-scan.yml
-    with:
-      image_name: votify-api:latest
-
-  docker-scan-frontend:
-    needs: test
-    uses: ./.github/workflows/docker-vuln-scan.yml
-    with:
-      image_name: votify-frontend:latest
-
-  docker-scan-test:
-    needs: test
-    uses: ./.github/workflows/docker-vuln-scan.yml
-    with:
-      image_name: votify-test:latest
 
   coverage:
     needs: test

@@ -1,8 +1,8 @@
-import { useState, FormEvent } from "react";
+import { FormEvent, useState } from "react";
 import { useRouter } from "next/router";
 import Button from "@/components/shared/Button";
 import Input from "@/components/shared/Input";
-import { IoMailOutline, IoLockClosedOutline } from "react-icons/io5";
+import { IoLockClosedOutline, IoMailOutline } from "react-icons/io5";
 import { getCurrentUser, login } from "@/libs/api";
 import UserLoginDTO from "@/libs/users/UserLoginDTO";
 import VotifyErrorCode from "@/libs/VotifyErrorCode";
@@ -95,7 +95,7 @@ export default function LoginPage() {
               variant="text"
               scheme="primary"
               id="forgot-password-link"
-              href="/auth/forgot-password"
+              href="/forgot-password"
               className="text-sm text-blue-600 hover:text-blue-700"
             >
               Esqueceu a senha?

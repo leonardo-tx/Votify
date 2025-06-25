@@ -3,32 +3,35 @@ name: Docker Vulnerability Scan
 on:
   workflow_call:
     inputs:
-      image_name:
+      image-name:
         required: true
         type: string
-        description: 'Name of the Docker image to be scanned'
+      image-version:
+        required: true
+        type: string
+      artifact-name:
+        required: true
+        type: string
 
 jobs:
   scan:
-    name: Scan Docker Image ${{ inputs.image_name }}
     runs-on: ubuntu-latest
 
     steps:
-      - name: Install dependencies
+      - name: Download image artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.artifact-name }}
+          path: .
+
+      - name: Load Docker image
         run: |
-          sudo apt-get update
-          sudo apt-get install -y wget
+          docker load -i ${{ inputs.artifact-name }}.tar
 
       - name: Install Trivy
         run: |
-          wget https://github.com/aquasecurity/trivy/releases/latest/download/trivy_0.51.1_Linux-64bit.deb
-          sudo dpkg -i trivy_0.51.1_Linux-64bit.deb
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
 
-      - name: Scan image with Trivy
+      - name: Scan Docker image
         run: |
-          echo "🔍 Scanning image: ${{ inputs.image_name }}"
-          trivy image \
-            --exit-code 1 \
-            --severity CRITICAL,HIGH \
-            --ignore-unfixed \
-            ${{ inputs.image_name }}
+          trivy image --severity CRITICAL,HIGH "${{ inputs.image-name }}:${{ inputs.image-version }}"

@@ -27,10 +27,9 @@ jobs:
           context: .
           file: ./docker/Dockerfile.api
           push: false
+          load: true
           tags: |
             ${{ env.API_IMAGE }}:${{ env.VERSION }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
 
       - name: Build Web Docker Image (no push)
         uses: docker/build-push-action@v5
@@ -38,7 +37,29 @@ jobs:
           context: .
           file: ./docker/Dockerfile.frontend
           push: false
+          load: true
           tags: |
             ${{ env.WEB_IMAGE }}:${{ env.VERSION }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+
+      - name: List Docker images
+        run: docker images
+
+      - name: Save API image to artifact
+        run: docker save ${{ env.API_IMAGE }}:${{ env.VERSION }} -o api-image.tar
+
+      - name: Save Web image to artifact
+        run: docker save ${{ env.WEB_IMAGE }}:${{ env.VERSION }} -o web-image.tar
+
+      - name: Upload API image artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-image
+          path: api-image.tar
+          retention-days: 1
+
+      - name: Upload Web image artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-image
+          path: web-image.tar
+          retention-days: 1

@@ -4,6 +4,7 @@ WORKDIR /build
 
 COPY votify-api votify-api
 COPY votify-core votify-core
+COPY votify-infra votify-infra
 COPY votify-dto votify-dto
 COPY votify-test votify-test
 COPY pom.xml pom.xml

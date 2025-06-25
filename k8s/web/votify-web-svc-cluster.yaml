@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: votify-web-svc-cluster
+spec:
+  type: ClusterIP
+  clusterIP: 10.96.10.10
+  selector:
+    app: votify-web
+  ports:
+  - port: 3000
+    targetPort: 3000

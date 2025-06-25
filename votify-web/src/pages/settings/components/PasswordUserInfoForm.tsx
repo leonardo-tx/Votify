@@ -57,7 +57,7 @@ export default function PasswordUserInfoForm() {
           Senha antiga:
         </label>
         <Input
-          type="text"
+          type="password"
           name="oldPassword"
           id="oldPassword"
           value={userInfo.oldPassword}
@@ -73,7 +73,7 @@ export default function PasswordUserInfoForm() {
           Senha nova:
         </label>
         <Input
-          type="text"
+          type="password"
           name="newPassword"
           id="newPassword"
           value={userInfo.newPassword}
