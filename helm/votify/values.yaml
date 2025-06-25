@@ -1,0 +1,57 @@
+api:
+  name: votify-api
+  replicas: 1
+  image: byces/votify-api
+  tag: latest
+  imagePullPolicy: Always
+  service:
+    type: ClusterIP
+    port: 8081
+    targetPort: 8081
+  cm:
+    MAIL_HOST: smtp.gmail.com
+    MAIL_PORT: "587"
+    MAIL_USERNAME: mailvotify@gmail.com
+  secret:
+    REFRESH_TOKEN_SECRET: V3RY_$ECRET_REFRESH_TOKEN_KEYyui943yriy384u5yu385ygu83
+    MAIL_PASSWORD: colocar_a_senha_do_app
+
+web:
+  name: votify-web
+  replicas: 1
+  image: byces/votify-web
+  tag: latest
+  imagePullPolicy: Always
+  service:
+    type: ClusterIP
+    port: 3000
+    targetPort: 3000
+  cm:
+    NEXT_PROXY_URL: http://nginx-svc
+
+mysql:
+  name: mysql
+  replicas: 1
+  image: mysql
+  tag: 9.3.0
+  imagePullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 3306
+    targetPort: 3306
+  cm:
+    MYSQL_DATABASE: votifydb
+  secret:
+    MYSQL_ROOT_PASSWORD: Admin@123
+
+nginx:
+  name: nginx
+  replicas: 1
+  image: nginx
+  tag: stable
+  imagePullPolicy: IfNotPresent
+  service:
+    type: NodePort
+    port: 80
+    targetPort: 80
+    nodePort: 30000

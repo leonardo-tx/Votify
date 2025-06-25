@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "{{ .Values.nginx.name }}-deploy"
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: {{ .Values.nginx.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.nginx.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.nginx.name }}
+    spec:
+      containers:
+        - name: {{ .Values.nginx.name }}
+          image: "{{ .Values.nginx.image }}:{{ .Values.nginx.tag }}"
+          imagePullPolicy: {{ .Values.nginx.imagePullPolicy }}
+          envFrom:
+            - configMapRef:
+                name: "{{ .Values.nginx.name }}-cm"
+          command: ["/bin/sh", "-c"]
+          args:
+            - >
+              envsubst '$$API_HOST $$API_PORT $$WEB_HOST $$WEB_PORT'
+              < /etc/nginx/templates/nginx.conf.template
+              > /etc/nginx/nginx.conf &&
+              nginx -g 'daemon off;'
+          volumeMounts:
+            - name: nginx-config
+              mountPath: /etc/nginx/templates
+              readOnly: true
+      volumes:
+        - name: nginx-config
+          configMap:
+            name: "{{ .Values.nginx.name }}-cm"
