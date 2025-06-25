@@ -172,6 +172,7 @@ class EmailConfirmationServiceTest {
         User newAccount = mock(User.class);
         when(newAccount.getId()).thenReturn(3L);
         when(newAccount.getName()).thenReturn(new Name("Name"));
+        when(newAccount.getEmail()).thenReturn(new Email("mail@gmail.com"));
 
         when(userProperties.getEmailConfirmationExpirationMinutes()).thenReturn(1);
         when(emailConfirmationRepository.save(any(EmailConfirmation.class)))
@@ -190,6 +191,7 @@ class EmailConfirmationServiceTest {
         String body = String.format(
                 messages.getString("message.email.confirmation.new.account.body"),
                 newAccount.getName().getValue(),
+                newAccount.getEmail().getValue(),
                 emailConfirmation.getCode().encodeToUrlCode(),
                 userProperties.getEmailConfirmationExpirationMinutes()
         );
@@ -225,6 +227,7 @@ class EmailConfirmationServiceTest {
         String body = String.format(
                 messages.getString("message.email.confirmation.new.account.body"),
                 newAccount.getName().getValue(),
+                newAccount.getEmail().getValue(),
                 emailConfirmation.getCode().encodeToUrlCode(),
                 userProperties.getEmailConfirmationExpirationMinutes()
         );
@@ -253,6 +256,7 @@ class EmailConfirmationServiceTest {
         User existingAccount = mock(User.class);
         when(existingAccount.getId()).thenReturn(2L);
         when(existingAccount.getName()).thenReturn(new Name("Jhonny Silverhand"));
+        when(existingAccount.getEmail()).thenReturn(new Email("jhonny@nightcity.2077"));
 
         when(userProperties.getEmailConfirmationExpirationMinutes()).thenReturn(1);
         when(emailConfirmationRepository.save(any(EmailConfirmation.class)))
@@ -271,6 +275,7 @@ class EmailConfirmationServiceTest {
         String body = String.format(
                 messages.getString("message.email.confirmation.existing.account.body"),
                 existingAccount.getName().getValue(),
+                existingAccount.getEmail().getValue(),
                 emailConfirmation.getCode().encodeToUrlCode(),
                 userProperties.getEmailConfirmationExpirationMinutes()
         );

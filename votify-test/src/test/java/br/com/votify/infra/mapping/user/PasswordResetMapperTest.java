@@ -20,11 +20,12 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class PasswordResetMapperTest {
-    @Mock
-    private UserEntityRepository userEntityRepository;
-
-    @InjectMocks
     private PasswordResetMapper passwordResetMapper;
+
+    @BeforeEach
+    void setupBeforeEach() {
+        passwordResetMapper = new PasswordResetMapper();
+    }
 
     @Test
     void testToModel() {
@@ -44,16 +45,14 @@ class PasswordResetMapperTest {
 
     @Test
     void testToEntity() {
-        UserEntity userEntity = mock(UserEntity.class);
         PasswordReset passwordReset = mock(PasswordReset.class);
         when(passwordReset.getCode()).thenReturn(new ConfirmationCode());
         when(passwordReset.getUserId()).thenReturn(2L);
         when(passwordReset.getExpiration()).thenReturn(Instant.now());
-        when(userEntityRepository.getReferenceById(2L)).thenReturn(userEntity);
 
         PasswordResetEntity passwordResetEntity = passwordResetMapper.toEntity(passwordReset);
         assertEquals(passwordReset.getCode().getValue(), passwordResetEntity.getCode());
-        assertEquals(userEntity, passwordResetEntity.getUser());
+        assertEquals(passwordReset.getUserId(), passwordResetEntity.getUser().getId());
         assertEquals(passwordReset.getExpiration(), passwordResetEntity.getExpiration());
     }
 }

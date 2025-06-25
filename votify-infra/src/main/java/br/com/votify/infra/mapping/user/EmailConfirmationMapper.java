@@ -6,16 +6,10 @@ import br.com.votify.core.model.user.field.Email;
 import br.com.votify.infra.mapping.Mapper;
 import br.com.votify.infra.persistence.user.EmailConfirmationEntity;
 import br.com.votify.infra.persistence.user.UserEntity;
-import br.com.votify.infra.repository.user.UserEntityRepository;
-import jakarta.persistence.EntityManager;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
-@RequiredArgsConstructor
 public class EmailConfirmationMapper implements Mapper<EmailConfirmation, EmailConfirmationEntity> {
-    private final UserEntityRepository userEntityRepository;
-
     @Override
     public EmailConfirmation toModel(EmailConfirmationEntity emailConfirmationEntity) {
         String newEmail = emailConfirmationEntity.getNewEmail();
@@ -29,12 +23,11 @@ public class EmailConfirmationMapper implements Mapper<EmailConfirmation, EmailC
 
     @Override
     public EmailConfirmationEntity toEntity(EmailConfirmation emailConfirmation) {
-        UserEntity userEntity = userEntityRepository.getReferenceById(emailConfirmation.getUserId());
         Email newEmail = emailConfirmation.getNewEmail();
         return EmailConfirmationEntity.builder()
                 .code(emailConfirmation.getCode().getValue())
                 .expiration(emailConfirmation.getExpiration())
-                .user(userEntity)
+                .user(UserEntity.builder().id(emailConfirmation.getUserId()).build())
                 .newEmail(newEmail == null ? null : newEmail.getValue())
                 .build();
     }

@@ -13,6 +13,7 @@ import VoteInsertDTO from "./polls/VoteInsertDTO";
 import EmailConfirmationRequestDTO from "./users/EmailConfirmationRequestDTO";
 import UserUpdateInfoDTO from "./users/UserUpdateInfoDTO";
 import UserUpdatePasswordRequestDTO from "./users/UserUpdatePasswordRequestDTO";
+import UserUpdateEmailRequestDTO from "./users/UserUpdateEmailRequestDTO";
 
 export const api = axios.create({
   baseURL:
@@ -52,7 +53,19 @@ export const updateUserInfo = async (
   form: UserUpdateInfoDTO,
 ): Promise<ApiResponse<UserDetailedView | null>> => {
   return await commonRequester(async () => {
-    const { data } = await api.put<ApiResponse<null>>("/users/me/info", form);
+    const { data } = await api.put<ApiResponse<UserDetailedView | null>>(
+      "/users/me/info",
+      form,
+    );
+    return data;
+  });
+};
+
+export const updateUserEmail = async (
+  form: UserUpdateEmailRequestDTO,
+): Promise<ApiResponse<null>> => {
+  return await commonRequester(async () => {
+    const { data } = await api.put<ApiResponse<null>>("/users/me/email", form);
     return data;
   });
 };

@@ -20,11 +20,12 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class RefreshTokenMapperTest {
-    @Mock
-    private UserEntityRepository userEntityRepository;
-
-    @InjectMocks
     private RefreshTokenMapper refreshTokenMapper;
+
+    @BeforeEach
+    void setupBeforeEach() {
+        refreshTokenMapper = new RefreshTokenMapper();
+    }
 
     @Test
     void testToModel() {
@@ -44,16 +45,14 @@ class RefreshTokenMapperTest {
 
     @Test
     void testToEntity() {
-        UserEntity userEntity = mock(UserEntity.class);
         RefreshToken refreshToken = mock(RefreshToken.class);
         when(refreshToken.getCode()).thenReturn("code");
         when(refreshToken.getUserId()).thenReturn(2L);
         when(refreshToken.getExpiration()).thenReturn(Instant.now());
-        when(userEntityRepository.getReferenceById(2L)).thenReturn(userEntity);
 
         RefreshTokenEntity refreshTokenEntity = refreshTokenMapper.toEntity(refreshToken);
         assertEquals(refreshToken.getCode(), refreshTokenEntity.getCode());
-        assertEquals(userEntity, refreshTokenEntity.getUser());
+        assertEquals(refreshToken.getUserId(), refreshTokenEntity.getUser().getId());
         assertEquals(refreshToken.getExpiration(), refreshTokenEntity.getExpiration());
     }
 }

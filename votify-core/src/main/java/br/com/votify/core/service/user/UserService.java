@@ -106,8 +106,6 @@ public class UserService {
             user = userRepository.findById(emailConfirmation.getUserId())
                     .orElseThrow(() -> new VotifyException(VotifyErrorCode.USER_NOT_FOUND));
         }
-        passwordResetService.deleteFromUser(user);
-
         user.setEmail(emailConfirmation.getNewEmail());
         userRepository.save(user);
     }

@@ -570,7 +570,6 @@ class UserServiceTest {
 
         verify(emailConfirmationService).confirmEmail(code, mockEmail);
         verify(userRepository).findById(1L);
-        verify(passwordResetService).deleteFromUser(mockUser);
         verify(mockUser).setEmail(newEmail);
         verify(userRepository).save(mockUser);
     }
@@ -614,7 +613,6 @@ class UserServiceTest {
 
         verify(emailConfirmationService).confirmEmail(code, mockEmail);
         verifyNoInteractions(contextService);
-        verify(passwordResetService).deleteFromUser(mockUser);
         verify(mockUser).setEmail(newEmail);
         verify(userRepository).save(mockUser);
     }
@@ -636,7 +634,6 @@ class UserServiceTest {
         userService.confirmEmail(code, null);
 
         verify(emailConfirmationService).confirmEmail(code, mockEmail);
-        verify(passwordResetService).deleteFromUser(mockUser);
         verify(mockUser).setEmail(newEmail);
         verify(userRepository).save(mockUser);
     }

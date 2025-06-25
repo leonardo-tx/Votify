@@ -33,8 +33,7 @@ public class PasswordResetRepositoryImpl implements PasswordResetRepository {
 
     @Override
     public void delete(PasswordReset passwordReset) {
-        PasswordResetEntity entity = mapper.toEntity(passwordReset);
-        repository.delete(entity);
+        repository.deleteById(passwordReset.getCode().getValue());
     }
 
     @Override

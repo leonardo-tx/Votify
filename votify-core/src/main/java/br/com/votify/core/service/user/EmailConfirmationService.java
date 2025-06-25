@@ -5,7 +5,6 @@ import br.com.votify.core.model.user.User;
 import br.com.votify.core.properties.user.UserProperties;
 import br.com.votify.core.model.user.field.Email;
 import br.com.votify.core.repository.user.EmailConfirmationRepository;
-import br.com.votify.core.repository.user.UserRepository;
 import br.com.votify.core.service.messaging.EmailSender;
 import br.com.votify.core.utils.exceptions.VotifyErrorCode;
 import br.com.votify.core.utils.exceptions.VotifyException;
@@ -62,6 +61,7 @@ public class EmailConfirmationService {
         String body = String.format(
                 messages.getString(bodyKey),
                 user.getName().getValue(),
+                user.getEmail().getValue(),
                 savedEmailConfirmation.getCode().encodeToUrlCode(),
                 userProperties.getEmailConfirmationExpirationMinutes()
         );

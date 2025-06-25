@@ -23,11 +23,12 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class EmailConfirmationMapperTest {
-    @Mock
-    private UserEntityRepository userEntityRepository;
-
-    @InjectMocks
     private EmailConfirmationMapper emailConfirmationMapper;
+
+    @BeforeEach
+    void setupBeforeEach() {
+        emailConfirmationMapper = new EmailConfirmationMapper();
+    }
 
     @Test
     void testToModelWithoutNewEmail() {
@@ -67,34 +68,30 @@ class EmailConfirmationMapperTest {
 
     @Test
     void testToEntityWithoutNewEmail() {
-        UserEntity userEntity = mock(UserEntity.class);
         EmailConfirmation emailConfirmation = mock(EmailConfirmation.class);
         when(emailConfirmation.getCode()).thenReturn(new ConfirmationCode());
         when(emailConfirmation.getUserId()).thenReturn(2L);
         when(emailConfirmation.getNewEmail()).thenReturn(null);
         when(emailConfirmation.getExpiration()).thenReturn(Instant.now());
-        when(userEntityRepository.getReferenceById(2L)).thenReturn(userEntity);
 
         EmailConfirmationEntity emailConfirmationEntity = emailConfirmationMapper.toEntity(emailConfirmation);
         assertEquals(emailConfirmation.getCode().getValue(), emailConfirmationEntity.getCode());
-        assertEquals(userEntity, emailConfirmationEntity.getUser());
+        assertEquals(emailConfirmation.getUserId(), emailConfirmationEntity.getUser().getId());
         assertEquals(emailConfirmation.getExpiration(), emailConfirmationEntity.getExpiration());
         assertNull(emailConfirmationEntity.getNewEmail());
     }
 
     @Test
     void testToEntityWithNewEmail() throws VotifyException {
-        UserEntity userEntity = mock(UserEntity.class);
         EmailConfirmation emailConfirmation = mock(EmailConfirmation.class);
         when(emailConfirmation.getCode()).thenReturn(new ConfirmationCode());
         when(emailConfirmation.getUserId()).thenReturn(2L);
         when(emailConfirmation.getNewEmail()).thenReturn(new Email("mail@mail.com"));
         when(emailConfirmation.getExpiration()).thenReturn(Instant.now());
-        when(userEntityRepository.getReferenceById(2L)).thenReturn(userEntity);
 
         EmailConfirmationEntity emailConfirmationEntity = emailConfirmationMapper.toEntity(emailConfirmation);
         assertEquals(emailConfirmation.getCode().getValue(), emailConfirmationEntity.getCode());
-        assertEquals(userEntity, emailConfirmationEntity.getUser());
+        assertEquals(emailConfirmation.getUserId(), emailConfirmationEntity.getUser().getId());
         assertEquals(emailConfirmation.getExpiration(), emailConfirmationEntity.getExpiration());
         assertEquals(emailConfirmation.getNewEmail().getValue(), emailConfirmationEntity.getNewEmail());
     }

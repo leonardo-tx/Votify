@@ -3,6 +3,8 @@ import { confirmEmail } from "@/libs/api";
 import VotifyErrorCode from "@/libs/VotifyErrorCode";
 import { useRouter } from "next/router";
 import { GetServerSideProps } from "next";
+import { useSetAtom } from "jotai";
+import { currentUserAtom } from "@/libs/users/atoms/currentUserAtom";
 
 interface Props {
   code: string;
@@ -11,14 +13,11 @@ interface Props {
 
 function ConfirmEmailPage({ code, email }: Props) {
   const router = useRouter();
-  const [status, setStatus] = useState<
-    "loading" | "success" | "error" | "invalid"
-  >("loading");
   const [message, setMessage] = useState<string>("Confirmando seu e-mail...");
+  const setCurrentUser = useSetAtom(currentUserAtom);
 
   useEffect(() => {
     if (!email || !code) {
-      setStatus("invalid");
       setMessage(
         "Link inválido. Você será redirecionado para a página inicial.",
       );
@@ -29,18 +28,17 @@ function ConfirmEmailPage({ code, email }: Props) {
     const handleConfirm = async () => {
       const response = await confirmEmail({ email, code });
       if (response.success) {
-        setStatus("success");
         setMessage("Email confirmado com sucesso! Redirecionando...");
+        setCurrentUser(null);
         setTimeout(() => router.push("/login"), 3000);
       } else {
-        setStatus("error");
         setMessage(getErrorMessage(response.errorCode));
         setTimeout(() => router.push("/"), 4000);
       }
     };
 
     handleConfirm();
-  }, [code, email, router]);
+  }, [code, email, router, setCurrentUser]);
 
   return (
     <div style={{ textAlign: "center", marginTop: "50px" }}>

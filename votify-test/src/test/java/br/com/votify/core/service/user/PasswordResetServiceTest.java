@@ -37,8 +37,6 @@ class PasswordResetServiceTest {
     @InjectMocks
     private PasswordResetService passwordResetService;
 
-    private final Email email = new Email("test@example.com");
-
     PasswordResetServiceTest() throws VotifyException {
     }
 

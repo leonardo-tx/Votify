@@ -7,7 +7,6 @@ import br.com.votify.core.model.user.field.Email;
 import br.com.votify.core.model.user.field.Password;
 import br.com.votify.core.service.user.decorators.NeedsUserContext;
 import br.com.votify.core.model.user.AuthTokens;
-import br.com.votify.core.service.user.EmailConfirmationService;
 import br.com.votify.core.service.user.PasswordResetService;
 import br.com.votify.core.service.user.UserService;
 import br.com.votify.core.utils.exceptions.VotifyException;
@@ -112,13 +111,22 @@ public class AuthController {
     @PostMapping("/confirm-email")
     @NeedsUserContext
     public ResponseEntity<ApiResponse<Object>> confirmEmail(
-            @RequestBody EmailConfirmationRequestDTO emailConfirmationRequestDto
+            @RequestBody EmailConfirmationRequestDTO emailConfirmationRequestDto,
+            HttpServletResponse response
     ) throws VotifyException {
         boolean hasEmail = emailConfirmationRequestDto.getEmail() != null;
         userService.confirmEmail(
                 emailConfirmationRequestDto.getCode(),
                 hasEmail ? new Email(emailConfirmationRequestDto.getEmail()) : null
         );
+        userService.logout();
+
+        Cookie refreshCookie = securityConfig.createRefreshTokenCookie(null);
+        Cookie accessCookie = securityConfig.createAccessTokenCookie(null);
+
+        response.addCookie(refreshCookie);
+        response.addCookie(accessCookie);
+
         return ApiResponse.success(null, HttpStatus.OK).createResponseEntity();
     }
 }
