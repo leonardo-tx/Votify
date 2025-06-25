@@ -1,35 +1,45 @@
 enum VotifyErrorCode {
   CLIENT_CONNECTION_FAILED = "client.connection.failed",
+
   USER_NAME_EMPTY = "user.name.empty",
   USER_NAME_INVALID_LENGTH = "user.name.invalid.length",
   USER_NAME_INVALID_CHARACTER = "user.name.invalid.character",
   USER_NAME_INVALID = "user.name.invalid",
   USER_NAME_ALREADY_EXISTS = "user.name.already.exists",
+
   EMAIL_EMPTY = "email.empty",
   EMAIL_INVALID_LENGTH = "email.invalid.length",
   EMAIL_INVALID = "email.invalid",
   EMAIL_ALREADY_EXISTS = "email.already.exists",
+  EMAIL_CONFIRMATION_CODE_INVALID = "email.confirmation.code.invalid",
+  EMAIL_ALREADY_CONFIRMED = "email.already.confirmed",
+  PENDING_EMAIL_CONFIRMATION = "email.pending.confirmation",
+
   PASSWORD_EMPTY = "password.empty",
   PASSWORD_INVALID_LENGTH = "password.invalid.length",
   PASSWORD_INVALID_CHARACTER = "password.invalid.character",
   PASSWORD_INVALID_BYTES = "password.invalid.bytes",
+
   NAME_EMPTY = "name.empty",
   NAME_INVALID_LENGTH = "name.invalid.length",
   NAME_INVALID = "name.invalid",
+
   USER_NOT_FOUND = "user.not.found",
+
   REFRESH_TOKEN_EXPIRED = "refresh.token.expired",
   REFRESH_TOKEN_INVALID = "refresh.token.invalid",
   ACCESS_TOKEN_EXPIRED = "access.token.expired",
   ACCESS_TOKEN_INVALID = "access.token.invalid",
+
   LOGIN_UNAUTHORIZED = "login.unauthorized",
   LOGIN_ALREADY_LOGGED = "login.already.logged",
-  EMAIL_ALREADY_CONFIRMED = 'email.already.confirmed',
-  EMAIL_CONFIRMATION_CODE_INVALID = 'email.confirmation.code.invalid',
   COMMON_UNAUTHORIZED = "common.unauthorized",
+
   INTERNAL = "internal",
   BAD_REQUEST = "bad.request",
   METHOD_NOT_ALLOWED = "method.not.allowed",
   ENDPOINT_NOT_FOUND = "endpoint.not.found",
+
   POLL_TITLE_INVALID_LENGTH = "poll.title.invalid.length",
   POLL_TITLE_EMPTY = "poll.title.empty",
   POLL_DESCRIPTION_EMPTY = "poll.description.empty",
@@ -46,13 +56,20 @@ enum VotifyErrorCode {
   POLL_VOTE_EMPTY = "poll.vote.empty",
   POLL_VOTE_INVALID = "poll.vote.invalid",
   POLL_VOTE_OUT_OF_DATE_INTERVAL = "poll.vote.out.of.date.interval",
+
   VOTE_OPTION_NAME_EMPTY = "vote.option.name.empty",
   VOTE_OPTION_NAME_INVALID_LENGTH = "vote.option.name.invalid.length",
+
   PASSWORD_RESET_CODE_INVALID = "password.reset.code.invalid",
   PASSWORD_RESET_REQUEST_EXISTS = "password.reset.request.exists",
-  PASSWORD_RESET_EMAIL_NOT_FOUND = "password.reset.email.not.found",
+
   POLL_TITLE_SEARCH_EMPTY = "poll.title.search.empty",
-  PENDING_EMAIL_CONFIRMATION = "pending.email.confirmation",
+
+  INVALID_OLD_PASSWORD = "invalid.old.password",
+  POLL_NOT_OWNER = "poll.not.owner",
+  POLL_ALREADY_IN_PROGRESS = "poll.already.in.progress",
+  POLL_CANNOT_EDIT_FINISHED = "poll.cannot.edit.finished",
+  POLL_CANNOT_CANCEL_FINISHED = "poll.cannot.cancel.finished",
 }
 
 export default VotifyErrorCode;
