@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "{{ .Values.api.name }}-cm"
+  namespace: {{ .Release.Namespace }}
+data:
+  DATABASE_NAME: "{{ .Values.mysql.name }}-svc"
+  MAIL_HOST: {{ .Values.api.cm.MAIL_HOST }}
+  MAIL_PORT: "{{ .Values.api.cm.MAIL_PORT }}"
+  MAIL_USERNAME: {{ .Values.api.cm.MAIL_USERNAME }}

@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: {{.Release.Namespace}}
+  name: "{{.Values.mysql.name}}-svc"
+spec:
+  selector:
+    app: {{ .Values.mysql.name }}
+  type: {{.Values.mysql.service.type}}
+  ports:
+    - protocol: TCP
+      {{- if (eq .Values.mysql.service.type "NodePort")}}
+      nodePort: {{.Values.mysql.service.nodePort}}
+      {{- end}}
+      targetPort: {{.Values.mysql.service.targetPort}}
+      port: {{.Values.mysql.service.port}}

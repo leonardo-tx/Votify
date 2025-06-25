@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "{{ .Values.nginx.name }}-cm"
+  namespace: {{ .Release.Namespace }}
+data:
+  API_HOST: "{{ .Values.api.name }}-svc"
+  API_PORT: "{{ .Values.api.service.port }}"
+  WEB_HOST: "{{ .Values.web.name }}-svc"
+  WEB_PORT: "{{ .Values.web.service.port }}"
+  nginx.conf.template: |-
+{{ .Files.Get "files/nginx.conf.template" | indent 4 }}

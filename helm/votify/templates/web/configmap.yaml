@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "{{ .Values.web.name }}-cm"
+  namespace: {{ .Release.Namespace }}
+data:
+  NEXT_PROXY_URL: {{ .Values.web.cm.NEXT_PROXY_URL }}
