@@ -37,6 +37,7 @@ export default function Home({ polls, page, totalPages }: Props) {
       <div className="flex flex-col gap-4">
         <div className="flex justify-end">
           <Button
+            id="open-poll-create-modal"
             scheme="primary"
             onClick={() => setIsCreateModalOpen(true)}
             disabled={!currentUser}
@@ -44,7 +45,7 @@ export default function Home({ polls, page, totalPages }: Props) {
               !currentUser
                 ? "Você precisa estar logado para criar uma enquete"
                 : undefined
-             }
+            }
           >
             Criar Nova Enquete
           </Button>

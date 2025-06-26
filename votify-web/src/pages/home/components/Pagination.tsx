@@ -14,7 +14,7 @@ export default function Pagination({
   if (totalPages <= 1) return null;
 
   return (
-    <div className="flex justify-center mt-4 space-x-2">
+    <div id="pagination" className="flex justify-center mt-4 space-x-2">
       <Button
         onClick={() => onPageChange(Math.max(0, currentPage - 1))}
         disabled={currentPage === 0}

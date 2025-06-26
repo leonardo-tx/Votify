@@ -1,4 +1,4 @@
-package br.com.votify.web.polls;
+package br.com.votify.web.home;
 
 import br.com.votify.web.BasePage;
 import org.openqa.selenium.WebDriver;

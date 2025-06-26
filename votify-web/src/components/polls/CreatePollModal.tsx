@@ -11,7 +11,9 @@ interface CreatePollModalProps {
   onClose: () => void;
 }
 
-type FormErrors = Partial<Record<keyof PollInsertDTO, string>> & { submit?: string };
+type FormErrors = Partial<Record<keyof PollInsertDTO, string>> & {
+  submit?: string;
+};
 
 const initialFormData: PollInsertDTO = {
   title: "",
@@ -40,7 +42,10 @@ const validateStartDate = (startDate: string): string | undefined => {
   }
 };
 
-const validateEndDate = (endDate: string, startDate: string): string | undefined => {
+const validateEndDate = (
+  endDate: string,
+  startDate: string,
+): string | undefined => {
   if (!endDate) {
     return "A data de término é obrigatória";
   }
@@ -54,7 +59,7 @@ const validateVoteOptions = (voteOptions: string[]): string | undefined => {
   if (validOptions.length < 1 || validOptions.length > 5) {
     return "A enquete deve ter entre 1 e 5 opções de voto";
   }
-  
+
   for (const option of validOptions) {
     if (option.length < 3 || option.length > 30) {
       return "Cada opção deve ter entre 3 e 30 caracteres";
@@ -62,7 +67,10 @@ const validateVoteOptions = (voteOptions: string[]): string | undefined => {
   }
 };
 
-const validateChoiceLimit = (choiceLimit: number, voteOptions: string[]): string | undefined => {
+const validateChoiceLimit = (
+  choiceLimit: number,
+  voteOptions: string[],
+): string | undefined => {
   const validOptions = voteOptions.filter((opt) => opt.trim().length > 0);
   if (choiceLimit < 1 || choiceLimit > validOptions.length) {
     return `O limite de escolhas deve estar entre 1 e ${validOptions.length}`;
@@ -82,17 +90,17 @@ interface FormFieldProps {
   rows?: number;
 }
 
-const FormField = ({ 
-  label, 
-  id, 
-  value, 
-  onChange, 
-  error, 
-  type = "text", 
-  placeholder, 
-  min, 
-  max, 
-  rows 
+const FormField = ({
+  label,
+  id,
+  value,
+  onChange,
+  error,
+  type = "text",
+  placeholder,
+  min,
+  max,
+  rows,
 }: FormFieldProps) => (
   <div>
     <label htmlFor={id} className="block text-sm font-medium mb-1">
@@ -102,7 +110,9 @@ const FormField = ({
       id={id}
       type={type}
       value={value}
-      onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => 
+      onChange={(
+        e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+      ) =>
         onChange(type === "number" ? parseInt(e.target.value) : e.target.value)
       }
       placeholder={placeholder}
@@ -123,17 +133,15 @@ interface VoteOptionsProps {
   error?: string;
 }
 
-const VoteOptions = ({ 
-  voteOptions, 
-  onUpdateOption, 
-  onRemoveOption, 
-  onAddOption, 
-  error 
+const VoteOptions = ({
+  voteOptions,
+  onUpdateOption,
+  onRemoveOption,
+  onAddOption,
+  error,
 }: VoteOptionsProps) => (
   <div>
-    <label className="block text-sm font-medium mb-1">
-      Opções de Voto
-    </label>
+    <label className="block text-sm font-medium mb-1">Opções de Voto</label>
     {voteOptions.map((option, index) => (
       <div key={index} className="flex gap-2 mb-2">
         <Input
@@ -159,19 +167,17 @@ const VoteOptions = ({
       </div>
     ))}
     {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
-    
-    {voteOptions.length < 5 && (
-      <Button
-        id="add-option-button"
-        scheme="primary"
-        variant="text"
-        type="button"
-        onClick={onAddOption}
-        className="mt-2 text-blue-500 hover:text-blue-700"
-      >
-        + Adicionar Opção
-      </Button>
-    )}
+    <Button
+      style={{ display: voteOptions.length < 5 ? "block" : "none" }}
+      id="add-option-button"
+      scheme="primary"
+      variant="text"
+      type="button"
+      onClick={onAddOption}
+      className="mt-2 text-blue-500 hover:text-blue-700"
+    >
+      + Adicionar Opção
+    </Button>
   </div>
 );
 
@@ -186,16 +192,19 @@ export default function CreatePollModal({
 
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
-    
+
     newErrors.title = validateTitle(formData.title);
     newErrors.description = validateDescription(formData.description);
     newErrors.startDate = validateStartDate(formData.startDate);
     newErrors.endDate = validateEndDate(formData.endDate, formData.startDate);
     newErrors.voteOptions = validateVoteOptions(formData.voteOptions);
-    newErrors.choiceLimitPerUser = validateChoiceLimit(formData.choiceLimitPerUser, formData.voteOptions);
+    newErrors.choiceLimitPerUser = validateChoiceLimit(
+      formData.choiceLimitPerUser,
+      formData.voteOptions,
+    );
 
     const filteredErrors = Object.fromEntries(
-      Object.entries(newErrors).filter(([, value]) => value !== undefined)
+      Object.entries(newErrors).filter(([, value]) => value !== undefined),
     ) as FormErrors;
 
     setErrors(filteredErrors);
@@ -207,20 +216,18 @@ export default function CreatePollModal({
     if (!validateForm()) return;
 
     setIsSubmitting(true);
-    
+
     const response = await createPoll(formData);
 
     if (response.success && response.data) {
-      onClose();
       router.push(`/polls/${response.data.id}`);
-      window.location.href = "/home";
+      onClose();
     } else {
       setErrors((prev) => ({
         ...prev,
         submit: response.errorMessage || "Erro ao criar enquete",
       }));
     }
-    
     setIsSubmitting(false);
   };
 
@@ -254,7 +261,7 @@ export default function CreatePollModal({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
+    <Modal id="poll-modal" isOpen={isOpen} onClose={onClose}>
       <h2 className="text-2xl font-bold mb-4">Criar Nova Enquete</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <FormField
@@ -300,7 +307,9 @@ export default function CreatePollModal({
           label="Limite de Escolhas por Usuário"
           id="choiceLimit"
           value={formData.choiceLimitPerUser}
-          onChange={(value) => updateField("choiceLimitPerUser", value as number)}
+          onChange={(value) =>
+            updateField("choiceLimitPerUser", value as number)
+          }
           error={errors.choiceLimitPerUser}
           type="number"
           min={1}
@@ -326,18 +335,21 @@ export default function CreatePollModal({
           >
             Cancelar
           </Button>
-          <Button 
-            id="create-poll-button" 
-            type="submit" 
-            scheme="primary" 
+          <Button
+            id="create-poll-button"
+            type="submit"
+            scheme="primary"
             disabled={isSubmitting}
           >
             {isSubmitting ? "Criando..." : "Criar Enquete"}
           </Button>
         </div>
-        
+
         {errors.submit && (
-          <p id="submit-error" className="text-red-500 text-sm mt-2 text-center">
+          <p
+            id="submit-error"
+            className="text-red-500 text-sm mt-2 text-center"
+          >
             {errors.submit}
           </p>
         )}

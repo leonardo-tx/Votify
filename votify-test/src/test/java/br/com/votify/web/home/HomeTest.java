@@ -12,8 +12,7 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class HomeTest extends SeleniumTest {
     private HomePage page;
@@ -170,6 +169,40 @@ class HomeTest extends SeleniumTest {
                 currentUrl.endsWith("/polls/8"),
                 "The URL must be on the polls page at the id 8."
         );
+    }
+
+    @TestTemplate
+    void shouldNavigateToNextPage() {
+        if (page.buttonNextPage.isDisplayed()) {
+            page.buttonNextPage.click();
+
+            wait.until(ExpectedConditions.urlContains("page=1"));
+            assertTrue(webDriver.getCurrentUrl().contains("page=1"));
+        }
+    }
+
+    @TestTemplate
+    void shouldNavigateToPreviousPage() {
+        seleniumHelper.get("/home?page=1");
+
+        if (page.buttonPreviousPage.isDisplayed()) {
+            page.buttonPreviousPage.click();
+
+            wait.until(ExpectedConditions.urlContains("page=0"));
+            assertTrue(webDriver.getCurrentUrl().contains("page=0"));
+        }
+    }
+
+    @TestTemplate
+    void shouldDisplayCreatePollButton() {
+        assertTrue(seleniumHelper.isInViewport(page.createPollButton));
+        assertEquals("Criar Nova Enquete", page.createPollButton.getText());
+    }
+
+    @TestTemplate
+    void shouldNotAllowCreatePollButtonWithoutAuthentication() {
+        assertTrue(seleniumHelper.isInViewport(page.createPollButton));
+        assertFalse(page.createPollButton.isEnabled());
     }
 
     private int countPolls() {

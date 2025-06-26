@@ -5,9 +5,10 @@ interface Props {
   children?: ReactNode;
   isOpen: boolean;
   onClose: () => void;
+  id?: string;
 }
 
-export default function Modal({ children, isOpen, onClose }: Props) {
+export default function Modal({ children, isOpen, onClose, id }: Props) {
   const modalRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -38,17 +39,13 @@ export default function Modal({ children, isOpen, onClose }: Props) {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [isOpen, onClose]);
-
-  const backgroundClassNames: string[] = [styles["modal-background"]];
-  if (!isOpen) {
-    backgroundClassNames.push(styles["modal-background-closed"]);
-  }
-
   return (
-    <div className={backgroundClassNames.join(" ")}>
-      <div ref={modalRef} className={styles["modal"]}>
-        {children}
+    isOpen && (
+      <div className={styles["modal-background"]}>
+        <div ref={modalRef} className={styles["modal"]}>
+          {children}
+        </div>
       </div>
-    </div>
+    )
   );
 }

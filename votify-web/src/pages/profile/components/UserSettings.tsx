@@ -29,7 +29,11 @@ const UserSettings: React.FC = () => {
 
   return (
     <>
-      <Modal isOpen={isDeleting} onClose={() => setIsDeleting(false)}>
+      <Modal
+        id="delete-modal"
+        isOpen={isDeleting}
+        onClose={() => setIsDeleting(false)}
+      >
         <h2 className="text-3xl">Tem certeza que deseja deletar sua conta?</h2>
         <p>
           Esta ação é irreversível e a maior parte dos seus dados associados
