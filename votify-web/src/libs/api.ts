@@ -10,6 +10,8 @@ import UserPasswordResetRequestDto from "@/libs/users/UserPasswordResetRequestDt
 import UserPasswordResetConfirmDTO from "@/libs/users/UserPasswordResetConfirmDTO";
 import { PollDetailedView } from "./polls/PollDetailedView";
 import VoteInsertDTO from "./polls/VoteInsertDTO";
+import PollUpdateDTO from "./polls/PollUpdateDTO";
+import UserSignUpDTO from "@/libs/users/UserSignUpDTO";
 import EmailConfirmationRequestDTO from "./users/EmailConfirmationRequestDTO";
 import UserUpdateInfoDTO from "./users/UserUpdateInfoDTO";
 import UserUpdatePasswordRequestDTO from "./users/UserUpdatePasswordRequestDTO";
@@ -44,7 +46,6 @@ export const getCurrentUser = async (): Promise<
 export const deleteCurrentUser = async (): Promise<ApiResponse<null>> => {
   return await commonRequester(async () => {
     const { data } = await api.delete<ApiResponse<null>>("/users/me");
-    console.log(data);
     return data;
   });
 };
@@ -122,6 +123,18 @@ export const login = async (
   });
 };
 
+export const signup = async (
+  credentials: UserSignUpDTO,
+): Promise<ApiResponse<UserSignUpDTO | null>> => {
+  return await commonRequester(async () => {
+    const { data } = await api.post<ApiResponse<UserSignUpDTO>>(
+      "/auth/register",
+      credentials,
+    );
+    return data;
+  });
+};
+
 export const forgotPassword = async (
   request: UserPasswordResetRequestDto,
 ): Promise<ApiResponse<null>> => {
@@ -154,6 +167,26 @@ export const confirmEmail = async (
       `/auth/confirm-email`,
       request,
     );
+    return data;
+  });
+};
+
+export const updatePoll = async (
+  id: number,
+  pollData: PollUpdateDTO,
+): Promise<ApiResponse<PollSimpleView>> => {
+  return await commonRequester(async () => {
+    const { data } = await api.put<ApiResponse<PollSimpleView>>(
+      `/polls/${id}`,
+      pollData,
+    );
+    return data;
+  });
+};
+
+export const cancelPoll = async (id: number): Promise<ApiResponse<null>> => {
+  return await commonRequester(async () => {
+    const { data } = await api.delete<ApiResponse<any>>(`/polls/${id}/cancel`);
     return data;
   });
 };

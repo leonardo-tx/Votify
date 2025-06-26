@@ -9,9 +9,9 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@headlessui/react": "^2.2.4",
     "@stomp/stompjs": "^7.1.1",
     "@svgr/webpack": "^8.1.0",
-    "@types/sockjs-client": "^1.5.4",
     "axios": "^1.8.3",
     "date-fns": "^4.1.0",
     "jotai": "^2.12.2",
@@ -29,6 +29,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/sockjs-client": "^1.5.4",
     "eslint": "^9",
     "eslint-config-next": "15.2.3",
     "tailwindcss": "^4",

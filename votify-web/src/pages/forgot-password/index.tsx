@@ -80,8 +80,8 @@ export default function ForgotPasswordPage() {
 
 function getErrorMessage(errorCode?: VotifyErrorCode): string {
   switch (errorCode) {
-    case VotifyErrorCode.PASSWORD_RESET_EMAIL_NOT_FOUND:
-      return "E-mail não existe ou está incorreto.";
+    case VotifyErrorCode.PASSWORD_RESET_REQUEST_EXISTS:
+      return "Um reset de senha já foi requisitado para esse usuário.";
     case VotifyErrorCode.USER_NOT_FOUND:
       return "Não existe um usuário com o e-mail inserido.";
     default:

@@ -8,7 +8,8 @@ interface Props {
   showUser?: boolean;
 }
 
-export default function PollList({ polls, showUser = true }: Props) {
+export default function PollList({ polls: initialPolls, showUser = true }: Props) {
+  const [polls, setPolls] = useState(initialPolls ?? []);
   const [now, setNow] = useState(0);
 
   useEffect(() => {
@@ -20,21 +21,22 @@ export default function PollList({ polls, showUser = true }: Props) {
     return () => clearInterval(timer);
   }, []);
 
-  if (polls === undefined) {
-    return <></>;
-  }
+  const handleCancel = (pollId: number) => {
+    setPolls((prev) => prev.filter((item) => item.poll.id !== pollId));
+  };
 
   return (
-    <div id="poll-list" className="grid grid-cols-1 gap-4">
-      {polls.map((item) => (
-        <PollCard
-          key={item.poll.id}
-          poll={item.poll}
-          user={item.user}
-          now={now}
-          showUser={showUser}
-        />
-      ))}
-    </div>
+      <div id="poll-list" className="grid grid-cols-1 gap-4">
+        {polls.map((item) => (
+            <PollCard
+                key={item.poll.id}
+                poll={item.poll}
+                user={item.user}
+                now={now}
+                showUser={showUser}
+                onCancel={handleCancel}
+            />
+        ))}
+      </div>
   );
 }

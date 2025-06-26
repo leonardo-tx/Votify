@@ -20,12 +20,12 @@ public class PollListViewDTO {
 
     public static PollListViewDTO parse(Poll entity) {
         return new PollListViewDTO(
-            entity.getId(),
-            entity.getTitle().getValue(),
-            entity.getDescription().getValue(),
-            entity.getStartDate(),
-            entity.getEndDate(),
-            entity.getResponsibleId()
+                entity.getId(),
+                entity.getTitle().getValue(),
+                entity.getDescription().getValue(),
+                entity.getStartDate(),
+                entity.getEndDate(),
+                entity.getResponsibleId()
         );
     }
-} 
+}

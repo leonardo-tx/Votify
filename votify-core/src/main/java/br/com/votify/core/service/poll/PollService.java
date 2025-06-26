@@ -1,9 +1,6 @@
 package br.com.votify.core.service.poll;
 
-import br.com.votify.core.model.poll.Poll;
-import br.com.votify.core.model.poll.PollRegister;
-import br.com.votify.core.model.poll.Vote;
-import br.com.votify.core.model.poll.VoteRegister;
+import br.com.votify.core.model.poll.*;
 import br.com.votify.core.model.poll.event.PollUpdateEvent;
 import br.com.votify.core.model.user.User;
 import br.com.votify.core.repository.poll.VoteRepository;
@@ -36,6 +33,24 @@ public class PollService {
         return pollRepository.save(poll);
     }
 
+    public Poll editPoll(Long id, PollRegister pollRegister, User responsible) throws VotifyException {
+        Optional<Poll> optionalPoll = pollRepository.findById(id);
+        if (optionalPoll.isEmpty()) {
+            throw new VotifyException(VotifyErrorCode.POLL_NOT_FOUND);
+        }
+
+        Poll poll = optionalPoll.get();
+        if (!poll.getResponsibleId().equals(responsible.getId())) {
+            throw new VotifyException(VotifyErrorCode.POLL_NOT_OWNER);
+        }
+        if (poll.hasNotStarted()) {
+            poll.editNotStartedPoll(pollRegister, responsible);
+        } else {
+            poll.setEndDate(pollRegister.getEndDate());
+        }
+        return pollRepository.save(poll);
+    }
+
     @Transactional
     public Vote vote(Poll poll, VoteRegister voteRegister) throws VotifyException {
         Vote vote = poll.vote(voteRegister);
@@ -53,7 +68,7 @@ public class PollService {
         Optional<Vote> vote = voteRepository.findByPollAndUser(poll, user);
         return vote.orElseGet(() -> Vote.parseUnsafe(0, poll.getId(), user.getId()));
     }
-    
+
     public Page<Poll> findAllByUser(User user, int page, int size) throws VotifyException {
         validatePageAndSize(page, size);
 

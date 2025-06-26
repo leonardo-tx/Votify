@@ -120,7 +120,7 @@ export default function LoginPage() {
                 variant="text"
                 scheme="primary"
                 id="create-account-link"
-                href="/auth/register"
+                href="/signup"
                 className="text-blue-600 hover:text-blue-700"
               >
                 Criar conta
@@ -139,6 +139,8 @@ function getErrorMessage(errorCode: VotifyErrorCode): string {
       return "A conta não existe ou a senha está incorreta.";
     case VotifyErrorCode.LOGIN_ALREADY_LOGGED:
       return "Você já está logado.";
+    case VotifyErrorCode.PENDING_EMAIL_CONFIRMATION:
+      return "Você precisa confirmar o e-mail da conta.";
   }
   return "Não foi possível fazer o login.";
 }

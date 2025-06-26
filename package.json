@@ -1,0 +1,33 @@
+{
+  "name": "votify",
+  "version": "1.0.0",
+  "description": "![Votify CI](https://github.com/leonardo-tx/Votify/actions/workflows/java-ci.yml/badge.svg)\r ![Line Coverage](https://raw.githubusercontent.com/leonardo-tx/Votify/refs/heads/badges/.github/badges/jacoco.svg)\r ![Branch Coverage](https://raw.githubusercontent.com/leonardo-tx/Votify/refs/heads/badges/.github/badges/branches.svg)",
+  "main": "index.js",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/leonardo-tx/Votify.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/leonardo-tx/Votify/issues"
+  },
+  "homepage": "https://github.com/leonardo-tx/Votify#readme",
+  "dependencies": {
+    "autoprefixer": "^10.4.21",
+    "axios": "^1.10.0",
+    "date-fns": "^4.1.0",
+    "next": "^15.3.3",
+    "postcss": "^8.5.6",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-icons": "^5.5.0",
+    "tailwindcss": "^4.1.10"
+  }
+}
