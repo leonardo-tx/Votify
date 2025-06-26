@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: votify-web-cm
+  namespace: votify
+data:
+  NEXT_PROXY_URL: http://nginx-svc-node

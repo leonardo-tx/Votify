@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: {{.Release.Namespace}}
+  name: "{{.Values.nginx.name}}-svc"
+spec:
+  selector:
+    app: {{ .Values.nginx.name }}
+  type: {{.Values.nginx.service.type}}
+  ports:
+    - protocol: TCP
+      {{- if (eq .Values.nginx.service.type "NodePort")}}
+      nodePort: {{.Values.nginx.service.nodePort}}
+      {{- end}}
+      targetPort: {{.Values.nginx.service.targetPort}}
+      port: {{.Values.nginx.service.port}}

@@ -6,16 +6,20 @@ import UserDetailedView from "./users/UserDetailedView";
 import VotifyErrorCode from "./VotifyErrorCode";
 import PollSimpleView from "./polls/PollSimpleView";
 import { PageResponse } from "./PageResponse";
+import UserPasswordResetRequestDto from "@/libs/users/UserPasswordResetRequestDto";
+import UserPasswordResetConfirmDTO from "@/libs/users/UserPasswordResetConfirmDTO";
 import { PollDetailedView } from "./polls/PollDetailedView";
 import VoteInsertDTO from "./polls/VoteInsertDTO";
 import { PollInsertDTO } from "./polls/PollInsertDTO";
+import EmailConfirmationRequestDTO from "./users/EmailConfirmationRequestDTO";
 import UserUpdateInfoDTO from "./users/UserUpdateInfoDTO";
 import UserUpdatePasswordRequestDTO from "./users/UserUpdatePasswordRequestDTO";
+import UserUpdateEmailRequestDTO from "./users/UserUpdateEmailRequestDTO";
 
 export const api = axios.create({
   baseURL:
     typeof window === "undefined"
-      ? `http://${process.env.NEXT_PUBLIC_API_URL}/api`
+      ? `${process.env.NEXT_PROXY_URL ?? "http://localhost:8081"}/api`
       : `${window.location.origin}/api`,
   withCredentials: true,
 });
@@ -50,7 +54,19 @@ export const updateUserInfo = async (
   form: UserUpdateInfoDTO,
 ): Promise<ApiResponse<UserDetailedView | null>> => {
   return await commonRequester(async () => {
-    const { data } = await api.put<ApiResponse<null>>("/users/me/info", form);
+    const { data } = await api.put<ApiResponse<UserDetailedView | null>>(
+      "/users/me/info",
+      form,
+    );
+    return data;
+  });
+};
+
+export const updateUserEmail = async (
+  form: UserUpdateEmailRequestDTO,
+): Promise<ApiResponse<null>> => {
+  return await commonRequester(async () => {
+    const { data } = await api.put<ApiResponse<null>>("/users/me/email", form);
     return data;
   });
 };
@@ -102,6 +118,42 @@ export const login = async (
     const { data } = await api.post<ApiResponse<null>>(
       "/auth/login",
       credentials,
+    );
+    return data;
+  });
+};
+
+export const forgotPassword = async (
+  request: UserPasswordResetRequestDto,
+): Promise<ApiResponse<null>> => {
+  return await commonRequester(async () => {
+    const { data } = await api.post<ApiResponse<null>>(
+      "/auth/forgot-password",
+      request,
+    );
+    return data;
+  });
+};
+
+export const resetPassword = async (
+  request: UserPasswordResetConfirmDTO,
+): Promise<ApiResponse<null>> => {
+  return await commonRequester(async () => {
+    const { data } = await api.post<ApiResponse<null>>(
+      "/auth/reset-password",
+      request,
+    );
+    return data;
+  });
+};
+
+export const confirmEmail = async (
+  request: EmailConfirmationRequestDTO,
+): Promise<ApiResponse<null>> => {
+  return await commonRequester(async () => {
+    const { data } = await api.post<ApiResponse<null>>(
+      `/auth/confirm-email`,
+      request,
     );
     return data;
   });

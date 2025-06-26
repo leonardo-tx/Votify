@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "{{ .Values.web.name }}-deploy"
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Values.web.name }}
+spec:
+  replicas: {{ .Values.web.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.web.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.web.name }}
+    spec:
+      containers:
+        - name: {{ .Values.web.name }}
+          image: "{{ .Values.web.image }}:{{ .Values.web.tag }}"
+          imagePullPolicy: {{ .Values.web.imagePullPolicy }}
+          envFrom:
+            - configMapRef:
+                name: "{{ .Values.web.name }}-cm"
+      restartPolicy: Always

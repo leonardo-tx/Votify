@@ -1,6 +1,6 @@
 package br.com.votify.web.profile;
 
-import br.com.votify.dto.users.UserLoginDTO;
+import br.com.votify.dto.user.UserLoginDTO;
 import br.com.votify.test.suites.SeleniumTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestTemplate;
@@ -10,17 +10,19 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class ProfilePageTest extends SeleniumTest {
-    private UserLoginDTO credentials;
+class ProfilePageTest extends SeleniumTest {
+    private static List<Cookie> cookies = null;
 
     @BeforeEach
-    public void setupBeforeEach() {
-        seleniumHelper.get("/profile/admin");
-        credentials = new UserLoginDTO("admin@votify.com.br", "admin123");
+    void setupBeforeEach() {
+        seleniumHelper.get("/home");
+        if (cookies == null) {
+            cookies = seleniumHelper.loginAndGetCookies(new UserLoginDTO("admin@votify.com.br", "admin123"));
+        }
     }
 
     @TestTemplate
-    public void shouldDisplayUserProfileInformation() {
+    void shouldDisplayUserProfileInformation() {
         seleniumHelper.get("/profile/admin");
         ProfilePage profilePage = new ProfilePage(webDriver);
 
@@ -43,7 +45,7 @@ public class ProfilePageTest extends SeleniumTest {
     }
 
     @TestTemplate
-    public void shouldDisplayErrorWhenProfileNotFound() {
+    void shouldDisplayErrorWhenProfileNotFound() {
         seleniumHelper.get("/profile/usuariodesconhecido99");
         ProfilePage profilePage = new ProfilePage(webDriver);
 
@@ -59,8 +61,8 @@ public class ProfilePageTest extends SeleniumTest {
     }
 
     @TestTemplate
-    public void shouldDisplayMessageWhenUserHasNoPolls() {
-        seleniumHelper.get("/profile/noPolls"); 
+    void shouldDisplayMessageWhenUserHasNoPolls() {
+        seleniumHelper.get("/profile/no-polls");
         ProfilePage profilePage = new ProfilePage(webDriver);
 
         assertTrue(
@@ -75,8 +77,7 @@ public class ProfilePageTest extends SeleniumTest {
     }
 
     @TestTemplate
-    public void shouldSuccessfullyEditProfileInformation() throws Exception {
-        List<Cookie> cookies = seleniumHelper.getLoginCookies(credentials);
+    void shouldSuccessfullyEditProfileInformation() {
         cookies.forEach(c -> webDriver.manage().addCookie(c));
 
         seleniumHelper.get("/profile/admin");
@@ -116,8 +117,8 @@ public class ProfilePageTest extends SeleniumTest {
     }
 
     @TestTemplate
-    public void shouldNotShowEditButtonForNonOwnerProfile() {
-        seleniumHelper.get("/profile/noPolls");
+    void shouldNotShowEditButtonForNonOwnerProfile() {
+        seleniumHelper.get("/profile/no-polls");
 
         assertThrows(
                 NoSuchElementException.class,
@@ -127,14 +128,13 @@ public class ProfilePageTest extends SeleniumTest {
     }
 
     @TestTemplate
-    public void shouldSuccessfullyDeleteUserAccount() throws Exception {
-        List<Cookie> cookies = seleniumHelper.getLoginCookies(credentials);
+    void shouldSuccessfullyDeleteUserAccount() {
         cookies.forEach(c -> webDriver.manage().addCookie(c));
 
         seleniumHelper.get("/profile/admin");
         ProfilePage profilePage = new ProfilePage(webDriver);
 
-        profilePage.deleteAccountButton.click();;
+        profilePage.deleteAccountButton.click();
 
         WebElement confirmDeleteButton = wait.until(d -> d.findElement(By.id("confirm-delete-button")));
         confirmDeleteButton.click();
@@ -147,11 +147,10 @@ public class ProfilePageTest extends SeleniumTest {
     }
 
     @TestTemplate
-    public void shouldNotShowDeleteButtonForNonOwnerProfile() throws Exception {
-        List<Cookie> cookies = seleniumHelper.getLoginCookies(credentials);
+    void shouldNotShowDeleteButtonForNonOwnerProfile() {
         cookies.forEach(c -> webDriver.manage().addCookie(c));
 
-        seleniumHelper.get("/profile/noPolls");
+        seleniumHelper.get("/profile/no-polls");
         assertThrows(
                 NoSuchElementException.class,
                 () -> webDriver.findElement(By.id("delete-account-button")),

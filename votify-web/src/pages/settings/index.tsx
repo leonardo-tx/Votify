@@ -5,6 +5,7 @@ import { useRouter } from "next/router";
 import UserInfoForm from "./components/UserInfoForm";
 import { useAtomValue } from "jotai";
 import PasswordUserInfoForm from "./components/PasswordUserInfoForm";
+import EmailUserInfoForm from "./components/EmailUserInfoForm";
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -36,6 +37,8 @@ export default function SettingsPage() {
           Editar Informações do Perfil
         </h1>
         <UserInfoForm />
+        <hr />
+        <EmailUserInfoForm />
         <hr />
         <PasswordUserInfoForm />
       </div>

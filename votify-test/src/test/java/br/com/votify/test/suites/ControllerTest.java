@@ -1,6 +1,7 @@
 package br.com.votify.test.suites;
 
 import br.com.votify.api.VotifyApiApplication;
+import br.com.votify.core.properties.user.UserProperties;
 import br.com.votify.test.MockMvcHelper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.*;
@@ -14,7 +15,6 @@ import org.springframework.test.web.servlet.MockMvc;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @AutoConfigureMockMvc
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-@Order(1)
 public abstract class ControllerTest {
     @Autowired
     protected MockMvc mockMvc;
@@ -22,10 +22,13 @@ public abstract class ControllerTest {
     @Autowired
     protected ObjectMapper objectMapper;
 
+    @Autowired
+    protected UserProperties userProperties;
+
     protected MockMvcHelper mockMvcHelper;
 
     @BeforeEach
     void setupBeforeEach() {
-        this.mockMvcHelper = new MockMvcHelper(mockMvc, objectMapper);
+        this.mockMvcHelper = new MockMvcHelper(mockMvc, objectMapper, userProperties);
     }
 }

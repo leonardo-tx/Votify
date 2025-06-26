@@ -27,25 +27,21 @@ public class CharacterUtilsTest {
     }
 
     @Provide
-    @SuppressWarnings("unused")
     private Arbitrary<Character> validOneByteDigits() {
         return Arbitraries.chars().with("1234567890");
     }
 
     @Provide
-    @SuppressWarnings("unused")
     private Arbitrary<Character> invalidOneByteDigits() {
         return Arbitraries.chars().filter(c -> c < 48 || c > 57);
     }
 
     @Provide
-    @SuppressWarnings("unused")
     private Arbitrary<Character> validOneByteLowercaseLetters() {
         return Arbitraries.chars().with("abcdefghijklmnopqrstuvwxyz");
     }
 
     @Provide
-    @SuppressWarnings("unused")
     private Arbitrary<Character> invalidOneByteLowercaseLetters() {
         return Arbitraries.chars().filter(c -> c < 97 || c > 122);
     }

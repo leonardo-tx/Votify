@@ -28,13 +28,16 @@
             <groupId>br.com.votify</groupId>
             <artifactId>votify-core</artifactId>
             <version>${votify.version}</version>
-            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>br.com.votify</groupId>
+            <artifactId>votify-infra</artifactId>
+            <version>${votify.version}</version>
         </dependency>
         <dependency>
             <groupId>br.com.votify</groupId>
             <artifactId>votify-dto</artifactId>
             <version>${votify.version}</version>
-            <scope>compile</scope>
         </dependency>
     </dependencies>
 
@@ -52,19 +55,6 @@
                         <configuration>
                             <classifier>exec</classifier>
                         </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.jacoco</groupId>
-                <artifactId>jacoco-maven-plugin</artifactId>
-                <version>${jacoco.version}</version>
-                <executions>
-                    <execution>
-                        <id>prepare-agent</id>
-                        <goals>
-                            <goal>prepare-agent</goal>
-                        </goals>
                     </execution>
                 </executions>
             </plugin>
