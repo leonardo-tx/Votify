@@ -44,7 +44,7 @@ export default function Home({ polls, page, totalPages }: Props) {
               !currentUser
                 ? "Você precisa estar logado para criar uma enquete"
                 : undefined
-            }
+             }
           >
             Criar Nova Enquete
           </Button>

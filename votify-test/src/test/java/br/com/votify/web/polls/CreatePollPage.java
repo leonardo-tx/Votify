@@ -29,16 +29,16 @@ public class CreatePollPage extends BasePage {
     @FindBy(css = "[id^='voteOption-']")
     public List<WebElement> voteOptionInputs;
 
-    @FindBy(xpath = "//button[contains(text(), 'Adicionar Opção')]")
+    @FindBy(id = "add-option-button")
     public WebElement addOptionButton;
 
-    @FindBy(xpath = "//button[contains(text(), 'Remover')]")
+    @FindBy(css = "[id^='remove-option-']")
     public List<WebElement> removeOptionButtons;
 
-    @FindBy(xpath = "//button[contains(text(), 'Criar Enquete')]")
+    @FindBy(id = "create-poll-button")
     public WebElement createButton;
 
-    @FindBy(xpath = "//button[contains(text(), 'Cancelar')]")
+    @FindBy(id = "cancel-button")
     public WebElement cancelButton;
 
     @FindBy(css = ".text-red-500")

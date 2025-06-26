@@ -51,7 +51,7 @@ const Input = forwardRef<HTMLInputElement | HTMLTextAreaElement, Props>(
         props = props as InputProps;
         inputNode = (
           <input
-            ref={ref}
+            ref={ref as React.Ref<HTMLInputElement>}
             placeholder={placeholder}
             className={defaultClassNames}
             {...props}
@@ -62,7 +62,7 @@ const Input = forwardRef<HTMLInputElement | HTMLTextAreaElement, Props>(
         props = props as TextareaProps;
         inputNode = (
           <textarea
-            ref={ref}
+            ref={ref as React.Ref<HTMLTextAreaElement>}
             placeholder={placeholder}
             className={defaultClassNames}
             {...props}
