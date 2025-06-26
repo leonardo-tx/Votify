@@ -11,6 +11,8 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment:
+      name: prod
     env:
       VERSION: ${{ inputs.version }}
       API_IMAGE: "byces/votify-api"
