@@ -10,6 +10,7 @@ import UserPasswordResetRequestDto from "@/libs/users/UserPasswordResetRequestDt
 import UserPasswordResetConfirmDTO from "@/libs/users/UserPasswordResetConfirmDTO";
 import { PollDetailedView } from "./polls/PollDetailedView";
 import VoteInsertDTO from "./polls/VoteInsertDTO";
+import { PollInsertDTO } from "./polls/PollInsertDTO";
 import EmailConfirmationRequestDTO from "./users/EmailConfirmationRequestDTO";
 import UserUpdateInfoDTO from "./users/UserUpdateInfoDTO";
 import UserUpdatePasswordRequestDTO from "./users/UserUpdatePasswordRequestDTO";
@@ -236,6 +237,25 @@ export const vote = async (
       `/polls/${id}/vote`,
       voteOption,
     );
+    return data;
+  });
+};
+
+export const createPoll = async (
+  pollData: PollInsertDTO,
+): Promise<ApiResponse<PollDetailedView | null>> => {
+  return await commonRequester(async () => {
+    const { data } = await api.post<ApiResponse<PollDetailedView>>("/polls", {
+      title: pollData.title,
+      description: pollData.description,
+      startDate: pollData.startDate ? new Date(pollData.startDate).toISOString() : null,
+      endDate: new Date(pollData.endDate).toISOString(),
+      choiceLimitPerUser: pollData.choiceLimitPerUser,
+      userRegistration: false,
+      voteOptions: pollData.voteOptions
+        .filter((opt) => opt.trim().length > 0)
+        .map((name) => ({ name })),
+    });
     return data;
   });
 };

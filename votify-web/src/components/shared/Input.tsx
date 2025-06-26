@@ -1,5 +1,18 @@
-import { forwardRef, InputHTMLAttributes, ReactNode } from "react";
+import {
+  forwardRef,
+  InputHTMLAttributes,
+  ReactNode,
+  TextareaHTMLAttributes,
+} from "react";
 import styles from "./styles/Input.module.css";
+
+type InputProps = InputHTMLAttributes<HTMLInputElement> & {
+  as?: "input";
+};
+
+type TextareaProps = TextareaHTMLAttributes<HTMLTextAreaElement> & {
+  as: "textarea";
+};
 
 type Props = {
   variant?: "filled" | "outline" | "line";
@@ -7,11 +20,12 @@ type Props = {
   className?: string;
   startElement?: ReactNode;
   endElement?: ReactNode;
-} & InputHTMLAttributes<HTMLInputElement>;
+} & (InputProps | TextareaProps);
 
-const Input = forwardRef<HTMLInputElement, Props>(
+const Input = forwardRef<HTMLInputElement | HTMLTextAreaElement, Props>(
   (
     {
+      as = "input",
       variant = "filled",
       placeholder,
       className,
@@ -30,6 +44,33 @@ const Input = forwardRef<HTMLInputElement, Props>(
       endElement === undefined || endElement === null
         ? ""
         : styles["input-div-end-element"] + " ";
+
+    let inputNode: ReactNode;
+    switch (as) {
+      case "input":
+        props = props as InputProps;
+        inputNode = (
+          <input
+            ref={ref as React.Ref<HTMLInputElement>}
+            placeholder={placeholder}
+            className={defaultClassNames}
+            {...props}
+          />
+        );
+        break;
+      case "textarea":
+        props = props as TextareaProps;
+        inputNode = (
+          <textarea
+            ref={ref as React.Ref<HTMLTextAreaElement>}
+            placeholder={placeholder}
+            className={defaultClassNames}
+            {...props}
+          />
+        );
+        break;
+    }
+
     return (
       <div
         className={
@@ -40,12 +81,7 @@ const Input = forwardRef<HTMLInputElement, Props>(
           className
         }
       >
-        <input
-          ref={ref}
-          placeholder={placeholder}
-          className={defaultClassNames}
-          {...props}
-        />
+        {inputNode}
         <div className={styles["start-element"]}>{startElement}</div>
         <div className={styles["end-element"]}>{endElement}</div>
       </div>

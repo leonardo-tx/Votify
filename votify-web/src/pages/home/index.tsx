@@ -6,6 +6,11 @@ import { useRouter } from "next/router";
 import Pagination from "./components/Pagination";
 import Head from "next/head";
 import { getAllActivePolls, getUserById } from "@/libs/api";
+import { useState } from "react";
+import CreatePollModal from "@/components/polls/CreatePollModal";
+import Button from "@/components/shared/Button";
+import { useAtomValue } from "jotai";
+import { currentUserAtom } from "@/libs/users/atoms/currentUserAtom";
 
 interface Props {
   polls: { poll: PollSimpleView; user: UserQueryView | null }[];
@@ -17,18 +22,11 @@ const pageSize = 10;
 
 export default function Home({ polls, page, totalPages }: Props) {
   const router = useRouter();
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const currentUser = useAtomValue(currentUserAtom);
 
   const handlePageChange = (page: number) => {
-    router.push(
-      {
-        pathname: "/home",
-        query: {
-          page: page,
-        },
-      },
-      undefined,
-      { shallow: false },
-    );
+    router.push(`/home?page=${page}`);
   };
 
   return (
@@ -37,6 +35,21 @@ export default function Home({ polls, page, totalPages }: Props) {
         <title>Home - Votify</title>
       </Head>
       <div className="flex flex-col gap-4">
+        <div className="flex justify-end">
+          <Button
+            id="open-poll-create-modal"
+            scheme="primary"
+            onClick={() => setIsCreateModalOpen(true)}
+            disabled={!currentUser}
+            title={
+              !currentUser
+                ? "Você precisa estar logado para criar uma enquete"
+                : undefined
+            }
+          >
+            Criar Nova Enquete
+          </Button>
+        </div>
         <div className="flex flex-col gap-3">
           <PollList polls={polls} />
           <Pagination
@@ -46,6 +59,11 @@ export default function Home({ polls, page, totalPages }: Props) {
           />
         </div>
       </div>
+
+      <CreatePollModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+      />
     </>
   );
 }

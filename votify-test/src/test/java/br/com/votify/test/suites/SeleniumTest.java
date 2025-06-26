@@ -19,6 +19,7 @@ import java.time.Instant;
 
 @SpringBootTest(classes = VotifyApiApplication.class, webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @ExtendWith({ BrowsersProviderExtension.class, ScreenshotExtension.class })
 public abstract class SeleniumTest {
     @Value("${frontend.base.url}")

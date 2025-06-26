@@ -5,9 +5,10 @@ interface Props {
   children?: ReactNode;
   isOpen: boolean;
   onClose: () => void;
+  id?: string;
 }
 
-export default function Modal({ children, isOpen, onClose }: Props) {
+export default function Modal({ children, isOpen, onClose, id }: Props) {
   const modalRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -38,7 +39,6 @@ export default function Modal({ children, isOpen, onClose }: Props) {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [isOpen, onClose]);
-
   return (
     isOpen && (
       <div className={styles["modal-background"]}>
