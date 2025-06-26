@@ -1,6 +1,6 @@
 package br.com.votify.web.polls;
 
-import br.com.votify.dto.users.UserLoginDTO;
+import br.com.votify.dto.user.UserLoginDTO;
 import br.com.votify.test.suites.SeleniumTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestTemplate;
@@ -14,13 +14,13 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class CreatePollTest extends SeleniumTest {
+class CreatePollTest extends SeleniumTest {
     private CreatePollPage createPollPage;
 
     @BeforeEach
-    void setupBeforeEach() throws Exception {
+    void setupBeforeEach() {
         seleniumHelper.get("/home");
-        List<Cookie> cookies = seleniumHelper.getLoginCookies(
+        List<Cookie> cookies = seleniumHelper.loginAndGetCookies(
                 new UserLoginDTO("common@votify.com.br", "password123")
         );
         cookies.forEach(c -> webDriver.manage().addCookie(c));
@@ -30,7 +30,7 @@ public class CreatePollTest extends SeleniumTest {
     }
 
     @TestTemplate
-    public void shouldCreatePollSuccessfully() {
+    void shouldCreatePollSuccessfully() {
         createPollPage.titleInput.sendKeys("Test Poll Title");
         createPollPage.descriptionInput.sendKeys("Test Poll Description");
         
@@ -53,7 +53,7 @@ public class CreatePollTest extends SeleniumTest {
     }
 
     @TestTemplate
-    public void shouldCreatePollWithStartDate() {
+    void shouldCreatePollWithStartDate() {
         createPollPage.titleInput.sendKeys("Test Poll With Start Date");
         createPollPage.descriptionInput.sendKeys("Test Poll Description");
         
@@ -75,7 +75,7 @@ public class CreatePollTest extends SeleniumTest {
     }
 
     @TestTemplate
-    public void shouldShowValidationErrorsForEmptyRequiredFields() {
+    void shouldShowValidationErrorsForEmptyRequiredFields() {
         createPollPage.createButton.click();
         
         wait.until(ExpectedConditions.visibilityOfAllElements(createPollPage.errorMessages));
@@ -87,7 +87,7 @@ public class CreatePollTest extends SeleniumTest {
     }
 
     @TestTemplate
-    public void shouldValidateTitleLength() {
+    void shouldValidateTitleLength() {
         createPollPage.titleInput.sendKeys("123");
         createPollPage.createButton.click();
         
@@ -98,7 +98,7 @@ public class CreatePollTest extends SeleniumTest {
     }
 
     @TestTemplate
-    public void shouldValidateStartDateInFuture() {
+    void shouldValidateStartDateInFuture() {
         LocalDateTime pastTime = LocalDateTime.now().minusMinutes(5);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
         
@@ -117,7 +117,7 @@ public class CreatePollTest extends SeleniumTest {
     }
 
     @TestTemplate
-    public void shouldValidateEndDateAfterStartDate() {
+    void shouldValidateEndDateAfterStartDate() {
         LocalDateTime startTime = LocalDateTime.now().plusMinutes(10);
         LocalDateTime endTime = startTime.minusMinutes(5); 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
@@ -137,7 +137,7 @@ public class CreatePollTest extends SeleniumTest {
     }
 
     @TestTemplate
-    public void shouldValidateVoteOptionsCount() {
+    void shouldValidateVoteOptionsCount() {
         createPollPage.titleInput.sendKeys("Test Poll Title");
         createPollPage.endDateInput.sendKeys(LocalDateTime.now().plusHours(1).format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm")));
         createPollPage.choiceLimitInput.sendKeys("1");
@@ -151,7 +151,7 @@ public class CreatePollTest extends SeleniumTest {
     }
 
     @TestTemplate
-    public void shouldValidateVoteOptionLength() {
+    void shouldValidateVoteOptionLength() {
         createPollPage.titleInput.sendKeys("Test Poll Title");
         createPollPage.endDateInput.sendKeys(LocalDateTime.now().plusHours(1).format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm")));
         createPollPage.choiceLimitInput.sendKeys("1");
@@ -167,7 +167,7 @@ public class CreatePollTest extends SeleniumTest {
     }
 
     @TestTemplate
-    public void shouldValidateChoiceLimit() {
+    void shouldValidateChoiceLimit() {
         createPollPage.titleInput.sendKeys("Test Poll Title");
         createPollPage.endDateInput.sendKeys(LocalDateTime.now().plusHours(1).format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm")));
         createPollPage.choiceLimitInput.sendKeys("5"); 
@@ -185,7 +185,7 @@ public class CreatePollTest extends SeleniumTest {
     }
 
     @TestTemplate
-    public void shouldAddAndRemoveVoteOptions() {
+    void shouldAddAndRemoveVoteOptions() {
         createPollPage.addOptionButton.click();
         createPollPage.addOptionButton.click();
         
@@ -197,7 +197,7 @@ public class CreatePollTest extends SeleniumTest {
     }
 
     @TestTemplate
-    public void shouldNotAllowMoreThanFiveVoteOptions() {
+    void shouldNotAllowMoreThanFiveVoteOptions() {
         for (int i = 0; i < 4; i++) {
             createPollPage.addOptionButton.click();
         }
@@ -208,14 +208,14 @@ public class CreatePollTest extends SeleniumTest {
     }
 
     @TestTemplate
-    public void shouldNotShowRemoveButtonForSingleOption() {
+    void shouldNotShowRemoveButtonForSingleOption() {
         assertEquals(1, createPollPage.voteOptionInputs.size());
         
         assertTrue(createPollPage.removeOptionButtons.isEmpty());
     }
 
     @TestTemplate
-    public void shouldCancelPollCreation() {
+    void shouldCancelPollCreation() {
         createPollPage.titleInput.sendKeys("Test Poll Title");
         
         createPollPage.cancelButton.click();

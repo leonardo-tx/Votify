@@ -1,19 +1,13 @@
 package br.com.votify.web.home;
 
-import br.com.votify.dto.users.UserLoginDTO;
 import br.com.votify.test.suites.SeleniumTest;
-import br.com.votify.web.polls.CreatePollPage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestTemplate;
-import org.openqa.selenium.By;
-import org.openqa.selenium.Cookie;
 import org.openqa.selenium.support.ui.ExpectedConditions;
-
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class HomePageTest extends SeleniumTest {
+class HomePageTest extends SeleniumTest {
     private HomePage homePage;
 
     @BeforeEach
@@ -23,13 +17,13 @@ public class HomePageTest extends SeleniumTest {
     }
 
     @TestTemplate
-    public void shouldDisplayCreatePollButton() {
+    void shouldDisplayCreatePollButton() {
         assertTrue(seleniumHelper.isInViewport(homePage.createPollButton));
         assertEquals("Criar Nova Enquete", homePage.createPollButton.getText());
     }
 
     @TestTemplate
-    public void shouldOpenCreatePollModalWhenButtonClicked() {
+    void shouldOpenCreatePollModalWhenButtonClicked() {
         homePage.createPollButton.click();
         
         wait.until(ExpectedConditions.visibilityOf(homePage.createPollModal));
@@ -40,7 +34,7 @@ public class HomePageTest extends SeleniumTest {
     }
 
     @TestTemplate
-    public void shouldCloseModalWhenCancelButtonClicked() {
+    void shouldCloseModalWhenCancelButtonClicked() {
         homePage.createPollButton.click();
         
         wait.until(ExpectedConditions.visibilityOf(homePage.createPollModal));
@@ -51,17 +45,17 @@ public class HomePageTest extends SeleniumTest {
     }
 
     @TestTemplate
-    public void shouldDisplayPollsList() {
+    void shouldDisplayPollsList() {
         assertTrue(seleniumHelper.isInViewport(homePage.pollsList));
     }
 
     @TestTemplate
-    public void shouldDisplayPagination() {
+    void shouldDisplayPagination() {
         assertTrue(seleniumHelper.isInViewport(homePage.pagination));
     }
 
     @TestTemplate
-    public void shouldNavigateToNextPage() {
+    void shouldNavigateToNextPage() {
         if (homePage.nextPageButton.isDisplayed()) {
             homePage.nextPageButton.click();
             
@@ -71,7 +65,7 @@ public class HomePageTest extends SeleniumTest {
     }
 
     @TestTemplate
-    public void shouldNavigateToPreviousPage() {
+    void shouldNavigateToPreviousPage() {
         seleniumHelper.get("/home?page=1");
         
         if (homePage.previousPageButton.isDisplayed()) {
@@ -83,7 +77,7 @@ public class HomePageTest extends SeleniumTest {
     }
 
     @TestTemplate
-    public void shouldCreatePollFromHomePage() {
+    void shouldCreatePollFromHomePage() {
         homePage.createPollButton.click();
         
         wait.until(ExpectedConditions.visibilityOf(homePage.createPollModal));
@@ -101,7 +95,7 @@ public class HomePageTest extends SeleniumTest {
     }
 
     @TestTemplate
-    public void shouldShowValidationErrorsInModal() {
+    void shouldShowValidationErrorsInModal() {
         homePage.createPollButton.click();
         
         wait.until(ExpectedConditions.visibilityOf(homePage.createPollModal));
@@ -113,18 +107,18 @@ public class HomePageTest extends SeleniumTest {
     }
 
     @TestTemplate
-    public void shouldAllowCreatePollButtonWithoutAuthentication() {
+    void shouldAllowCreatePollButtonWithoutAuthentication() {
         seleniumHelper.get("/home");
         
         assertTrue(seleniumHelper.isInViewport(homePage.createPollButton));
         assertTrue(homePage.createPollButton.isEnabled());
         
-        String buttonTitle = homePage.createPollButton.getAttribute("title");
+        String buttonTitle = homePage.createPollButton.getDomAttribute("title");
         assertTrue(buttonTitle == null || !buttonTitle.contains("Você precisa estar logado"));
     }
 
     @TestTemplate
-    public void shouldOpenModalWithoutAuthentication() {
+    void shouldOpenModalWithoutAuthentication() {
         seleniumHelper.get("/home");
         
         homePage.createPollButton.click();

@@ -11,7 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class LogEmailSenderTest {
+class LogEmailSenderTest {
     @InjectMocks
     private LogEmailSender logEmailSender;
 

@@ -12,8 +12,6 @@ import br.com.votify.dto.poll.PollDetailedViewDTO;
 import br.com.votify.test.suites.SocketControllerTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.time.Instant;
 import java.util.List;
@@ -25,9 +23,6 @@ import static org.mockito.Mockito.*;
 class PollSocketControllerTest extends SocketControllerTest {
     @Autowired
     private PollSocketController pollSocketController;
-
-    @MockitoBean
-    private SimpMessagingTemplate simpMessagingTemplate;
 
     @Test
     void testHandlePollUpdateEvent() throws VotifyException {
